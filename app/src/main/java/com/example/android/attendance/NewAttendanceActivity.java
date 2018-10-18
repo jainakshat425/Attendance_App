@@ -6,11 +6,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,8 +28,8 @@ import android.widget.Toast;
 import com.example.android.attendance.adapters.SpinnerArrayAdapter;
 import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
 import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
-import com.example.android.attendance.data.DatabaseHelper;
 import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
+import com.example.android.attendance.data.DatabaseHelper;
 import com.example.android.attendance.data.DbHelperMethods;
 import com.example.android.attendance.utilities.ExtraUtils;
 
@@ -413,6 +413,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
         semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                subjectSelected = null;
                 if (position != 0) {
                     semesterSelected = parent.getItemAtPosition(position).toString();
                     setupSubjectSpinner();
@@ -464,6 +465,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
         branchSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                subjectSelected = null;
                 if (position != 0) {
                     branchSelected = parent.getItemAtPosition(position).toString();
                     setupSubjectSpinner();

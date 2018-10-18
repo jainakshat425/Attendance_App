@@ -1,24 +1,23 @@
 package com.example.android.attendance.data;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
-
 import com.example.android.attendance.contracts.BranchContract.BranchEntry;
-
 import com.example.android.attendance.contracts.ClassContract.ClassEntry;
-
 import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
 
 public class DbHelperMethods {
 
-    public static int getClassId(Context context, int college, String semester, String branch_id, String section) {
+    private static final int CLASS_DOES_NOT_EXIST = -1;
+
+    public static int getClassId(Context context, int collegeId, String semester, String branchId, String section) {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         SQLiteDatabase db;
-        int classId = -1;
         try {
             db = dbHelper.openDataBaseReadOnly();
         } catch (SQLException sqle) {
@@ -31,9 +30,9 @@ public class DbHelperMethods {
                 +ClassEntry.BRANCH_ID + "=?" + " and "
                 +ClassEntry.SECTION + "=?";
 
-        String[] selectionArgs = {String.valueOf(college),
+        String[] selectionArgs = {String.valueOf(collegeId),
                 String.valueOf(semester),
-                String.valueOf(branch_id),
+                String.valueOf(branchId),
                 String.valueOf(section)};
 
         Cursor cursor = db.query(ClassEntry.TABLE_NAME, projection, selections, selectionArgs,
@@ -41,10 +40,19 @@ public class DbHelperMethods {
         int classIdIndex = cursor.getColumnIndex(ClassEntry.ID);
 
         if (cursor.getCount() != 0 && cursor.moveToFirst()) {
-            classId = cursor.getInt(classIdIndex);
+            //if class is found
+            return cursor.getInt(classIdIndex);
+        } else {
+            //if class is not found insert new class
+            db = dbHelper.openDatabaseForReadWrite();
+            ContentValues values = new ContentValues();
+            values.put(ClassEntry.COLLEGE_ID, collegeId);
+            values.put(ClassEntry.SEMESTER, semester);
+            values.put(ClassEntry.BRANCH_ID, branchId);
+            values.put(ClassEntry.SECTION, section);
+            long newRowId = db.insert(ClassEntry.TABLE_NAME, null, values);
+            return (int) newRowId;
         }
-
-        return classId;
     }
 
     public static int getBranchId(Context context, String branchName) {
