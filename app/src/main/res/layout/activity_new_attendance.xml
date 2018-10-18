@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relative_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".NewAttendanceActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark"
+        app:titleTextColor="@android:color/white" />
+
+    <!-- Date  -->
+    <LinearLayout
+        android:id="@+id/date_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <!-- Label -->
+        <TextView
+            style="@style/CategoryStyle"
+            android:text="Date" />
+
+        <!-- input field -->
+        <EditText
+            android:id="@+id/edit_date"
+            style="@style/EditorFieldStyle"
+            android:clickable="true"
+            android:focusable="false"
+            android:hint="dd-mm-yyyy"
+            android:inputType="date" />
+    </LinearLayout>
+
+    <!-- Label -->
+    <TextView
+        android:id="@+id/select_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/date_layout"
+        android:layout_margin="16dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="Select"
+        android:textColor="@color/colorAccent" />
+    <!-- Spinners category -->
+    <LinearLayout
+        android:id="@+id/spinner_layout_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/select_tv"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:orientation="horizontal">
+        <!-- semester field -->
+        <Spinner
+            android:id="@+id/semester_spinner"
+            style="@style/SpinnerStyle"
+            android:layout_marginRight="4dp" />
+        <!-- branch field -->
+        <Spinner
+            android:id="@+id/branch_spinner"
+            style="@style/SpinnerStyle" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/spinner_layout_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/spinner_layout_1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <!-- section field -->
+        <Spinner
+            android:id="@+id/section_spinner"
+            style="@style/SpinnerStyle"
+            android:layout_marginRight="4dp" />
+
+        <!-- subject field -->
+        <Spinner
+            android:id="@+id/subject_spinner"
+            style="@style/SpinnerStyle" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lecture_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/spinner_layout_2"
+        android:paddingBottom="16dp">
+        <!-- Label -->
+        <TextView
+            android:id="@+id/lecture_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif-medium"
+            android:text="Lecture"
+            android:textColor="@color/colorAccent" />
+        <!-- lecture layout -->
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_weight="2">
+
+            <EditText
+                android:id="@+id/lecture_et"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/minus_lecture_button"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                tools:text="1" />
+
+            <Button
+                android:id="@+id/minus_lecture_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:text="-"
+                android:textColor="@color/textColor" />
+
+            <Button
+                android:id="@+id/plus_lecture_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/lecture_et"
+                android:text="+" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <!-- switch layout -->
+    <RelativeLayout
+        android:id="@+id/switch_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/lecture_layout"
+        android:layout_marginTop="16dp">
+
+        <Switch
+            android:id="@+id/college_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:showText="false"
+            android:textOff="GIT"
+            android:textOn="GCT" />
+
+        <TextView
+            android:id="@+id/git_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/college_switch"
+            android:paddingTop="4dp"
+            android:text="GIT"
+            android:textColor="@color/textColor" />
+
+        <TextView
+            android:id="@+id/gct_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/college_switch"
+            android:paddingTop="4dp"
+            android:text="GCT" />
+    </RelativeLayout>
+
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_new_attendance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:background="@color/colorPrimary"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/baseline_done_white_24" />
+
+</RelativeLayout>

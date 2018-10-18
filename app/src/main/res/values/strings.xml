@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Attendance</string>
+    <string name="Login">Login</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="enter_following_details">Enter following details:</string>
+    <string name="need_help">Need Help?</string>
+    <string name="toast_login_successful">Login Successful</string>
+    <string name="pick_date">Pick Date</string>
+    <string name="subject">Subject</string>
+    <string name="semester">Semester</string>
+    <string name="college_gct">GCT</string>
+    <string name="college_git">GIT</string>
+    <string name="gtcjaipur_com">\@gtcjaipur.com</string>
+    <string name="update_attendance_title">Update Attendance</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+    <string name="main_notification_channel_name">Primary</string>
+    <string name="attendance_reminder_notification_title">It\'s time to take Attendance!</string>
+    <string name="attendance_reminder_notification_body">Details about attendance should be shown here</string>
+</resources>
