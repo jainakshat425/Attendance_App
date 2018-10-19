@@ -99,8 +99,8 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         subjectTv.setText(subject);
         dateTv.setText(date);
         dayTv.setText(day + ",");
-        setSemesterTv(semester);
-        setLectureTv(lecture);
+        semesterTv.setText(ExtraUtils.getSemester(semester));
+        lectureTv.setText(ExtraUtils.getLecture(lecture));
 
         /**
          * open the database for getting the table of Students for Attendance
@@ -261,30 +261,6 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         finish();
     }
 
-    private void setLectureTv(String lecture) {
-        if (Integer.parseInt(lecture) == 1) {
-            lectureTv.setText(lecture + "st Lecture");
-        } else if (Integer.parseInt(lecture) == 2) {
-            lectureTv.setText(lecture + "nd Lecture");
-        } else if (Integer.parseInt(lecture) == 3) {
-            lectureTv.setText(lecture + "rd Lecture");
-        } else {
-            lectureTv.setText(lecture + "th Lecture");
-        }
-    }
-
-    private void setSemesterTv(String semester) {
-        if (Integer.parseInt(semester) == 1) {
-            semesterTv.setText(semester + "st Sem");
-        } else if (Integer.parseInt(semester) == 2) {
-            semesterTv.setText(semester + "nd Sem");
-        } else if (Integer.parseInt(semester) == 3) {
-            semesterTv.setText(semester + "rd Sem");
-        } else {
-            semesterTv.setText(semester + "th Sem");
-        }
-    }
-
 
     private void initializeAllViews() {
         collegeTv = (TextView) findViewById(R.id.college_text_view);
@@ -293,7 +269,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         sectionTv = (TextView) findViewById(R.id.section_text_view);
         subjectTv = (TextView) findViewById(R.id.subject_text_view);
         dateTv = (TextView) findViewById(R.id.date_text_view);
-        lectureTv = (TextView) findViewById(R.id.lecure_text_view);
+        lectureTv = (TextView) findViewById(R.id.lecture_text_view);
         dayTv = (TextView) findViewById(R.id.day_text_view);
 
         stdListView = findViewById(R.id.students_list_view);

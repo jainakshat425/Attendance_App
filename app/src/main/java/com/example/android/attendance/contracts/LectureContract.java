@@ -17,5 +17,6 @@ public class LectureContract {
         public static final String LECTURE_START_TIME = "lect_start_time";
         public static final String LECTURE_END_TIME = "lect_end_time";
         public static final String LECTURE_NUMBER = "lect_no";
+        public static final String LECTURE_DAY = "day";
     }
 }

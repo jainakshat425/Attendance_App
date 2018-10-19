@@ -10,6 +10,14 @@ import com.example.android.attendance.contracts.AttendanceRecordContract.Attenda
 import com.example.android.attendance.contracts.BranchContract.BranchEntry;
 import com.example.android.attendance.contracts.ClassContract.ClassEntry;
 import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
+import com.example.android.attendance.contracts.LectureContract.LectureEntry;
+import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
+import static com.example.android.attendance.utilities.ExtraUtils.getCurrentDay;
 
 public class DbHelperMethods {
 
@@ -134,4 +142,56 @@ public class DbHelperMethods {
 
         return db.rawQuery(query, new String[] {facUserId});
     }
+
+    public static Cursor getLectureCursor(Context context, String facUserId) {
+
+        /**
+         * open the database for getting the records of attendance
+         */
+        DatabaseHelper databaseHelper = new DatabaseHelper(context);
+
+        SQLiteDatabase db;
+        try {
+            db = databaseHelper.openDatabaseForReadWrite();
+        } catch (SQLException sqle) {
+            throw sqle;
+        }
+
+        String projection = LectureEntry.TABLE_NAME + "." + LectureEntry.ID + ","
+                + LectureEntry.CLASS_ID + ","
+                + LectureEntry.FAC_USER_ID + ","
+                + LectureEntry.LECTURE_NUMBER + ","
+                + LectureEntry.LECTURE_DAY + ","
+                + ClassEntry.COLLEGE_ID + ","
+                + ClassEntry.SEMESTER + ","
+                + ClassEntry.TABLE_NAME + "." + ClassEntry.BRANCH_ID + ","
+                + ClassEntry.SECTION + ","
+                + CollegeEntry.NAME + ","
+                + BranchEntry.BRANCH_NAME + ","
+                + SubjectEntry.SUB_NAME_COL;
+
+
+        String tableName = LectureEntry.TABLE_NAME
+                + " INNER JOIN " + ClassEntry.TABLE_NAME
+                + " ON " + ClassEntry.TABLE_NAME + "." + ClassEntry.ID + " = "
+                + LectureEntry.CLASS_ID
+                + " INNER JOIN " + CollegeEntry.TABLE_NAME
+                + " ON " + CollegeEntry.TABLE_NAME + "." + CollegeEntry.ID + " = "
+                + ClassEntry.COLLEGE_ID
+                + " INNER JOIN " + BranchEntry.TABLE_NAME
+                + " ON " + BranchEntry.TABLE_NAME + "." + BranchEntry.ID + " = "
+                + ClassEntry.TABLE_NAME + "." + ClassEntry.BRANCH_ID
+                + " INNER JOIN " + SubjectEntry.TABLE_NAME
+                + " ON " + SubjectEntry.TABLE_NAME + "." + SubjectEntry._ID + " = "
+                + LectureEntry.SUBJECT_ID;
+
+
+        String query = "SELECT " + projection + " FROM " + tableName + " WHERE "
+                + LectureEntry.FAC_USER_ID + "=?" + " and "
+                + LectureEntry.LECTURE_DAY + "=?";
+
+        return db.rawQuery(query, new String[] {facUserId, getCurrentDay()});
+    }
+
+
 }

@@ -83,7 +83,7 @@
                 tools:text="ADS" />
 
             <TextView
-                android:id="@+id/lecure_text_view"
+                android:id="@+id/lecture_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"

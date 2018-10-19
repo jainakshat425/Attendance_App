@@ -1,51 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.android.attendance">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".LoginActivity"
             android:label="Attendance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".MainActivity"
-            android:label="Attendance" >
-        <intent-filter>
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+            android:label="Attendance">
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".NewAttendanceActivity"
             android:label="New Attendance"
             android:parentActivityName=".MainActivity" />
-        <activity android:name=".TakeAttendanceActivity"
-            android:parentActivityName=".NewAttendanceActivity"
-            android:label="Take Attendance"/>
+        <activity
+            android:name=".TakeAttendanceActivity"
+            android:label="Take Attendance"
+            android:parentActivityName=".NewAttendanceActivity" />
 
-        <!--This is required for immediate syncs -->
+        <!-- This is required for immediate syncs -->
         <service
             android:name=".sync.AttendanceReminderIntentService"
-            android:exported="false"/>
+            android:exported="false" />
 
         <!-- This is the Service declaration used in conjunction with FirebaseJobDispatcher -->
         <service
             android:name=".sync.AttendanceReminderFirebaseJobService"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
             </intent-filter>
         </service>
 
+        <receiver android:name=".AttendanceWidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/attendance_widget_provider_info" />
+        </receiver>
     </application>
 
 </manifest>

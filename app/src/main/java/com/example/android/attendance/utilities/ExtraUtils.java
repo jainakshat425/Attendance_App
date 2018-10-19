@@ -1,5 +1,9 @@
 package com.example.android.attendance.utilities;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 public class ExtraUtils {
 
     public static final String EXTRA_COLLEGE_ID = "extra_college_id";
@@ -23,4 +27,44 @@ public class ExtraUtils {
     public static final String EXTRA_FAC_USER_ID = "extra_fac_user_id";
     public static final String EXTRA_FAC_NAME = "extra_fac_name";
     public static final String EXTRA_FAC_DEPT = "extra_fac_dept";
+
+
+    public static String getLecture(String lecture) {
+        if (Integer.parseInt(lecture) == 1) {
+            lecture = lecture + "st Lecture";
+        } else if (Integer.parseInt(lecture) == 2) {
+            lecture = lecture + "nd Lecture";
+        } else if (Integer.parseInt(lecture) == 3) {
+            lecture = lecture + "rd Lecture";
+        } else {
+            lecture = lecture + "th Lecture";
+        }
+        return lecture;
+    }
+
+    public static String getSemester(String semester) {
+        if (Integer.parseInt(semester) == 1) {
+            semester = semester + "st Sem";
+        } else if (Integer.parseInt(semester) == 2) {
+            semester = semester + "nd Sem";
+        } else if (Integer.parseInt(semester) == 3) {
+            semester = semester + "rd Sem";
+        } else {
+            semester = semester + "th Sem";
+        }
+        return semester;
+    }
+
+    public static String getCurrentDay() {
+        SimpleDateFormat simpleDayFormat = new SimpleDateFormat("EEEE", Locale.US);
+        String day = simpleDayFormat.format(Calendar.getInstance().getTime());
+        return day;
+    }
+
+    public static String getCurrentDate() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
+        String date = simpleDateFormat.format(Calendar.getInstance().getTime());
+        return date;
+    }
 }
+

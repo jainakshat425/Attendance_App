@@ -1,9 +1,11 @@
 package com.example.android.attendance;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -100,6 +102,9 @@ public class LoginActivity extends AppCompatActivity {
             intentBundle.putString(ExtraUtils.EXTRA_FAC_NAME,name);
             intentBundle.putString(ExtraUtils.EXTRA_FAC_USER_ID,userId);
             intentBundle.putString(ExtraUtils.EXTRA_FAC_DEPT,dept);
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            preferences.edit().putString(ExtraUtils.EXTRA_FAC_USER_ID, userId).apply();
 
             Intent mainIntent = new Intent();
             mainIntent.setClass(this,MainActivity.class);
