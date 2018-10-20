@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/done_take_attendance"
-        android:title="Done"
+        android:id="@+id/save_attendance"
+        android:title="Save"
         android:orderInCategory="1"
         android:icon="@drawable/baseline_done_white_24"
         app:showAsAction="always" />

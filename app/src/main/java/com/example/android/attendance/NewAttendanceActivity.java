@@ -39,6 +39,13 @@ import java.util.Locale;
 
 public class NewAttendanceActivity extends AppCompatActivity {
 
+    public static final int LECTURE_NOT_FOUND = 1;
+    public static final int BRANCH_NOT_FOUND = 2;
+    public static final int CLASS_NOT_FOUND = 3;
+    public static final int INVALID_INPUTS = 4;
+    public static final int ATTENDANCE_ALREADY_EXISTS = 5;
+    private static final int ALL_INPUTS_VALID = 0;
+
     /**
      * Declare all spinners, there adapters and variable for storing selected item
      */
@@ -82,7 +89,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
     private EditText dateEditText;
     private Calendar myCalendar;
     private String currentDateString = null;
-    private String currentDay = null;
+    private String daySelected = null;
 
     //declare buttons and edit text field for lecture selection
     private EditText lectureEt;
@@ -94,8 +101,9 @@ public class NewAttendanceActivity extends AppCompatActivity {
     DatabaseHelper databaseHelper;
     SQLiteDatabase db;
 
-    String branchId;
-    String classId;
+    int branchId;
+    int classId;
+    int lectureId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -272,7 +280,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
         currentDateString = simpleDateFormat.format(myCalendar.getTime());
 
         SimpleDateFormat simpleDayFormat = new SimpleDateFormat("EEEE", Locale.US);
-        currentDay = simpleDayFormat.format(myCalendar.getTime());
+        daySelected = simpleDayFormat.format(myCalendar.getTime());
         dateEditText.setText(currentDateString);
     }
 
@@ -286,35 +294,30 @@ public class NewAttendanceActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if (allInputsValid()) {
-                    if (!attendanceAlreadyExists()) {
+                if (allInputsProvided()) {
+                    int resultCode = allInputsValid();
+                    if (resultCode == ALL_INPUTS_VALID) {
                         Intent takeAttendanceIntent = new Intent();
                         takeAttendanceIntent.setClass(NewAttendanceActivity.this,
                                 TakeAttendanceActivity.class);
                         takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_COLLEGE_ID,
                                 String.valueOf(collegeSelected));
                         takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_DATE, currentDateString);
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_DAY, currentDay);
+                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_DAY, daySelected);
                         takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_SEMESTER, semesterSelected);
                         takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_BRANCH, branchSelected);
                         takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_SECTION, sectionSelected);
                         takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_SUBJECT, subjectSelected);
-
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_CLASS_ID, classId);
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_BRANCH_ID, branchId);
+                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
+                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_BRANCH_ID, String.valueOf(branchId));
                         takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_LECTURE,
                                 lectureEt.getText().toString());
                         takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_FAC_USER_ID,
                                 getIntent().getStringExtra(ExtraUtils.EXTRA_FAC_USER_ID));
                         startActivityForResult(takeAttendanceIntent, TAKE_ATTENDANCE_REQ_CODE);
                     } else {
-                        RelativeLayout parentlayout = findViewById(R.id.relative_layout);
-                        Snackbar snackbar = Snackbar.make(parentlayout,
-                                "Attendance already exists!",
-                                Snackbar.LENGTH_LONG);
-                        snackbar.show();
+                        showError(resultCode);
                     }
-
                 } else {
                     Toast.makeText(NewAttendanceActivity.this, "Complete all fields",
                             Toast.LENGTH_SHORT).show();
@@ -324,10 +327,34 @@ public class NewAttendanceActivity extends AppCompatActivity {
         });
     }
 
+    private void showError(int resultCode) {
+        String error;
+        switch (resultCode) {
+            case LECTURE_NOT_FOUND:
+                error = "Lecture Not Found!";
+                break;
+            case CLASS_NOT_FOUND:
+                error = "Class Not Found!";
+                break;
+            case BRANCH_NOT_FOUND:
+                error = "Branch Not Found!";
+                break;
+            case ATTENDANCE_ALREADY_EXISTS:
+                error = "Attendance Already Exists!";
+                break;
+            default:
+                error = "Unknown Error!";
+                break;
+        }
+        RelativeLayout parentLayout = findViewById(R.id.relative_layout);
+        Snackbar.make(parentLayout, error, Snackbar.LENGTH_LONG).show();
+
+    }
+
     /**
      * check all inputs are valid or not
      */
-    private boolean allInputsValid() {
+    private boolean allInputsProvided() {
         int currentLectureValue = Integer.parseInt(lectureEt.getText().toString());
         if (collegeSelected < 1 || collegeSelected > 2 || currentDateString == null ||
                 semesterSelected == null || branchSelected == null || subjectSelected == null ||
@@ -485,28 +512,39 @@ public class NewAttendanceActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    /**
-     * check that whether attendance already exists or not
-     */
-    private boolean attendanceAlreadyExists() {
+    private int allInputsValid() {
+        Cursor cursor = null;
+        branchId = DbHelperMethods.getBranchId(this, branchSelected);
+        if (branchId > 0) {
+            classId = DbHelperMethods.getClassId(this, collegeSelected,
+                    semesterSelected,
+                    String.valueOf(branchId),
+                    sectionSelected);
+            if (classId > 0) {
+                lectureId = DbHelperMethods.getLectureId(this, String.valueOf(classId),
+                        lectureEt.getText().toString(), daySelected);
 
-        branchId = String.valueOf(DbHelperMethods.getBranchId(this, branchSelected));
-        classId = String.valueOf(DbHelperMethods.getClassId(this, collegeSelected,
-                semesterSelected, branchId, sectionSelected));
+                if (lectureId > 0) {
 
-        String selection = AttendanceRecordEntry.CLASS_ID_COL + "=?" + " and " +
-                AttendanceRecordEntry.DATE_COL + "=?" + " and " +
-                AttendanceRecordEntry.SUBJECT_COL + "=?" + " and " +
-                AttendanceRecordEntry.LECTURE_COL + "=?";
+                    String selection = AttendanceRecordEntry.LECTURE_ID_COL + "=?" + " and " +
+                            AttendanceRecordEntry.DATE_COL + "=?";
 
-        String[] selectionArgs = new String[]{classId,
-                dateEditText.getText().toString(),
-                subjectSelected,
-                lectureEt.getText().toString()};
+                    String[] selectionArgs = new String[]{String.valueOf(lectureId),
+                            dateEditText.getText().toString()};
 
-        Cursor cursor = db.query(AttendanceRecordEntry.TABLE_NAME, null, selection,
-                selectionArgs, null, null, null);
+                    cursor = db.query(AttendanceRecordEntry.TABLE_NAME, null, selection,
+                            selectionArgs, null, null, null);
 
-        return (cursor.getCount() > 0 );
+                } else {
+                    return LECTURE_NOT_FOUND;
+                }
+            } else {
+                return CLASS_NOT_FOUND;
+            }
+        } else {
+            return BRANCH_NOT_FOUND;
+        }
+        if (cursor != null && cursor.getCount() > 0) return ATTENDANCE_ALREADY_EXISTS;
+        else return ALL_INPUTS_VALID;
     }
 }

@@ -2,8 +2,6 @@ package com.example.android.attendance;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -21,15 +19,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.android.attendance.adapters.MainListCursorAdapter;
-import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
 import com.example.android.attendance.data.DbHelperMethods;
 import com.example.android.attendance.sync.ReminderUtilities;
 import com.example.android.attendance.utilities.ExtraUtils;
 
 
 public class MainActivity extends AppCompatActivity {
-
-    private String SELECTION = AttendanceRecordEntry.FACULTY_ID_COL + "=?";
 
     private TextView facNameTv;
     private TextView facDeptTv;
@@ -43,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int NEW_ATTENDANCE_REQUEST_CODE = 1;
     private static final int UPDATE_ATTENDANCE_REQ_CODE = 2;
-    private static final int LOGIN_REQUEST_CODE = 0;
 
     Bundle intentBundle;
 
@@ -69,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
 
         RelativeLayout emptyView = findViewById(R.id.empty_view_main);
         mainListView.setEmptyView(emptyView);
-
 
 
         Cursor cursor = DbHelperMethods.getAttendanceRecordsCursor(this, facUserId);
@@ -167,6 +160,5 @@ public class MainActivity extends AppCompatActivity {
     public static int getUpdateAttendanceReqCode() {
         return UPDATE_ATTENDANCE_REQ_CODE;
     }
-
 
 }

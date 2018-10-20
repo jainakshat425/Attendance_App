@@ -5,9 +5,12 @@ import android.provider.BaseColumns;
 public class AttendanceContract {
     public static abstract class AttendanceEntry implements BaseColumns {
 
-        public static final String _ID = BaseColumns._ID;
-        public static final String NAME_COL = "name";
-        public static final String ROLL_NO_COL = "roll_no";
-        public static final String TOTAL_ATTENDANCE_COL = "total_attendance";
+
+        public static final String TABLE_NAME = "attendance";
+
+        public static final String ID = BaseColumns._ID;
+        public static final String STUDENT_ID = "std_id";
+        public static final String ATTENDANCE_RECORD_ID  = "attendance_record_id";
+        public static final String ATTENDANCE_STATE = "attendance_state";
     }
 }

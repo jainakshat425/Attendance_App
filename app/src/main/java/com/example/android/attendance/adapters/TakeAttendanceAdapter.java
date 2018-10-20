@@ -12,25 +12,19 @@ import android.widget.TextView;
 
 import com.example.android.attendance.R;
 import com.example.android.attendance.contracts.AttendanceContract.AttendanceEntry;
+import com.example.android.attendance.contracts.StudentContract;
+import com.example.android.attendance.contracts.StudentContract.StudentEntry;
 
 import java.util.ArrayList;
 
 public class TakeAttendanceAdapter extends CursorAdapter {
 
-    private static String ATTENDANCE_TABLE;
-    private static String NEW_COLUMN;
     private static ArrayList<Integer> attendanceStatesList;
-    private static ArrayList<Integer> totalAttendanceList;
 
-    public TakeAttendanceAdapter(Activity context, Cursor cursor, String attendanceTable,
-                                 String newColumn, ArrayList<Integer> attendanceStates,
-                                 ArrayList<Integer> totalAttendances) {
+    public TakeAttendanceAdapter(Activity context, Cursor cursor,
+                                 ArrayList<Integer> attendanceStates) {
         super(context, cursor, 0);
-        ATTENDANCE_TABLE = attendanceTable;
-        NEW_COLUMN = newColumn;
         attendanceStatesList = attendanceStates;
-        totalAttendanceList = totalAttendances;
-
     }
 
     //inflates a new view
@@ -44,12 +38,12 @@ public class TakeAttendanceAdapter extends CursorAdapter {
     @Override
     public void bindView(final View view, final Context context, final Cursor cursor) {
 
-        int nameIndex = cursor.getColumnIndexOrThrow(AttendanceEntry.NAME_COL);
+        int nameIndex = cursor.getColumnIndexOrThrow(StudentEntry.S_NAME_COL);
         String name = cursor.getString(nameIndex);
         TextView nameTv = (TextView) view.findViewById(R.id.name_text_view);
         nameTv.setText(name);
 
-        int rollNoIndex = cursor.getColumnIndexOrThrow(AttendanceEntry.ROLL_NO_COL);
+        int rollNoIndex = cursor.getColumnIndexOrThrow(StudentEntry.S_ROLL_NO_COL);
         String rollNo = cursor.getString(rollNoIndex);
         TextView rollNoTv = (TextView) view.findViewById(R.id.roll_no_text);
         rollNoTv.setText(rollNo);
@@ -69,15 +63,10 @@ public class TakeAttendanceAdapter extends CursorAdapter {
             @Override
             public void onClick(View v) {
                 int position = Integer.parseInt(String.valueOf(v.getTag()));
-                int currentTotalAttendance = totalAttendanceList.get(position);
                 if (attendanceStatesList.get(position) == 1) {
                     attendanceStatesList.set(position, 0);
-                    if (currentTotalAttendance != 0) {
-                        totalAttendanceList.set(position, --currentTotalAttendance);
-                    }
                 } else {
                     attendanceStatesList.set(position, 1);
-                    totalAttendanceList.set(position, ++currentTotalAttendance);
                 }
 
             }
@@ -94,16 +83,4 @@ public class TakeAttendanceAdapter extends CursorAdapter {
         return attendanceStatesList.get(i);
     }
 
-    //return the total attendance of the i'th student
-    public static int getTotalAttendance(int i) { return totalAttendanceList.get(i); }
-
-    //return the new column of ATTENDANCE
-    public static String getAttendanceColumn() {
-        return NEW_COLUMN;
-    }
-
-    //return the present attendance table
-    public static String getAttendanceTableName() {
-        return ATTENDANCE_TABLE;
-    }
 }

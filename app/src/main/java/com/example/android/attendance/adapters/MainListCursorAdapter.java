@@ -18,13 +18,13 @@ import com.example.android.attendance.MainActivity;
 import com.example.android.attendance.R;
 import com.example.android.attendance.TakeAttendanceActivity;
 import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
-import com.example.android.attendance.contracts.BranchContract;
 import com.example.android.attendance.contracts.BranchContract.BranchEntry;
-import com.example.android.attendance.contracts.ClassContract;
 import com.example.android.attendance.contracts.ClassContract.ClassEntry;
-import com.example.android.attendance.contracts.CollegeContract;
 import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
-import com.example.android.attendance.contracts.StudentContract.StudentEntry;
+import com.example.android.attendance.contracts.LectureContract;
+import com.example.android.attendance.contracts.LectureContract.LectureEntry;
+import com.example.android.attendance.contracts.SubjectContract;
+import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
 import com.example.android.attendance.utilities.ExtraUtils;
 
 public class MainListCursorAdapter extends CursorAdapter {
@@ -50,17 +50,20 @@ public class MainListCursorAdapter extends CursorAdapter {
         /**
          * get column index from attendanceRecord table
          */
-        int id = cursor.getColumnIndex(AttendanceRecordEntry._ID);
-        int facUserIdIndex = cursor.getColumnIndex(AttendanceRecordEntry.FACULTY_ID_COL);
-        int classIdIndex = cursor.getColumnIndex(AttendanceRecordEntry.CLASS_ID_COL);
-        int tableNameIndex = cursor.getColumnIndex(AttendanceRecordEntry.ATTENDANCE_TABLE_COL);
-        int columnNameIndex = cursor.getColumnIndex(AttendanceRecordEntry.ATTENDANCE_COL);
+        int attendRecIdIndex = cursor.getColumnIndex(AttendanceRecordEntry.ID);
+        int lectureIdIndex = cursor.getColumnIndex(AttendanceRecordEntry.LECTURE_ID_COL);
+        int dateIndex = cursor.getColumnIndex(AttendanceRecordEntry.DATE_COL);
         int stdPresentIndex = cursor.getColumnIndex(AttendanceRecordEntry.STUDENTS_PRESENT_COL);
         int totalStdIndex = cursor.getColumnIndex(AttendanceRecordEntry.TOTAL_STUDENTS_COL);
-        int subjectIndex = cursor.getColumnIndex(AttendanceRecordEntry.SUBJECT_COL);
-        int lectureIndex = cursor.getColumnIndex(AttendanceRecordEntry.LECTURE_COL);
-        int dateIndex = cursor.getColumnIndex(AttendanceRecordEntry.DATE_COL);
-        int dayIndex = cursor.getColumnIndex(AttendanceRecordEntry.DAY_COL);
+
+        /**
+         * get column index from lectures table
+         */
+        int facUserIdIndex = cursor.getColumnIndex(LectureEntry.FAC_USER_ID);
+        int classIdIndex = cursor.getColumnIndex(LectureEntry.CLASS_ID);
+        int subjectIndex = cursor.getColumnIndex(LectureEntry.SUBJECT_ID);
+        int dayIndex = cursor.getColumnIndex(LectureEntry.LECTURE_DAY);
+        int lectureNoIndex = cursor.getColumnIndex(LectureEntry.LECTURE_NUMBER);
 
         /**
          * get column index from classes table
@@ -80,21 +83,26 @@ public class MainListCursorAdapter extends CursorAdapter {
          */
         int branchNameIndex = cursor.getColumnIndex(BranchEntry.BRANCH_NAME);
 
-        String tableName = cursor.getString(tableNameIndex);
-        String columnName = cursor.getString(columnNameIndex);
+        /**
+         * get column index from subject table
+         */
+        int subjectNameIndex = cursor.getColumnIndex(SubjectEntry.SUB_NAME_COL);
+
         int stdPresent = cursor.getInt(stdPresentIndex);
         int totalStudents = cursor.getInt(totalStdIndex);
         String college = cursor.getString(collegeNameIndex);
-        int semester = cursor.getInt(semesterIndex);
+        String semester = String.valueOf(cursor.getInt(semesterIndex));
         String branch = cursor.getString(branchNameIndex);
         String section = cursor.getString(sectionIndex);
         String facUserId = cursor.getString(facUserIdIndex);
-        String subject = cursor.getString(subjectIndex);
+        String subject = cursor.getString(subjectNameIndex);
         String date = cursor.getString(dateIndex);
         String day = cursor.getString(dayIndex);
-        int lecture = cursor.getInt(lectureIndex);
+        String lectureNo = String.valueOf(cursor.getInt(lectureNoIndex));
         int collegeId = cursor.getInt(collegeIdIndex);
         int branchId = cursor.getInt(branchIdIndex);
+        int classId = cursor.getInt(classIdIndex);
+        int attendRecId = cursor.getInt(attendRecIdIndex);
 
 
         TextView collegeTv = (TextView) view.findViewById(R.id.college_tv);
@@ -109,7 +117,7 @@ public class MainListCursorAdapter extends CursorAdapter {
         }
 
         TextView semesterTv = (TextView) view.findViewById(R.id.semester_tv);
-        setSemesterTv(semester, semesterTv);
+        semesterTv.setText(ExtraUtils.getSemester(semester));
 
         TextView branchTv = (TextView) view.findViewById(R.id.branch_tv);
         branchTv.setText(branch);
@@ -128,7 +136,7 @@ public class MainListCursorAdapter extends CursorAdapter {
         dayTv.setText(day.substring(0,3) + ",");
 
         TextView lectureTv = (TextView) view.findViewById(R.id.lecture_tv);
-        setLectureTv(String.valueOf(lecture), lectureTv);
+        lectureTv.setText(ExtraUtils.getLecture(lectureNo));
 
         TextView studentsPresentTv = (TextView) view.findViewById(R.id.students_present_tv);
         studentsPresentTv.setText(String.valueOf(stdPresent));
@@ -137,19 +145,18 @@ public class MainListCursorAdapter extends CursorAdapter {
         totalStudentsTv.setText(String.valueOf(totalStudents));
 
         intentBundle = new Bundle();
+        intentBundle.putString(ExtraUtils.EXTRA_ATTEND_REC_ID, String.valueOf(attendRecId));
+        intentBundle.putString(ExtraUtils.EXTRA_FAC_USER_ID, facUserId);
         intentBundle.putString(ExtraUtils.EXTRA_DATE, date);
-        intentBundle.putString(ExtraUtils.EXTRA_SEMESTER, String.valueOf(semester));
+        intentBundle.putString(ExtraUtils.EXTRA_SEMESTER, semester);
         intentBundle.putString(ExtraUtils.EXTRA_BRANCH, branch);
         intentBundle.putString(ExtraUtils.EXTRA_SECTION, section);
         intentBundle.putString(ExtraUtils.EXTRA_SUBJECT, subject);
         intentBundle.putString(ExtraUtils.EXTRA_COLLEGE, college);
-        intentBundle.putString(ExtraUtils.EXTRA_FAC_USER_ID, facUserId);
-        intentBundle.putString(ExtraUtils.EXTRA_LECTURE,String.valueOf(lecture));
+        intentBundle.putString(ExtraUtils.EXTRA_LECTURE,lectureNo);
         intentBundle.putString(ExtraUtils.EXTRA_DAY,day);
-        intentBundle.putString(ExtraUtils.EXTRA_TABLE_NAME, tableName);
-        intentBundle.putString(ExtraUtils.EXTRA_ATTENDANCE_COL_NAME, columnName);
+        intentBundle.putString(ExtraUtils.EXTRA_CLASS_ID,String.valueOf(classId));
         intentBundle.putString(ExtraUtils.EXTRA_COLLEGE_ID, String.valueOf(collegeId));
-        intentBundle.putString(ExtraUtils.EXTRA_BRANCH_ID, String.valueOf(branchId));
 
         view.setTag(intentBundle);
         view.setOnClickListener(new View.OnClickListener() {
@@ -164,30 +171,5 @@ public class MainListCursorAdapter extends CursorAdapter {
         });
 
     }
-
-    private void setSemesterTv(int semester, TextView semesterTv) {
-        if (semester == 1) {
-            semesterTv.setText(String.valueOf(semester) + "st Sem");
-        } else if (semester == 2) {
-            semesterTv.setText(String.valueOf(semester) + "nd Sem");
-        } else if (semester == 3) {
-            semesterTv.setText(String.valueOf(semester) + "rd Sem");
-        } else {
-            semesterTv.setText(String.valueOf(semester) + "th Sem");
-        }
-    }
-
-    private void setLectureTv(String lecture, TextView lectureTv) {
-        if (Integer.parseInt(lecture) == 1) {
-            lectureTv.setText(lecture + "st Lecture");
-        } else if (Integer.parseInt(lecture) == 2) {
-            lectureTv.setText(lecture + "nd Lecture");
-        } else if (Integer.parseInt(lecture) == 3) {
-            lectureTv.setText(lecture + "rd Lecture");
-        } else {
-            lectureTv.setText(lecture + "th Lecture");
-        }
-    }
-
 
 }
