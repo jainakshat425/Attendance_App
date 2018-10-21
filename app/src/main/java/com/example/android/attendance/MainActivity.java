@@ -1,16 +1,19 @@
 package com.example.android.attendance;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Build;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int UPDATE_ATTENDANCE_REQ_CODE = 2;
 
     Bundle intentBundle;
+    private SharedPreferences mPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         intentBundle = getIntent().getExtras();
+
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         String facName = intentBundle.getString(ExtraUtils.EXTRA_FAC_NAME);
         String facUserId = intentBundle.getString(ExtraUtils.EXTRA_FAC_USER_ID);
@@ -150,11 +156,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        intentBundle.getString(ExtraUtils.EXTRA_FAC_USER_ID);
-        Cursor cursor = DbHelperMethods.getAttendanceRecordsCursor(this,
-                intentBundle.getString(ExtraUtils.EXTRA_FAC_USER_ID));
-        cursorAdapter.swapCursor(cursor);
-        cursorAdapter.notifyDataSetChanged();
+        String facUserId = mPreferences.getString(ExtraUtils.EXTRA_FAC_USER_ID, "");
+        if (!facUserId.isEmpty() || facUserId.equals("")) {
+            Cursor cursor = DbHelperMethods.getAttendanceRecordsCursor(this,
+                    intentBundle.getString(ExtraUtils.EXTRA_FAC_USER_ID));
+            cursorAdapter.swapCursor(cursor);
+            cursorAdapter.notifyDataSetChanged();
+        } else {
+            RelativeLayout parentLayout = findViewById(R.id.main_layout);
+            Snackbar.make(parentLayout, "Something Went Wrong!", Snackbar.LENGTH_LONG).show();
+        }
     }
 
     public static int getUpdateAttendanceReqCode() {

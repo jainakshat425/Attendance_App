@@ -26,7 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.attendance.adapters.SpinnerArrayAdapter;
-import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
 import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
 import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
 import com.example.android.attendance.data.DatabaseHelper;
@@ -526,14 +525,11 @@ public class NewAttendanceActivity extends AppCompatActivity {
 
                 if (lectureId > 0) {
 
-                    String selection = AttendanceRecordEntry.LECTURE_ID_COL + "=?" + " and " +
-                            AttendanceRecordEntry.DATE_COL + "=?";
+                    boolean attendanceAlreadyExist = DbHelperMethods.isAttendanceAlreadyExists
+                            (this, lectureId, dateEditText.getText().toString());
 
-                    String[] selectionArgs = new String[]{String.valueOf(lectureId),
-                            dateEditText.getText().toString()};
-
-                    cursor = db.query(AttendanceRecordEntry.TABLE_NAME, null, selection,
-                            selectionArgs, null, null, null);
+                    if (attendanceAlreadyExist) return ATTENDANCE_ALREADY_EXISTS;
+                    else return ALL_INPUTS_VALID;
 
                 } else {
                     return LECTURE_NOT_FOUND;
@@ -544,7 +540,5 @@ public class NewAttendanceActivity extends AppCompatActivity {
         } else {
             return BRANCH_NOT_FOUND;
         }
-        if (cursor != null && cursor.getCount() > 0) return ATTENDANCE_ALREADY_EXISTS;
-        else return ALL_INPUTS_VALID;
     }
 }

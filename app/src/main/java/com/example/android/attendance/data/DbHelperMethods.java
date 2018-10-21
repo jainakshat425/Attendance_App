@@ -14,6 +14,7 @@ import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
 import com.example.android.attendance.contracts.LectureContract.LectureEntry;
 import com.example.android.attendance.contracts.StudentContract.StudentEntry;
 import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
+import com.example.android.attendance.utilities.ExtraUtils;
 
 import static com.example.android.attendance.utilities.ExtraUtils.getCurrentDay;
 
@@ -170,6 +171,7 @@ public class DbHelperMethods {
 
     public static Cursor getLectureCursor(Context context, String facUserId) {
 
+        String time = ExtraUtils.getCurrentTime();
 
         String projection = LectureEntry.TABLE_NAME + "." + LectureEntry.ID + ","
                 + LectureEntry.CLASS_ID + ","
@@ -199,13 +201,20 @@ public class DbHelperMethods {
                 + " ON " + SubjectEntry.TABLE_NAME + "." + SubjectEntry._ID + " = "
                 + LectureEntry.SUBJECT_ID;
 
+        String selection = LectureEntry.FAC_USER_ID + "=?" + " and "
+                + LectureEntry.LECTURE_DAY + "=?" + " and "
+                + LectureEntry.LECTURE_START_TIME + "<=?" + " and "
+                + LectureEntry.LECTURE_END_TIME + ">?";
+
+        String[] selectionArgs = new String[]{facUserId, getCurrentDay(), time, time};
+
 
         String query = "SELECT " + projection + " FROM " + tableName + " WHERE "
-                + LectureEntry.FAC_USER_ID + "=?" + " and "
-                + LectureEntry.LECTURE_DAY + "=?";
+                + selection;
 
-        return getDbReadOnly(context).rawQuery(query, new String[]{facUserId, getCurrentDay()});
+        return getDbReadOnly(context).rawQuery(query, selectionArgs);
     }
+
 
     public static Cursor getStudentForUpdateAttendance(Context context, String attendRecId) {
         String tableName = AttendanceEntry.TABLE_NAME
@@ -293,5 +302,20 @@ public class DbHelperMethods {
                 .insert(AttendanceRecordEntry.TABLE_NAME, null, values);
 
         return attendRecId;
+    }
+
+    public static boolean isAttendanceAlreadyExists(Context context, int lectureId, String date) {
+
+        String selection = AttendanceRecordEntry.LECTURE_ID_COL + "=?" + " and " +
+                AttendanceRecordEntry.DATE_COL + "=?";
+
+        String[] selectionArgs = new String[]{String.valueOf(lectureId),
+                date};
+
+        Cursor cursor = DbHelperMethods.getDbReadOnly(context)
+                .query(AttendanceRecordEntry.TABLE_NAME, null, selection,
+                        selectionArgs, null, null, null);
+
+        return (cursor != null && cursor.getCount() > 0);
     }
 }

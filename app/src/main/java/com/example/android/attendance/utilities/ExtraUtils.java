@@ -64,5 +64,11 @@ public class ExtraUtils {
         String date = simpleDateFormat.format(Calendar.getInstance().getTime());
         return date;
     }
+
+    public static String getCurrentTime() {
+        SimpleDateFormat timeFormat = new SimpleDateFormat("H", Locale.US);
+        String time = timeFormat.format(Calendar.getInstance().getTime());
+        return time;
+    }
 }
 
