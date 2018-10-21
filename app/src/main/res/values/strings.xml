@@ -22,4 +22,7 @@
     <string name="add_widget">Add widget</string>
     <string name="lecture_details">Lecture Details</string>
     <string name="take_attendance_title">Take Attendance</string>
+    <string name="out_of">out of</string>
+    <string name="attendance_done">Attendance Done</string>
+    <string name="not_logged_in">Not Logged In</string>
 </resources>

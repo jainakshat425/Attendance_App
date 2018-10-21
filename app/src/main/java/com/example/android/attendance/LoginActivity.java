@@ -1,11 +1,14 @@
 package com.example.android.attendance;
 
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -93,23 +96,40 @@ public class LoginActivity extends AppCompatActivity {
             cursor.close();
         }
         else {
-            String name = cursor.getString(cursor.getColumnIndexOrThrow(FacultyEntry.F_NAME_COL));
-            String dept = cursor.getString(cursor.getColumnIndexOrThrow
-                    (FacultyEntry.F_DEPARTMENT_COL));
             String userId = cursor.getString(cursor.getColumnIndexOrThrow
                     (FacultyEntry.F_USER_ID_COL));
 
-            intentBundle.putString(ExtraUtils.EXTRA_FAC_NAME,name);
-            intentBundle.putString(ExtraUtils.EXTRA_FAC_USER_ID,userId);
-            intentBundle.putString(ExtraUtils.EXTRA_FAC_DEPT,dept);
-
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             preferences.edit().putString(ExtraUtils.EXTRA_FAC_USER_ID, userId).apply();
-
-            Intent mainIntent = new Intent();
-            mainIntent.setClass(this,MainActivity.class);
-            mainIntent.putExtras(intentBundle);
-            startActivity(mainIntent);
+            setResult(Activity.RESULT_OK);
+            finish();
         }
     }
+
+    private void showAlertDialog() {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Do you want to exit?")
+                .setPositiveButton("No",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        }).setNegativeButton("Yes",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                setResult(Activity.RESULT_CANCELED);
+                                finish();
+                            }
+                        }).create();
+        dialog.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+       showAlertDialog();
+    }
 }
+
+

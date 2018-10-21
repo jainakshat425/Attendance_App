@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:src="@drawable/ic_empty_attendance_list"
-                android:tint="@color/needHelpButtonColor" />
+                android:tint="@color/darkRedColor" />
 
             <TextView
                 android:id="@+id/list_empty_tv"
@@ -63,7 +63,7 @@
                 android:alpha="0.70"
                 android:fontFamily="sans-serif-medium"
                 android:text="Attendance list is Empty!"
-                android:textColor="@color/needHelpButtonColor" />
+                android:textColor="@color/darkRedColor" />
 
             <TextView
                 android:layout_width="wrap_content"

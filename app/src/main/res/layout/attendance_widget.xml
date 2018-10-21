@@ -1,121 +1,131 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="@dimen/widget_margin"
-    android:elevation="5dp">
+    android:elevation="5dp"
+    android:padding="@dimen/widget_margin">
 
     <TextView
         android:id="@+id/widget_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:background="@color/colorPrimary"
         android:padding="6sp"
-        android:text="@string/lecture_details"
+        android:text="@string/not_logged_in"
         android:textAlignment="center"
         android:textColor="#fff"
         android:textSize="16sp" />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#fff"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:paddingBottom="4dp">
+        android:layout_height="match_parent"
+        android:layout_below="@id/widget_header"
+        android:orientation="vertical"
+        android:visibility="visible">
 
-        <TextView
-            android:id="@+id/widget_college_tv"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
-            android:textAllCaps="true"
-            tools:text="GIT" />
+            android:layout_below="@id/widget_header"
+            android:background="#fff"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="4dp">
 
-        <TextView
-            android:id="@+id/widget_semester_tv"
+            <TextView
+                android:id="@+id/widget_college_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:textAllCaps="true"
+                tools:text="GIT" />
+
+            <TextView
+                android:id="@+id/widget_semester_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                tools:text="V Sem" />
+
+            <TextView
+                android:id="@+id/widget_branch_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/widget_college_tv"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginBottom="4dp"
+                tools:text="CS" />
+
+            <TextView
+                android:id="@+id/widget_section_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/widget_college_tv"
+                android:layout_marginStart="4dp"
+                android:layout_marginLeft="4dp"
+                android:layout_toEndOf="@id/widget_branch_tv"
+                android:layout_toRightOf="@id/widget_branch_tv"
+                tools:text="'A'" />
+
+
+            <TextView
+                android:id="@+id/widget_subject_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/widget_semester_tv"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginBottom="4dp"
+                tools:text="ADS" />
+
+            <TextView
+                android:id="@+id/widget_lecture_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/widget_subject_tv"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginBottom="4dp"
+                tools:text="5th Lecture" />
+
+            <TextView
+                android:id="@+id/widget_day_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/widget_branch_tv"
+                android:paddingRight="4dp"
+                tools:text="Thursday," />
+
+            <TextView
+                android:id="@+id/widget_date_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/widget_branch_tv"
+                android:layout_toEndOf="@id/widget_day_tv"
+                android:layout_toRightOf="@id/widget_day_tv"
+                tools:text="07-08-2018" />
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/lets_go_button"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
-            tools:text="V Sem" />
+            android:layout_height="30dp"
+            android:layout_gravity="right"
+            android:background="@color/darkRedColor"
+            android:text="let's go"
+            android:textColor="#fff"
+            android:textSize="10sp" />
+    </LinearLayout>
 
-        <TextView
-            android:id="@+id/widget_branch_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/widget_college_tv"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_marginBottom="4dp"
-            tools:text="CS" />
-
-        <TextView
-            android:id="@+id/widget_section_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/widget_college_tv"
-            android:layout_marginStart="4dp"
-            android:layout_marginLeft="4dp"
-            android:layout_toEndOf="@id/widget_branch_tv"
-            android:layout_toRightOf="@id/widget_branch_tv"
-            tools:text="'A'" />
-
-
-        <TextView
-            android:id="@+id/widget_subject_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/widget_semester_tv"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginBottom="4dp"
-            tools:text="ADS" />
-
-        <TextView
-            android:id="@+id/widget_lecture_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/widget_subject_tv"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginBottom="4dp"
-            tools:text="5th Lecture" />
-
-        <TextView
-            android:id="@+id/widget_day_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/widget_branch_tv"
-            android:paddingRight="4dp"
-            tools:text="Thursday," />
-
-        <TextView
-            android:id="@+id/widget_date_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/widget_branch_tv"
-            android:layout_toEndOf="@id/widget_day_tv"
-            android:layout_toRightOf="@id/widget_day_tv"
-            tools:text="07-08-2018" />
-
-    </RelativeLayout>
-    <Button
-        android:id="@+id/lets_go_button"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
-        android:background="@color/needHelpButtonColor"
-        android:layout_gravity="right"
-        android:textSize="10sp"
-        android:text="let's go"
-        android:textColor="#fff"/>
-
-</LinearLayout>
+</RelativeLayout>

@@ -172,6 +172,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             case R.id.save_attendance:
                 saveAttendance();
                 updateAttendanceRecord();
+                ExtraUtils.updateWidget(this);
 
                 Intent intent = new Intent();
                 intent.putExtras(bundle);

@@ -5,7 +5,7 @@
     <color name="colorAccent">#39796b</color>
 
     <color name="textColor">#212121</color>
-    <color name="needHelpButtonColor">#870000</color>
+    <color name="darkRedColor">#870000</color>
     <color name="serialNoBgColor">#006978</color>
 
     <color name="colorDepartment">#00600f</color>

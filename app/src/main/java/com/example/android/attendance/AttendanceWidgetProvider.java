@@ -38,14 +38,13 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
         String facUserId = preferences.getString(ExtraUtils.EXTRA_FAC_USER_ID, null);
         if (facUserId == null) {
             views.setTextViewText(R.id.widget_header, "Not Logged In");
+            views.setViewVisibility(R.id.attendance_detail_layout, View.GONE);
             views.setViewVisibility(R.id.lets_go_button, View.GONE);
         } else if (Integer.parseInt(ExtraUtils.getCurrentTime()) > 16) {
             views.setTextViewText(R.id.widget_header, "Off From Work");
+            views.setViewVisibility(R.id.attendance_detail_layout, View.GONE);
             views.setViewVisibility(R.id.lets_go_button, View.GONE);
         } else {
-            views.setTextViewText(R.id.widget_header, "Lecture Details");
-            views.setViewVisibility(R.id.lets_go_button, View.VISIBLE);
-
             setupLectureDetails(context, views, facUserId);
         }
 
@@ -73,13 +72,13 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
             String collegeName = cursor.getString(cursor.getColumnIndex(CollegeEntry.NAME));
             String date = ExtraUtils.getCurrentDate();
 
-            views.setTextViewText(R.id.college_text_view, collegeName);
+            views.setTextViewText(R.id.widget_college_tv, collegeName);
             views.setTextViewText(R.id.widget_branch_tv, branch);
             views.setTextViewText(R.id.widget_section_tv, section);
             views.setTextViewText(R.id.widget_subject_tv, subject);
             views.setTextViewText(R.id.widget_day_tv, day);
             views.setTextViewText(R.id.widget_date_tv, date);
-            views.setTextViewText(R.id.semester_text_view,
+            views.setTextViewText(R.id.widget_semester_tv,
                     ExtraUtils.getSemester(String.valueOf(semester)));
             views.setTextViewText(R.id.widget_lecture_tv,
                     ExtraUtils.getLecture(String.valueOf(lecture)));
@@ -90,6 +89,8 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
                     .isAttendanceAlreadyExists(context, lectureId, date);
 
             if (!attendanceAlreadyExist) {
+                views.setTextViewText(R.id.widget_header, "Lecture Details");
+                views.setViewVisibility(R.id.attendance_detail_layout, View.VISIBLE);
 
                 // Create an Intent to launch TakeAttendanceActivity when clicked
                 Intent intent = new Intent(context, TakeAttendanceActivity.class);
@@ -108,6 +109,8 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
                 PendingIntent pendingIntent = PendingIntent.getActivity(context,
                         WIDGET_REQUEST_CODE, intent, 0);
                 views.setOnClickPendingIntent(R.id.lets_go_button, pendingIntent);
+
+                views.setViewVisibility(R.id.lets_go_button, View.VISIBLE);
             } else {
                 views.setTextViewText(R.id.widget_header, "Attendance Done");
                 views.setViewVisibility(R.id.lets_go_button, View.GONE);
@@ -133,5 +136,6 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
     }
+
 }
 

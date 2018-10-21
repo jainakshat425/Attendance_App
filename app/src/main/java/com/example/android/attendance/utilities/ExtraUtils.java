@@ -1,5 +1,15 @@
 package com.example.android.attendance.utilities;
 
+import android.app.Activity;
+import android.app.Application;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+
+import com.example.android.attendance.AttendanceWidgetProvider;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -70,5 +80,18 @@ public class ExtraUtils {
         String time = timeFormat.format(Calendar.getInstance().getTime());
         return time;
     }
+
+    public static void updateWidget(Activity context) {
+        Intent intent = new Intent(context, AttendanceWidgetProvider.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+         // Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
+         // since it seems the onUpdate() is only fired on that:
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        int[] ids = appWidgetManager.getAppWidgetIds(new ComponentName(context, AttendanceWidgetProvider.class));
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        context.sendBroadcast(intent);
+    }
+
+
 }
 

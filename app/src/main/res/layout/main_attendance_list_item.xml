@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="8dp"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="8dp">
+    android:paddingBottom="4dp"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingTop="4dp">
 
     <!-- college text inside circle bg -->
     <TextView
@@ -21,7 +21,8 @@
         android:textAllCaps="true"
         android:textColor="@android:color/white"
         android:textSize="12sp"
-        tools:text="GIT" />
+        tools:text="GIT"
+        android:layout_alignParentStart="true" />
 
     <!-- layout holding semester, branch and section -->
     <RelativeLayout
@@ -29,8 +30,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@id/college_tv">
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@id/college_tv"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/college_tv">
 
         <!-- semester text -->
         <TextView
@@ -65,26 +68,32 @@
             android:paddingRight="2dp"
             android:textColor="#000"
             android:textSize="16sp"
-            tools:text="'A'" />
+            tools:text="'A'"
+            android:layout_marginStart="4dp"
+            android:layout_toEndOf="@id/branch_tv"
+            android:paddingStart="4dp"
+            android:paddingEnd="2dp" />
     </RelativeLayout>
 
     <!-- separator in between class and subject -->
     <View
         android:id="@+id/separator"
         android:layout_width="1dp"
-        android:layout_height="40dp"
+        android:layout_height="50dp"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
         android:layout_toRightOf="@id/sem_branch_layout"
-        android:background="@android:color/darker_gray" />
+        android:background="@android:color/darker_gray"
+        android:layout_toEndOf="@id/sem_branch_layout" />
 
     <LinearLayout
         android:id="@+id/attendance_detail_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/separator"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_toEndOf="@id/separator">
 
         <!-- subject text -->
         <TextView
@@ -115,23 +124,35 @@
                 android:id="@+id/day_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="monospace"
-                android:textSize="12sp"
                 android:textAllCaps="true"
                 android:paddingRight="4dp"
                 android:textColor="@android:color/black"
-                tools:text="Sat," />
+                tools:text="Sat,"
+                android:textSize="12sp"
+                android:paddingEnd="4dp" />
 
             <!-- date text -->
             <TextView
                 android:id="@+id/date_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="monospace"
                 android:textColor="@android:color/black"
+                android:textSize="12sp"
                 tools:text="07-08-2018" />
         </LinearLayout>
     </LinearLayout>
+
+    <!-- separator in between class and subject -->
+    <View
+        android:id="@+id/separator2"
+        android:layout_width="1dp"
+        android:layout_height="50dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:layout_toLeftOf="@id/attendance_count_layout"
+        android:background="@android:color/darker_gray"
+        android:layout_toStartOf="@id/attendance_count_layout" />
 
     <LinearLayout
         android:id="@+id/attendance_count_layout"
@@ -140,7 +161,8 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:orientation="vertical"
-        android:padding="4dp">
+        android:padding="4dp"
+        android:layout_alignParentEnd="true">
 
         <!-- students present text -->
         <TextView
@@ -157,7 +179,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="2dp"
-            android:text="out of"
+            android:text="@string/out_of"
             android:textColor="@android:color/black"
             android:textSize="10sp" />
 
