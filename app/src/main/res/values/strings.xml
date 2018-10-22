@@ -25,4 +25,9 @@
     <string name="out_of">out of</string>
     <string name="attendance_done">Attendance Done</string>
     <string name="not_logged_in">Not Logged In</string>
+    <string name="attendance_list_is_empty">Attendance list is Empty!</string>
+    <string name="click_button_below_to_add_new_attendance">Click button below to add new Attendance...</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

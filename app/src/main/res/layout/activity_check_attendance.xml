@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".CheckAttendanceActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark" />
+
+    <LinearLayout style="@style/SpinnerLayoutContainer">
+
+        <TextView
+            style="@style/SpinnerTextStyle"
+            android:text="College" />
+
+        <Spinner
+            android:id="@+id/college_spin"
+            style="@style/SpinnerStyle" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/SpinnerLayoutContainer">
+
+        <TextView
+            style="@style/SpinnerTextStyle"
+            android:text="Semester" />
+
+        <Spinner
+            android:id="@+id/semester_spin"
+            style="@style/SpinnerStyle" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/SpinnerLayoutContainer">
+
+        <TextView
+            style="@style/SpinnerTextStyle"
+            android:text="Branch" />
+
+        <Spinner
+            android:id="@+id/branch_spin"
+            style="@style/SpinnerStyle" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/SpinnerLayoutContainer">
+
+        <TextView
+            style="@style/SpinnerTextStyle"
+            android:text="Section" />
+
+        <Spinner
+            android:id="@+id/section_spin"
+            style="@style/SpinnerStyle" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/show_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_margin="16dp"
+        android:background="@color/colorAccent"
+        android:text="Show"
+        android:textColor="#fff" />
+
+</LinearLayout>

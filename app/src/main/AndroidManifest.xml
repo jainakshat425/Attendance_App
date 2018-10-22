@@ -31,6 +31,16 @@
             android:label="Take Attendance"
             android:parentActivityName=".NewAttendanceActivity" />
 
+        <activity
+            android:name=".ShowAttendanceActivity"
+            android:label="Attendance"
+            android:parentActivityName=".CheckAttendanceActivity" />
+
+        <activity
+            android:name=".CheckAttendanceActivity"
+            android:label="Attendance"
+            android:parentActivityName=".MainActivity" />
+
         <!-- This is required for immediate syncs -->
         <service
             android:name=".sync.AttendanceReminderIntentService"

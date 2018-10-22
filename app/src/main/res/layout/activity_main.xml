@@ -50,7 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:src="@drawable/ic_empty_attendance_list"
+                app:srcCompat="@drawable/ic_empty_attendance_list"
                 android:tint="@color/darkRedColor" />
 
             <TextView
@@ -62,7 +62,7 @@
                 android:layout_marginTop="32dp"
                 android:alpha="0.70"
                 android:fontFamily="sans-serif-medium"
-                android:text="Attendance list is Empty!"
+                android:text="@string/attendance_list_is_empty"
                 android:textColor="@color/darkRedColor" />
 
             <TextView
@@ -71,7 +71,7 @@
                 android:layout_below="@id/list_empty_tv"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="4dp"
-                android:text="Click button below to add new Attendance..." />
+                android:text="@string/click_button_below_to_add_new_attendance" />
         </RelativeLayout>
 
 
@@ -83,6 +83,7 @@
             android:layout_alignParentRight="true"
             android:layout_margin="@dimen/fab_margin"
             android:background="@color/colorPrimary"
+            android:layout_alignParentEnd="true"
             android:src="@drawable/baseline_add_white_48" />
 
 

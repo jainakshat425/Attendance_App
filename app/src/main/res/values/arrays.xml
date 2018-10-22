@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- array containing colleges for spinner -->
+    <string-array name="colleges_array">
+        <item>College</item>
+        <item>GIT</item>
+        <item>GCT</item>
+    </string-array>
+
     <!-- array containing 'semester' for spinner -->
     <string-array name="semester_array">
         <item>Semester</item>
@@ -34,4 +41,5 @@
         <item>E</item>
         <item>F</item>
     </string-array>
+
 </resources>
