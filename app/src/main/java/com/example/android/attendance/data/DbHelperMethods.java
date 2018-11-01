@@ -324,13 +324,13 @@ public class DbHelperMethods {
     public static Cursor getClassAttendanceCursor(Context context, int classId) {
 
 
-        String query = "select std_id, count(std_id)" +
+        String query = "select std_roll_no, std_name, count(std_id) as total_present" +
                 " from " +
                 "(select * from attendance" +
                 " inner join students" +
                 " on students._id = attendance.std_id" +
                 " where class_id=? and attendance_state=?)" +
-                " group by std_id;";
+                " group by std_id order by std_roll_no asc;";
 
         String[] selection = new String[]{String.valueOf(classId),
                 String.valueOf(1)};

@@ -11,8 +11,6 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.example.android.attendance.R;
-import com.example.android.attendance.contracts.AttendanceContract.AttendanceEntry;
-import com.example.android.attendance.contracts.StudentContract;
 import com.example.android.attendance.contracts.StudentContract.StudentEntry;
 
 import java.util.ArrayList;
@@ -40,18 +38,18 @@ public class TakeAttendanceAdapter extends CursorAdapter {
 
         int nameIndex = cursor.getColumnIndexOrThrow(StudentEntry.S_NAME_COL);
         String name = cursor.getString(nameIndex);
-        TextView nameTv = (TextView) view.findViewById(R.id.name_text_view);
+        TextView nameTv = (TextView) view.findViewById(R.id.tv_name);
         nameTv.setText(name);
 
         int rollNoIndex = cursor.getColumnIndexOrThrow(StudentEntry.S_ROLL_NO_COL);
         String rollNo = cursor.getString(rollNoIndex);
-        TextView rollNoTv = (TextView) view.findViewById(R.id.roll_no_text);
+        TextView rollNoTv = (TextView) view.findViewById(R.id.tv_roll_no);
         rollNoTv.setText(rollNo);
 
         int position = cursor.getPosition();
 
         int serialNo = position;
-        TextView serialTv = (TextView) view.findViewById(R.id.serial_no_tv);
+        TextView serialTv = (TextView) view.findViewById(R.id.tv_serial_no);
         serialTv.setText(String.valueOf(serialNo +1));
 
         CheckBox presentCheckbox = view.findViewById(R.id.present_checkbox);

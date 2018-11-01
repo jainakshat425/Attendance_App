@@ -28,5 +28,6 @@ public class ShowAttendanceActivity extends AppCompatActivity {
                 section);
 
         Cursor cursor = DbHelperMethods.getClassAttendanceCursor(this, classId);
+
     }
 }
