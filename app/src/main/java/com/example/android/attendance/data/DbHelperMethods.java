@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.example.android.attendance.ShowAttendanceActivity;
 import com.example.android.attendance.contracts.AttendanceContract.AttendanceEntry;
 import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
 import com.example.android.attendance.contracts.BranchContract.BranchEntry;
@@ -83,7 +84,7 @@ public class DbHelperMethods {
                 + SubjectEntry.BRANCH_ID_COL + "=?"
                 + SubjectEntry.SUB_SEMESTER_COL + "=?";
 
-        String[] selectionArgs = new String[] {subject, branchId, semester};
+        String[] selectionArgs = new String[]{subject, branchId, semester};
 
         Cursor cursor = getDbReadOnly(context).query(SubjectEntry.TABLE_NAME,
                 new String[]{SubjectEntry._ID},
@@ -106,7 +107,7 @@ public class DbHelperMethods {
                                    String daySelected) {
         int lectureId = -1;
 
-        String[] projection = new String[] {LectureEntry.ID};
+        String[] projection = new String[]{LectureEntry.ID};
         String selection = LectureEntry.CLASS_ID + "=?" + " and "
                 + LectureEntry.LECTURE_NUMBER + "=?" + " and "
                 + LectureEntry.LECTURE_DAY + "=?";
@@ -115,7 +116,7 @@ public class DbHelperMethods {
         Cursor cursor = getDbReadOnly(context).query(LectureEntry.TABLE_NAME,
                 projection,
                 selection,
-                selectionArgs, null,null,null);
+                selectionArgs, null, null, null);
 
         if (cursor.getCount() != 0 && cursor.moveToFirst()) {
             cursor.moveToFirst();
@@ -132,7 +133,7 @@ public class DbHelperMethods {
                 + AttendanceRecordEntry.STUDENTS_PRESENT_COL + ","
                 + AttendanceRecordEntry.TOTAL_STUDENTS_COL + ","
                 + LectureEntry.FAC_USER_ID + ","
-                + LectureEntry.CLASS_ID + ","
+                + LectureEntry.TABLE_NAME + "." + LectureEntry.CLASS_ID + ","
                 + LectureEntry.SUBJECT_ID + ","
                 + LectureEntry.LECTURE_DAY + ","
                 + LectureEntry.LECTURE_NUMBER + ","
@@ -151,7 +152,7 @@ public class DbHelperMethods {
                 + AttendanceRecordEntry.LECTURE_ID_COL
                 + " INNER JOIN " + ClassEntry.TABLE_NAME
                 + " ON " + ClassEntry.TABLE_NAME + "." + ClassEntry.ID + " = "
-                + LectureEntry.CLASS_ID
+                + LectureEntry.TABLE_NAME + "." + LectureEntry.CLASS_ID
                 + " INNER JOIN " + CollegeEntry.TABLE_NAME
                 + " ON " + CollegeEntry.TABLE_NAME + "." + CollegeEntry.ID + " = "
                 + ClassEntry.COLLEGE_ID
@@ -174,7 +175,7 @@ public class DbHelperMethods {
         String time = ExtraUtils.getCurrentTime();
 
         String projection = LectureEntry.TABLE_NAME + "." + LectureEntry.ID + ","
-                + LectureEntry.CLASS_ID + ","
+                + LectureEntry.TABLE_NAME + "." + LectureEntry.CLASS_ID + ","
                 + LectureEntry.FAC_USER_ID + ","
                 + LectureEntry.LECTURE_NUMBER + ","
                 + LectureEntry.LECTURE_DAY + ","
@@ -190,7 +191,7 @@ public class DbHelperMethods {
         String tableName = LectureEntry.TABLE_NAME
                 + " INNER JOIN " + ClassEntry.TABLE_NAME
                 + " ON " + ClassEntry.TABLE_NAME + "." + ClassEntry.ID + " = "
-                + LectureEntry.CLASS_ID
+                + LectureEntry.TABLE_NAME + "." + LectureEntry.CLASS_ID
                 + " INNER JOIN " + CollegeEntry.TABLE_NAME
                 + " ON " + CollegeEntry.TABLE_NAME + "." + CollegeEntry.ID + " = "
                 + ClassEntry.COLLEGE_ID
@@ -234,7 +235,7 @@ public class DbHelperMethods {
         String orderBy = StudentEntry.S_ROLL_NO_COL + " ASC";
 
         String query = "SELECT " + projection + " FROM " + tableName + " WHERE " + selection +
-                " ORDER BY " +orderBy;
+                " ORDER BY " + orderBy;
 
         return getDbReadOnly(context).rawQuery(query, selectionArgs);
     }
@@ -256,7 +257,7 @@ public class DbHelperMethods {
         String orderBy = StudentEntry.S_ROLL_NO_COL + " ASC";
 
         String query = "SELECT " + projection + " FROM " + tableName + " WHERE " + selection +
-                " ORDER BY " +orderBy;
+                " ORDER BY " + orderBy;
 
         return getDbReadOnly(context).rawQuery(query, selectionArgs);
     }
@@ -292,11 +293,12 @@ public class DbHelperMethods {
     }
 
 
-    public static int createAttendanceRecord(Context context, String lectureId, String date) {
+    public static int createAttendanceRecord(Context context, String lectureId, String date, String classId) {
 
         ContentValues values = new ContentValues();
         values.put(AttendanceRecordEntry.LECTURE_ID_COL, lectureId);
         values.put(AttendanceRecordEntry.DATE_COL, date);
+        values.put(AttendanceRecordEntry.CLASS_ID_COL, classId);
 
         int attendRecId = (int) getDbReadWrite(context)
                 .insert(AttendanceRecordEntry.TABLE_NAME, null, values);
@@ -317,5 +319,24 @@ public class DbHelperMethods {
                         selectionArgs, null, null, null);
 
         return (cursor != null && cursor.getCount() > 0);
+    }
+
+    public static Cursor getClassAttendanceCursor(Context context, int classId) {
+
+
+        String query = "select std_id, count(std_id)" +
+                " from " +
+                "(select * from attendance" +
+                " inner join students" +
+                " on students._id = attendance.std_id" +
+                " where class_id=? and attendance_state=?)" +
+                " group by std_id;";
+
+        String[] selection = new String[]{String.valueOf(classId),
+                String.valueOf(1)};
+
+        Cursor cursor = DbHelperMethods.getDbReadOnly(context)
+                .rawQuery(query, selection);
+        return cursor;
     }
 }

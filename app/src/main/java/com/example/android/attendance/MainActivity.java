@@ -198,7 +198,6 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_check_attendance:
                 Intent checkAttendanceIntent = new Intent(this, CheckAttendanceActivity.class);
                 startActivity(checkAttendanceIntent);
-
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

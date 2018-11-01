@@ -10,6 +10,7 @@ public class AttendanceRecordContract {
 
         public static final String ID = BaseColumns._ID;
         public static final String LECTURE_ID_COL = "lecture_id";
+        public static final String CLASS_ID_COL = "class_id";
         public static final String TOTAL_STUDENTS_COL = "total_students";
         public static final String STUDENTS_PRESENT_COL = "students_present";
         public static final String DATE_COL = "date";

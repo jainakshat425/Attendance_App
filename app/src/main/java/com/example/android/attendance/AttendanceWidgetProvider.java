@@ -34,16 +34,22 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.attendance_widget);
 
+        Intent mainIntent = new Intent(context, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context,
+                WIDGET_REQUEST_CODE, mainIntent, 0);
+        views.setOnClickPendingIntent(R.id.widget_details, pendingIntent);
+
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String facUserId = preferences.getString(ExtraUtils.EXTRA_FAC_USER_ID, null);
         if (facUserId == null) {
             views.setTextViewText(R.id.widget_header, "Not Logged In");
-            views.setViewVisibility(R.id.attendance_detail_layout, View.GONE);
-            views.setViewVisibility(R.id.lets_go_button, View.GONE);
+            views.setViewVisibility(R.id.widget_details, View.GONE);
+            views.setViewVisibility(R.id.take_button, View.GONE);
         } else if (Integer.parseInt(ExtraUtils.getCurrentTime()) > 16) {
             views.setTextViewText(R.id.widget_header, "Off From Work");
-            views.setViewVisibility(R.id.attendance_detail_layout, View.GONE);
-            views.setViewVisibility(R.id.lets_go_button, View.GONE);
+            views.setViewVisibility(R.id.widget_details, View.GONE);
+            views.setViewVisibility(R.id.take_button, View.GONE);
         } else {
             setupLectureDetails(context, views, facUserId);
         }
@@ -72,6 +78,7 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
             String collegeName = cursor.getString(cursor.getColumnIndex(CollegeEntry.NAME));
             String date = ExtraUtils.getCurrentDate();
 
+            views.setViewVisibility(R.id.widget_details, View.VISIBLE);
             views.setTextViewText(R.id.widget_college_tv, collegeName);
             views.setTextViewText(R.id.widget_branch_tv, branch);
             views.setTextViewText(R.id.widget_section_tv, section);
@@ -89,8 +96,8 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
                     .isAttendanceAlreadyExists(context, lectureId, date);
 
             if (!attendanceAlreadyExist) {
-                views.setTextViewText(R.id.widget_header, "Lecture Details");
-                views.setViewVisibility(R.id.attendance_detail_layout, View.VISIBLE);
+                views.setTextViewText(R.id.widget_header, "Current Lecture");
+                views.setViewVisibility(R.id.take_button, View.VISIBLE);
 
                 // Create an Intent to launch TakeAttendanceActivity when clicked
                 Intent intent = new Intent(context, TakeAttendanceActivity.class);
@@ -108,13 +115,16 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
                 intent.putExtra(ExtraUtils.EXTRA_FAC_USER_ID, facUserId);
                 PendingIntent pendingIntent = PendingIntent.getActivity(context,
                         WIDGET_REQUEST_CODE, intent, 0);
-                views.setOnClickPendingIntent(R.id.lets_go_button, pendingIntent);
+                views.setOnClickPendingIntent(R.id.take_button, pendingIntent);
 
-                views.setViewVisibility(R.id.lets_go_button, View.VISIBLE);
             } else {
                 views.setTextViewText(R.id.widget_header, "Attendance Done");
-                views.setViewVisibility(R.id.lets_go_button, View.GONE);
+                views.setViewVisibility(R.id.take_button, View.GONE);
             }
+        } else {
+            views.setTextViewText(R.id.widget_header, "Attendance Not Found!");
+            views.setViewVisibility(R.id.widget_details, View.GONE);
+            views.setViewVisibility(R.id.take_button, View.GONE);
         }
     }
 

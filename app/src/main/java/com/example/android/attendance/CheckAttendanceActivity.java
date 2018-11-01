@@ -3,11 +3,13 @@ package com.example.android.attendance;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.example.android.attendance.adapters.SpinnerArrayAdapter;
@@ -79,6 +81,10 @@ public class CheckAttendanceActivity extends AppCompatActivity {
                             String.valueOf(sectionSelected));
 
                     startActivity(showAttendanceIntent);
+                } else {
+                    LinearLayout parentLayout = findViewById(R.id.check_attendance_linear_layout);
+                    Snackbar.make(parentLayout, "Complete all fields!",
+                            Snackbar.LENGTH_LONG).show();
                 }
             }
         });

@@ -109,7 +109,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
                     .getLectureId(this, classId, lecture, day));
 
             attendRecId = String.valueOf(DbHelperMethods
-                    .createAttendanceRecord(this, lectureId, date));
+                    .createAttendanceRecord(this, lectureId, date, classId));
             setupAttendance(attendRecId, classId);
         }
 
