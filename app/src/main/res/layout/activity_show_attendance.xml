@@ -3,12 +3,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_show_attendance"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal"
-        android:scrollbars="vertical" />
+        android:gravity="center">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_show_attendance"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:scrollbars="vertical" />
+    </RelativeLayout>
 
 </LinearLayout>

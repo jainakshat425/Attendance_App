@@ -214,8 +214,8 @@ public class NewAttendanceActivity extends AppCompatActivity {
      * setup college switch
      */
     private void setupCollegeSwitch() {
-        gitTv = (TextView) findViewById(R.id.git_tv);
-        gctTv = (TextView) findViewById(R.id.gct_tv);
+        gitTv = findViewById(R.id.git_tv);
+        gctTv = findViewById(R.id.gct_tv);
 
         //setup switch for selection of college
         collegeSwitch = findViewById(R.id.college_switch);
@@ -368,13 +368,13 @@ public class NewAttendanceActivity extends AppCompatActivity {
      */
     private void setupSubjectSpinner() {
 
-        subjectSpinner = (Spinner) findViewById(R.id.subject_spinner);
+        subjectSpinner = findViewById(R.id.subject_spinner);
         if (semesterSelected != null && branchSelected != null) {
 
             /**
              * query the database and store result in cursor
              */
-            String branchId = String.valueOf(DbHelperMethods.getBranchId(this, branchSelected));
+            String branchId = String.valueOf(DbHelperMethods.getBranchId(db, branchSelected));
             String[] projection = {SubjectEntry.SUB_NAME_COL};
             String selection = SubjectEntry.SUB_SEMESTER_COL + "=?" + " and "
                     + SubjectEntry.BRANCH_ID_COL + "=?";
@@ -409,6 +409,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
 
                     }
                 });
+                subjectCursor.close();
             } else {
                 emptySubjectSpinner();
             }
@@ -512,21 +513,20 @@ public class NewAttendanceActivity extends AppCompatActivity {
     }
 
     private int allInputsValid() {
-        Cursor cursor = null;
-        branchId = DbHelperMethods.getBranchId(this, branchSelected);
+        branchId = DbHelperMethods.getBranchId(db, branchSelected);
         if (branchId > 0) {
-            classId = DbHelperMethods.getClassId(this, collegeSelected,
+            classId = DbHelperMethods.getClassId(db, collegeSelected,
                     semesterSelected,
                     String.valueOf(branchId),
                     sectionSelected);
             if (classId > 0) {
-                lectureId = DbHelperMethods.getLectureId(this, String.valueOf(classId),
+                lectureId = DbHelperMethods.getLectureId(db, String.valueOf(classId),
                         lectureEt.getText().toString(), daySelected);
 
                 if (lectureId > 0) {
 
                     boolean attendanceAlreadyExist = DbHelperMethods.isAttendanceAlreadyExists
-                            (this, lectureId, dateEditText.getText().toString());
+                            (db, lectureId, dateEditText.getText().toString());
 
                     if (attendanceAlreadyExist) return ATTENDANCE_ALREADY_EXISTS;
                     else return ALL_INPUTS_VALID;

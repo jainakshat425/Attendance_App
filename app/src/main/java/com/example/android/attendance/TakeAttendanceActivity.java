@@ -22,6 +22,7 @@ import com.example.android.attendance.contracts.AttendanceContract.AttendanceEnt
 import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
 import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
 import com.example.android.attendance.contracts.StudentContract.StudentEntry;
+import com.example.android.attendance.data.DatabaseHelper;
 import com.example.android.attendance.data.DbHelperMethods;
 import com.example.android.attendance.utilities.ExtraUtils;
 
@@ -51,6 +52,9 @@ public class TakeAttendanceActivity extends AppCompatActivity {
 
     private boolean isUpdateMode = false;
 
+    private DatabaseHelper mDatabaseHelper;
+    private SQLiteDatabase mDb;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +65,10 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
+
+        mDatabaseHelper = new DatabaseHelper(this);
+        mDb = mDatabaseHelper.openDatabaseForReadWrite();
+
 
         /**
          * initialize all text views
@@ -93,7 +101,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         sectionTv.setText(section);
         subjectTv.setText(subject);
         dateTv.setText(date);
-        dayTv.setText(day + ",");
+        dayTv.setText(String.format("%s,", day));
         semesterTv.setText(ExtraUtils.getSemester(semester));
         lectureTv.setText(ExtraUtils.getLecture(lecture));
 
@@ -106,10 +114,10 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             setTitle(R.string.take_attendance_title);
             isUpdateMode = false;
             String lectureId = String.valueOf(DbHelperMethods
-                    .getLectureId(this, classId, lecture, day));
+                    .getLectureId(mDb, classId, lecture, day));
 
             attendRecId = String.valueOf(DbHelperMethods
-                    .createAttendanceRecord(this, lectureId, date, classId));
+                    .createAttendanceRecord(mDb, lectureId, date, classId));
             setupAttendance(attendRecId, classId);
         }
 
@@ -118,17 +126,17 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     private void setupAttendance(String attendRecId, String classId) {
 
         ArrayList<Integer> attendanceStatesList;
-        int attendanceState, attendanceIndex = 0;
+        int attendanceState, attendanceIndex;
 
         if (isUpdateMode) {
-            currentTableCursor = DbHelperMethods.getStudentForUpdateAttendance(this, attendRecId);
+            currentTableCursor = DbHelperMethods.getStudentForUpdateAttendance(mDb, attendRecId);
         } else {
-            currentTableCursor = DbHelperMethods.getStudentForNewAttendance(this, classId);
+            currentTableCursor = DbHelperMethods.getStudentForNewAttendance(mDb, classId);
 
         }
 
         if (currentTableCursor.getCount() != 0 && currentTableCursor.moveToFirst()) {
-            attendanceStatesList = new ArrayList<Integer>();
+            attendanceStatesList = new ArrayList<>();
 
             currentTableCursor.moveToFirst();
             if (isUpdateMode) {
@@ -153,7 +161,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
 
             stdListView.setAdapter(takeAttendanceAdapter);
         } else {
-            Toast.makeText(this,"Students Not Exist!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Students Not Exist!", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -189,14 +197,14 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     }
 
     private void initializeAllViews() {
-        collegeTv = (TextView) findViewById(R.id.college_text_view);
-        semesterTv = (TextView) findViewById(R.id.semester_text_view);
-        branchTv = (TextView) findViewById(R.id.branch_text_view);
-        sectionTv = (TextView) findViewById(R.id.section_text_view);
-        subjectTv = (TextView) findViewById(R.id.subject_text_view);
-        dateTv = (TextView) findViewById(R.id.date_text_view);
-        lectureTv = (TextView) findViewById(R.id.lecture_text_view);
-        dayTv = (TextView) findViewById(R.id.day_text_view);
+        collegeTv = findViewById(R.id.college_text_view);
+        semesterTv = findViewById(R.id.semester_text_view);
+        branchTv = findViewById(R.id.branch_text_view);
+        sectionTv = findViewById(R.id.section_text_view);
+        subjectTv = findViewById(R.id.subject_text_view);
+        dateTv = findViewById(R.id.date_text_view);
+        lectureTv = findViewById(R.id.lecture_text_view);
+        dayTv = findViewById(R.id.day_text_view);
 
         stdListView = findViewById(R.id.students_list_view);
     }
@@ -204,7 +212,6 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     private void saveAttendance() {
         ContentValues newValues;
         int attendanceState;
-        SQLiteDatabase db = DbHelperMethods.getDbReadWrite(this);
 
         if (isUpdateMode) {
             if (currentTableCursor.moveToFirst()) {
@@ -220,7 +227,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
                     newValues = new ContentValues();
                     newValues.put(AttendanceEntry.ATTENDANCE_STATE, attendanceState);
 
-                    db.update(AttendanceEntry.TABLE_NAME,
+                    mDb.update(AttendanceEntry.TABLE_NAME,
                             newValues, AttendanceEntry.ID + "=?", new String[]{currentId});
                     currentTableCursor.moveToNext();
                 }
@@ -241,7 +248,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
                     newValues.put(AttendanceEntry.ATTENDANCE_STATE, attendanceState);
                     newValues.put(AttendanceEntry.ATTENDANCE_RECORD_ID, attendRecId);
 
-                    db.insert(AttendanceEntry.TABLE_NAME, null, newValues);
+                    mDb.insert(AttendanceEntry.TABLE_NAME, null, newValues);
                     currentTableCursor.moveToNext();
                 }
             }
@@ -258,8 +265,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         String where = AttendanceRecordEntry.ID + "=?";
         String[] whereArgs = new String[]{attendRecId};
 
-        int rowUpdated = DbHelperMethods.getDbReadWrite(this)
-                .update(AttendanceRecordEntry.TABLE_NAME, record, where, whereArgs);
+        int rowUpdated = mDb.update(AttendanceRecordEntry.TABLE_NAME, record, where, whereArgs);
 
         Toast.makeText(this, "Rows Updated: " + rowUpdated, Toast.LENGTH_SHORT).show();
     }
@@ -272,10 +278,13 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         String selection = AttendanceEntry.ATTENDANCE_RECORD_ID + "=?" + " and "
                 + AttendanceEntry.ATTENDANCE_STATE + "=?";
         String[] selectionArgs = {attendRecId, String.valueOf(PRESENT)};
-        Cursor studentsPresent = DbHelperMethods.getDbReadOnly(this)
-                .query(AttendanceEntry.TABLE_NAME, null, selection, selectionArgs,
-                        null, null, null);
-        return studentsPresent.getCount();
+        Cursor cursor = mDb.query(AttendanceEntry.TABLE_NAME, null, selection, selectionArgs,
+                null, null, null);
+
+        int stdPresent = cursor.getCount();
+
+        cursor.close();
+        return stdPresent;
     }
 
     private void showAlertDialog() {
@@ -303,9 +312,9 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     }
 
     private void undoAttendanceAndFinish() {
-        int rowDeleted = DbHelperMethods.getDbReadWrite(this)
-                .delete(AttendanceRecordEntry.TABLE_NAME, AttendanceRecordEntry.ID + "=?",
-                        new String[]{attendRecId});
+        int rowDeleted = mDb.delete(AttendanceRecordEntry.TABLE_NAME,
+                AttendanceRecordEntry.ID + "=?",
+                new String[]{attendRecId});
         if (rowDeleted > 0) {
             Toast.makeText(this, "Attendance not saved!", Toast.LENGTH_SHORT).show();
         } else {

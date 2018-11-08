@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity
     private static final int LOGIN_REQUEST_CODE = 4;
 
     private DatabaseHelper mDatabaseHelper;
+    private SQLiteDatabase mDb;
 
     private SharedPreferences mPreferences;
     private String facUserId = "";
@@ -75,6 +77,8 @@ public class MainActivity extends AppCompatActivity
             ExtraUtils.updateWidget(this);
 
             mDatabaseHelper = new DatabaseHelper(this);
+            mDb = mDatabaseHelper.openDataBaseReadOnly();
+
             String selection = FacultyEntry.F_USER_ID_COL + "=?";
             String[] selectionArgs = {facUserId};
             Cursor facCursor = mDatabaseHelper.openDataBaseReadOnly()
@@ -97,12 +101,13 @@ public class MainActivity extends AppCompatActivity
                 mainListView.setEmptyView(emptyView);
 
 
-                Cursor cursor = DbHelperMethods.getAttendanceRecordsCursor(this, facUserId);
+                Cursor cursor = DbHelperMethods.getAttendanceRecordsCursor(mDb, facUserId);
                 cursorAdapter = new MainListCursorAdapter(this, cursor);
                 mainListView.setAdapter(cursorAdapter);
 
                 setupFloatingActionButton(facUserId);
             }
+            facCursor.close();
         }
     }
 
@@ -123,9 +128,9 @@ public class MainActivity extends AppCompatActivity
 
         View drawerFacDetails = navigationView.getHeaderView(0);
 
-        facNameTv = (TextView) drawerFacDetails.findViewById(R.id.fac_name_tv);
-        facDeptTv = (TextView) drawerFacDetails.findViewById(R.id.fac_dept_tv);
-        facIdTv = (TextView) drawerFacDetails.findViewById(R.id.fac_id_tv);
+        facNameTv =  drawerFacDetails.findViewById(R.id.fac_name_tv);
+        facDeptTv =  drawerFacDetails.findViewById(R.id.fac_dept_tv);
+        facIdTv = drawerFacDetails.findViewById(R.id.fac_id_tv);
 
         facNameTv.setText(facName);
         facDeptTv.setText(facDept);
@@ -176,8 +181,7 @@ public class MainActivity extends AppCompatActivity
         else {
             String userId = mPreferences.getString(ExtraUtils.EXTRA_FAC_USER_ID, "");
             if (!userId.isEmpty() || !userId.equals("")) {
-                Cursor cursor = DbHelperMethods.getAttendanceRecordsCursor(this,
-                        userId);
+                Cursor cursor = DbHelperMethods.getAttendanceRecordsCursor(mDb, userId);
                 cursorAdapter.swapCursor(cursor);
                 cursorAdapter.notifyDataSetChanged();
             } else {
@@ -199,7 +203,7 @@ public class MainActivity extends AppCompatActivity
                 Intent checkAttendanceIntent = new Intent(this, CheckAttendanceActivity.class);
                 startActivity(checkAttendanceIntent);
         }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

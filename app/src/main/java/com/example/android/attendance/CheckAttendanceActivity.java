@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
@@ -47,6 +49,9 @@ public class CheckAttendanceActivity extends AppCompatActivity {
     private SpinnerArrayAdapter sectionAdapter;
     private String sectionSelected = null;
 
+    private CheckBox mDetailedReport;
+    private boolean showCompleteReport;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +69,15 @@ public class CheckAttendanceActivity extends AppCompatActivity {
         setupBranchSpinner();
         setupSectionSpinner();
 
+        mDetailedReport = (CheckBox) findViewById(R.id.cb_detailed_report);
+        mDetailedReport.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                showCompleteReport = isChecked;
+            }
+        });
+
+
         (findViewById(R.id.show_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,6 +93,8 @@ public class CheckAttendanceActivity extends AppCompatActivity {
                             String.valueOf(branchSelected));
                     showAttendanceIntent.putExtra(ExtraUtils.EXTRA_SECTION,
                             String.valueOf(sectionSelected));
+                    showAttendanceIntent.putExtra(ExtraUtils.EXTRA_SHOW_COMPLETE_REPORT,
+                            showCompleteReport);
 
                     startActivity(showAttendanceIntent);
                 } else {

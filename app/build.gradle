@@ -33,4 +33,8 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5';
 
+
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+
+
 }

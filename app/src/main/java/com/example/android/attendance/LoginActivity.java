@@ -93,7 +93,6 @@ public class LoginActivity extends AppCompatActivity {
 
         if ( cursor == null || !cursor.moveToFirst()) {
             Toast.makeText(this,"Account doesn't Exist", Toast.LENGTH_SHORT ).show();
-            cursor.close();
         }
         else {
             String userId = cursor.getString(cursor.getColumnIndexOrThrow
@@ -101,6 +100,7 @@ public class LoginActivity extends AppCompatActivity {
 
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             preferences.edit().putString(ExtraUtils.EXTRA_FAC_USER_ID, userId).apply();
+            cursor.close();
             setResult(Activity.RESULT_OK);
             finish();
         }

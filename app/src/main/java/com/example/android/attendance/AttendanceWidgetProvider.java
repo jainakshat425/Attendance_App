@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
@@ -18,6 +19,7 @@ import com.example.android.attendance.contracts.ClassContract.ClassEntry;
 import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
 import com.example.android.attendance.contracts.LectureContract.LectureEntry;
 import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
+import com.example.android.attendance.data.DatabaseHelper;
 import com.example.android.attendance.data.DbHelperMethods;
 import com.example.android.attendance.utilities.ExtraUtils;
 
@@ -29,8 +31,11 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
 
     public static final int WIDGET_REQUEST_CODE = 5;
 
+    private DatabaseHelper mDbHelper;
+    private SQLiteDatabase mDb;
+
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
+                                int appWidgetId, SQLiteDatabase db) {
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.attendance_widget);
 
@@ -42,24 +47,27 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String facUserId = preferences.getString(ExtraUtils.EXTRA_FAC_USER_ID, null);
+        int currentTime = Integer.parseInt(ExtraUtils.getCurrentTime());
         if (facUserId == null) {
             views.setTextViewText(R.id.widget_header, "Not Logged In");
             views.setViewVisibility(R.id.widget_details, View.GONE);
             views.setViewVisibility(R.id.take_button, View.GONE);
-        } else if (Integer.parseInt(ExtraUtils.getCurrentTime()) > 16) {
+        } else if (currentTime > 16 || currentTime < 8) {
             views.setTextViewText(R.id.widget_header, "Off From Work");
             views.setViewVisibility(R.id.widget_details, View.GONE);
             views.setViewVisibility(R.id.take_button, View.GONE);
         } else {
-            setupLectureDetails(context, views, facUserId);
+            setupLectureDetails(context, views, facUserId, db);
         }
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
-    private static void setupLectureDetails(Context context, RemoteViews views, String facUserId) {
-        Cursor cursor = DbHelperMethods.getLectureCursor(context, facUserId);
+    private static void setupLectureDetails(Context context, RemoteViews views,
+                                            String facUserId, SQLiteDatabase db) {
+
+        Cursor cursor = DbHelperMethods.getLectureCursor(db, facUserId);
 
         if (cursor.getCount() != 0 && cursor.moveToFirst()) {
             cursor.moveToFirst();
@@ -90,10 +98,10 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
             views.setTextViewText(R.id.widget_lecture_tv,
                     ExtraUtils.getLecture(String.valueOf(lecture)));
 
-            int lectureId = DbHelperMethods.getLectureId(context, String.valueOf(classId),
+            int lectureId = DbHelperMethods.getLectureId(db, String.valueOf(classId),
                     String.valueOf(lecture), day);
             boolean attendanceAlreadyExist = DbHelperMethods
-                    .isAttendanceAlreadyExists(context, lectureId, date);
+                    .isAttendanceAlreadyExists(db, lectureId, date);
 
             if (!attendanceAlreadyExist) {
                 views.setTextViewText(R.id.widget_header, "Current Lecture");
@@ -131,9 +139,11 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        mDbHelper = new DatabaseHelper(context);
+        mDb = mDbHelper.openDataBaseReadOnly();
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
+            updateAppWidget(context, appWidgetManager, appWidgetId, mDb);
         }
     }
 

@@ -1,16 +1,22 @@
 package com.example.android.attendance.data;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+
+
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import static com.example.android.attendance.utilities.ExtraUtils.getCurrentDay;
 
 public class DatabaseHelper extends SQLiteOpenHelper{
 
