@@ -7,6 +7,10 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
+import android.view.Gravity;
+import android.widget.TableRow;
+import android.widget.TextView;
 
 import com.example.android.attendance.AttendanceWidgetProvider;
 
@@ -94,5 +98,17 @@ public class ExtraUtils {
     }
 
 
+    public static TextView getTextView(Context context, int textSize) {
+        TextView tv = new TextView(context);
+        tv.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT,
+                TableRow.LayoutParams.WRAP_CONTENT));
+        tv.setGravity(Gravity.CENTER);
+        tv.setTextSize(textSize);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            tv.setTextColor(context.getColor(android.R.color.black));
+        }
+        tv.setPadding(4, 4, 4, 4);
+        return tv;
+    }
 }
 

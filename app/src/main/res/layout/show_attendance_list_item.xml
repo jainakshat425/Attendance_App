@@ -120,8 +120,7 @@
         </android.support.constraint.ConstraintLayout>
 
 
-    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <TableLayout
         android:id="@+id/sub_wise_attend_table"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

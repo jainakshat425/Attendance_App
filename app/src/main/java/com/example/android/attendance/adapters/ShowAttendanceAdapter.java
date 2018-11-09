@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.example.android.attendance.R;
 import com.example.android.attendance.StudentReport;
+import com.example.android.attendance.utilities.ExtraUtils;
 
 
 import java.util.ArrayList;
@@ -88,15 +89,7 @@ public class ShowAttendanceAdapter extends
 
         Integer[] colText = currentStdReport.getmSubAttendance().toArray(new Integer[0]);
         for (int text : colText) {
-            TextView tv = new TextView(mContext);
-            tv.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT,
-                    TableRow.LayoutParams.WRAP_CONTENT));
-            tv.setGravity(Gravity.CENTER);
-            tv.setTextSize(16);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                tv.setTextColor(mContext.getColor(android.R.color.black));
-            }
-            tv.setPadding(4, 4, 4, 4);
+            TextView tv = ExtraUtils.getTextView(mContext, 16);
             tv.setText(String.valueOf(text));
             holder.row.addView(tv);
         }
@@ -137,15 +130,7 @@ public class ShowAttendanceAdapter extends
                     TableLayout.LayoutParams.WRAP_CONTENT));
             String[] headerText = mSubNameList.toArray(new String[0]);
             for (String c : headerText) {
-                TextView tv = new TextView(mContext);
-                tv.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT,
-                        TableRow.LayoutParams.WRAP_CONTENT));
-                tv.setGravity(Gravity.CENTER);
-                tv.setTextSize(14);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    tv.setTextColor(mContext.getColor(android.R.color.black));
-                }
-                tv.setPadding(4, 4, 4, 4);
+                TextView tv = ExtraUtils.getTextView(mContext, 14);
                 tv.setText(c);
                 rowHeader.addView(tv);
             }

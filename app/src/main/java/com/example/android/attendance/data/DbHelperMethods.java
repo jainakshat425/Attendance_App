@@ -15,6 +15,8 @@ import com.example.android.attendance.contracts.LectureContract.LectureEntry;
 import com.example.android.attendance.contracts.StudentContract.StudentEntry;
 import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
 
+import java.util.List;
+
 import static com.example.android.attendance.utilities.ExtraUtils.getCurrentDay;
 
 
@@ -365,5 +367,17 @@ public class DbHelperMethods {
 
 
         return db.rawQuery(query, selection);
+    }
+
+    public static Cursor getTotalLecturesForEachSub(SQLiteDatabase db, int classId) {
+
+        String projection = "subjects.sub_name,count(attendance_records._id) as sub_total_lect";
+        String table = "lectures left join attendance_records" +
+                " on lectures._id = attendance_records.lecture_id inner join subjects" +
+                " on lectures.subject_id = subjects._id";
+        String query = "select " +projection+ " from " +table+
+                " where lectures.class_id =? group by lectures.subject_id";
+
+        return db.rawQuery(query, new String[]{String.valueOf(classId)});
     }
 }
