@@ -1,20 +1,27 @@
 package com.example.android.attendance.adapters;
 
 import android.content.Context;
-import android.database.Cursor;
+
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
+
+
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.example.android.attendance.R;
 import com.example.android.attendance.StudentReport;
-import com.example.android.attendance.contracts.StudentContract.StudentEntry;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +33,7 @@ public class ShowAttendanceAdapter extends
     private List<StudentReport> mStdReportList;
     private ArrayList<String> mSubNameList;
     private int mTotalClasses;
+
 
     public ShowAttendanceAdapter(Context context, List<StudentReport> stdReportList,
                                  ArrayList<String> subNameList, int totalClasses) {
@@ -49,8 +57,6 @@ public class ShowAttendanceAdapter extends
     public void onBindViewHolder(@NonNull AttendanceViewHolder holder, int position) {
         StudentReport currentStdReport = mStdReportList.get(position);
 
-        holder.serialNoTv.setText(String.valueOf(++position));
-
         String name = currentStdReport.getmName();
         holder.nameTv.setText(name);
 
@@ -62,32 +68,38 @@ public class ShowAttendanceAdapter extends
 
         holder.totalClassesTv.setText(String.valueOf(mTotalClasses));
 
-        float attendancePercent = ((float)totalPresent/(float)mTotalClasses) * 100;
+        float attendancePercent = ((float) totalPresent / (float) mTotalClasses) * 100;
         holder.percentTv.setText(String.format("%.1f%%", attendancePercent));
 
-        for (int i = 0; i < currentStdReport.getmSubAttendance().size(); i++) {
-            LinearLayout childContainer = new LinearLayout(mContext);
+        holder.serialNoTv.setText(String.valueOf(++position));
 
-            childContainer.setOrientation(LinearLayout.HORIZONTAL);
-            childContainer.setLayoutParams(
-                    new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT));
-            childContainer.setPadding(8,4,8,4);
+        GradientDrawable attendanceLevelCircle = (GradientDrawable) holder.serialNoTv.getBackground();
 
-            TextView subNameTv = new TextView(mContext);
-            subNameTv.setText(mSubNameList.get(i));
-            subNameTv.setGravity(Gravity.START);
-
-            TextView subAttendTv = new TextView(mContext);
-            subAttendTv.setText(String.valueOf(currentStdReport.getmSubAttendance().get(i)));
-            subAttendTv.setGravity(Gravity.END);
-
-            childContainer.addView(subNameTv);
-            childContainer.addView(subAttendTv);
-
-            holder.container.addView(childContainer);
+        if (attendancePercent < 75) {
+            attendanceLevelCircle.setColor(ContextCompat.getColor(mContext, R.color.darkRedColor));
+        } else {
+            attendanceLevelCircle.setColor(ContextCompat.getColor(mContext, R.color.serialNoBgColor));
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            holder.serialNoTv.setBackground(attendanceLevelCircle);
         }
 
+        // dara rows
 
+        Integer[] colText = currentStdReport.getmSubAttendance().toArray(new Integer[0]);
+        for (int text : colText) {
+            TextView tv = new TextView(mContext);
+            tv.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT,
+                    TableRow.LayoutParams.WRAP_CONTENT));
+            tv.setGravity(Gravity.CENTER);
+            tv.setTextSize(16);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                tv.setTextColor(mContext.getColor(android.R.color.black));
+            }
+            tv.setPadding(4, 4, 4, 4);
+            tv.setText(String.valueOf(text));
+            holder.row.addView(tv);
+        }
     }
 
     @Override
@@ -104,7 +116,9 @@ public class ShowAttendanceAdapter extends
         final TextView totalPresentTv;
         final TextView totalClassesTv;
         final TextView percentTv;
-        final LinearLayout container;
+        final TableLayout subWiseAttendTable;
+        final TableRow rowHeader;
+        final TableRow row;
 
         public AttendanceViewHolder(View view) {
             super(view);
@@ -115,7 +129,32 @@ public class ShowAttendanceAdapter extends
             totalPresentTv = view.findViewById(R.id.tv_total_present);
             totalClassesTv = view.findViewById(R.id.tv_total_classes);
             percentTv = view.findViewById(R.id.tv_attendance_percent);
-            container = view.findViewById(R.id.sub_wise_attend_container);
+            subWiseAttendTable = view.findViewById(R.id.sub_wise_attend_table);
+
+            rowHeader = new TableRow(mContext);
+            rowHeader.setBackgroundColor(Color.parseColor("#c0c0c0"));
+            rowHeader.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
+                    TableLayout.LayoutParams.WRAP_CONTENT));
+            String[] headerText = mSubNameList.toArray(new String[0]);
+            for (String c : headerText) {
+                TextView tv = new TextView(mContext);
+                tv.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT,
+                        TableRow.LayoutParams.WRAP_CONTENT));
+                tv.setGravity(Gravity.CENTER);
+                tv.setTextSize(14);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    tv.setTextColor(mContext.getColor(android.R.color.black));
+                }
+                tv.setPadding(4, 4, 4, 4);
+                tv.setText(c);
+                rowHeader.addView(tv);
+            }
+            subWiseAttendTable.addView(rowHeader);
+
+            row = new TableRow(mContext);
+            row.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
+                    TableLayout.LayoutParams.WRAP_CONTENT));
+            subWiseAttendTable.addView(row);
 
         }
     }
