@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -21,6 +22,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,6 +37,9 @@ import com.example.android.attendance.data.DbHelperMethods;
 import com.example.android.attendance.sync.ReminderUtilities;
 import com.example.android.attendance.utilities.ExtraUtils;
 import com.example.android.attendance.utilities.PdfUtils;
+
+import java.io.File;
+import java.io.FileOutputStream;
 
 
 public class MainActivity extends AppCompatActivity
@@ -82,6 +87,9 @@ public class MainActivity extends AppCompatActivity
         } else {
             ExtraUtils.updateWidget(this);
 
+            PdfUtils.generatePdf(this, this);
+
+
             mDatabaseHelper = new DatabaseHelper(this);
             mDb = mDatabaseHelper.openDataBaseReadOnly();
 
@@ -114,6 +122,7 @@ public class MainActivity extends AppCompatActivity
                 setupFloatingActionButton(facUserId);
             }
             facCursor.close();
+
         }
     }
 
@@ -214,9 +223,5 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-
-    public void generatePdf(View view) {
-        PdfUtils.generatePdf(this, this);
-    }
 
 }

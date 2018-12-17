@@ -18,41 +18,20 @@ import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Image;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-
-import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
 public class PdfUtils {
 
     public static void generatePdf(Context context, Activity activity) {
 
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
-        DrawerLayout root = (DrawerLayout) inflater.inflate(R.layout.activity_main, null);
-        root.setDrawingCacheEnabled(true);
-        Bitmap screen = getBitmapFromView(activity.getWindow().findViewById(R.id.main_list_view));
-
-        createPdf(context, screen);
-    }
-
-    public static Bitmap getBitmapFromView(View view) {
-        Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(returnedBitmap);
-        Drawable bgDrawable = view.getBackground();
-        if (bgDrawable != null)
-            bgDrawable.draw(canvas);
-        else
-            canvas.drawColor(Color.WHITE);
-        view.draw(canvas);
-        return returnedBitmap;
-    }
-
-    public static void createPdf(Context context, Bitmap bmp) {
         //First Check if the external storage is writable
         String state = Environment.getExternalStorageState();
         if (!Environment.MEDIA_MOUNTED.equals(state)) {
@@ -60,64 +39,54 @@ public class PdfUtils {
         }
 
         //Create a directory for your PDF
-        File pdfDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOWNLOADS), "Attendance");
-        if (!pdfDir.exists()) {
-            pdfDir.mkdir();
-        }
+        File pdfFile = new File(context.getExternalFilesDir("pdf"), "myPdfFile.pdf");
 
-        //Now create the name of your PDF file that you will generate
-        File pdfFile = new File(pdfDir, "myPdfFile.pdf");
-        convertImageToPdf(context, pdfFile, bmp);
-    }
 
-    public static void convertImageToPdf(Context context, File file, Bitmap bmp) {
+        Document document = new Document();
 
         try {
-            Document document = new Document();
-
-            PdfWriter.getInstance(document, new FileOutputStream(file));
-            document.open();
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            byte[] byteArray = stream.toByteArray();
-            addImage(document, byteArray);
-            document.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void addImage(Document document,byte[] byteArray)
-    {
-        Image image = null;
-        try
-        {
-            image = Image.getInstance(byteArray);
-        }
-        catch (BadElementException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (MalformedURLException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        // image.scaleAbsolute(150f, 150f);
-        try
-        {
-            document.add(image);
+            PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
         } catch (DocumentException e) {
-            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
+        document.open();
+        // step 4
+        try {
+            document.add(createFirstTable());
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        }
+        // step 5
+        document.close();
     }
+
+    /**
+     * Creates our first table
+     * @return our first table
+     */
+    public static PdfPTable createFirstTable() {
+        // a table with three columns
+        PdfPTable table = new PdfPTable(3);
+        // the cell object
+        PdfPCell cell;
+        // we add a cell with colspan 3
+        cell = new PdfPCell(new Phrase("Cell with colspan 3"));
+        cell.setColspan(3);
+        table.addCell(cell);
+        // now we add a cell with rowspan 2
+        cell = new PdfPCell(new Phrase("Cell with rowspan 2"));
+        cell.setRowspan(2);
+        table.addCell(cell);
+        // we add the four remaining cells with addCell()
+        table.addCell("row 1; cell 1");
+        table.addCell("row 1; cell 2");
+        table.addCell("row 2; cell 1");
+        table.addCell("row 2; cell 2");
+        return table;
+    }
+
 }
 
