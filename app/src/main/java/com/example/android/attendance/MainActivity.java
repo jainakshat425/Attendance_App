@@ -5,6 +5,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -17,6 +21,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
@@ -29,6 +34,7 @@ import com.example.android.attendance.data.DatabaseHelper;
 import com.example.android.attendance.data.DbHelperMethods;
 import com.example.android.attendance.sync.ReminderUtilities;
 import com.example.android.attendance.utilities.ExtraUtils;
+import com.example.android.attendance.utilities.PdfUtils;
 
 
 public class MainActivity extends AppCompatActivity
@@ -177,7 +183,7 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == LOGIN_REQUEST_CODE && resultCode == Activity.RESULT_OK)
                setupMainActivity();
         else if (requestCode == LOGIN_REQUEST_CODE && resultCode == Activity.RESULT_CANCELED)
-            finish();
+               finish();
         else {
             String userId = mPreferences.getString(ExtraUtils.EXTRA_FAC_USER_ID, "");
             if (!userId.isEmpty() || !userId.equals("")) {
@@ -208,5 +214,9 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+
+    public void generatePdf(View view) {
+        PdfUtils.generatePdf(this, this);
+    }
 
 }

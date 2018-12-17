@@ -23,6 +23,8 @@ import com.example.android.attendance.data.DatabaseHelper;
 import com.example.android.attendance.data.DbHelperMethods;
 import com.example.android.attendance.utilities.ExtraUtils;
 
+import java.io.IOException;
+
 /**
  * Implementation of App Widget functionality.
  */
@@ -31,11 +33,9 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
 
     public static final int WIDGET_REQUEST_CODE = 5;
 
-    private DatabaseHelper mDbHelper;
-    private SQLiteDatabase mDb;
-
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId, SQLiteDatabase db) {
+                                int appWidgetId) {
+
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.attendance_widget);
 
@@ -57,7 +57,7 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
             views.setViewVisibility(R.id.widget_details, View.GONE);
             views.setViewVisibility(R.id.take_button, View.GONE);
         } else {
-            setupLectureDetails(context, views, facUserId, db);
+            setupLectureDetails(context, views, facUserId);
         }
 
         // Instruct the widget manager to update the widget
@@ -65,7 +65,11 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
     }
 
     private static void setupLectureDetails(Context context, RemoteViews views,
-                                            String facUserId, SQLiteDatabase db) {
+                                            String facUserId) {
+
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+
+        SQLiteDatabase db = dbHelper.openDataBaseReadOnly();
 
         Cursor cursor = DbHelperMethods.getLectureCursor(db, facUserId);
 
@@ -124,10 +128,10 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
                 PendingIntent pendingIntent = PendingIntent.getActivity(context,
                         WIDGET_REQUEST_CODE, intent, 0);
                 views.setOnClickPendingIntent(R.id.take_button, pendingIntent);
-
             } else {
                 views.setTextViewText(R.id.widget_header, "Attendance Done");
                 views.setViewVisibility(R.id.take_button, View.GONE);
+                views.setOnClickPendingIntent(R.id.take_button, null);
             }
         } else {
             views.setTextViewText(R.id.widget_header, "Attendance Not Found!");
@@ -139,11 +143,9 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        mDbHelper = new DatabaseHelper(context);
-        mDb = mDbHelper.openDataBaseReadOnly();
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, mDb);
+            updateAppWidget(context, appWidgetManager, appWidgetId);
         }
     }
 

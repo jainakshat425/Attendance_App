@@ -85,8 +85,7 @@
             android:background="@color/colorPrimary"
             android:layout_alignParentEnd="true"
             android:src="@drawable/baseline_add_white_48" />
-
-
+        
     </RelativeLayout>
     <!-- Container for contents of drawer - use NavigationView to make configuration easier -->
     <android.support.design.widget.NavigationView
