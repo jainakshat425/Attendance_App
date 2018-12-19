@@ -10,7 +10,7 @@
 
     <!-- college text inside circle bg -->
     <TextView
-        android:id="@+id/college_tv"
+        android:id="@+id/sch_college_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -31,13 +31,13 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="8dp"
-        android:layout_toRightOf="@id/college_tv"
+        android:layout_toEndOf="@id/sch_college_tv"
         android:layout_marginStart="8dp"
-        android:layout_toEndOf="@id/college_tv">
+        android:layout_toRightOf="@id/sch_college_tv">
 
         <!-- semester text -->
         <TextView
-            android:id="@+id/semester_tv"
+            android:id="@+id/sch_semester_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -48,29 +48,29 @@
 
         <!-- branch text -->
         <TextView
-            android:id="@+id/branch_tv"
+            android:id="@+id/sch_branch_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/semester_tv"
+            android:layout_below="@id/sch_semester_tv"
             android:textColor="#000"
             android:textSize="16sp"
             tools:text="CS" />
 
         <!-- section text -->
         <TextView
-            android:id="@+id/section_tv"
+            android:id="@+id/sch_section_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/semester_tv"
+            android:layout_below="@id/sch_semester_tv"
             android:layout_marginLeft="4dp"
-            android:layout_toRightOf="@id/branch_tv"
+            android:layout_toEndOf="@id/sch_branch_tv"
             android:paddingLeft="4dp"
             android:paddingRight="2dp"
             android:textColor="#000"
             android:textSize="16sp"
             tools:text="'A'"
             android:layout_marginStart="4dp"
-            android:layout_toEndOf="@id/branch_tv"
+            android:layout_toRightOf="@id/sch_branch_tv"
             android:paddingStart="4dp"
             android:paddingEnd="2dp" />
     </RelativeLayout>
@@ -97,7 +97,7 @@
 
         <!-- subject text -->
         <TextView
-            android:id="@+id/subject_tv"
+            android:id="@+id/sch_subject_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#000"
@@ -106,7 +106,7 @@
 
         <!-- lecture text -->
         <TextView
-            android:id="@+id/lecture_tv"
+            android:id="@+id/sch_lecture_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"

@@ -4,7 +4,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.example.android.attendance"
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -32,6 +32,8 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5';
+
+    implementation 'ca.antonious:materialdaypicker:0.4.0'
 
 
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'

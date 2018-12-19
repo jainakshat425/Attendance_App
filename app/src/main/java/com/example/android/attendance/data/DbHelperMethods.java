@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.example.android.attendance.utilities.ExtraUtils;
 import com.example.android.attendance.contracts.AttendanceContract.AttendanceEntry;
 import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
 import com.example.android.attendance.contracts.BranchContract.BranchEntry;
@@ -13,6 +12,7 @@ import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
 import com.example.android.attendance.contracts.LectureContract.LectureEntry;
 import com.example.android.attendance.contracts.StudentContract.StudentEntry;
 import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
+import com.example.android.attendance.utilities.ExtraUtils;
 
 import static com.example.android.attendance.utilities.ExtraUtils.getCurrentDay;
 
@@ -391,5 +391,16 @@ public class DbHelperMethods {
         }
         cursor.close();
         return collegeName;
+    }
+
+    public static Cursor getScheduleCursor(SQLiteDatabase db, String facUserId, String day) {
+
+        String query = "select colleges.name, classes.sem, branches.b_name," +
+                " classes.section, lectures.lect_no, subjects.sub_name, lect_start_time, lect_end_time" +
+                "from lectures,subjects,classes,branches,colleges" +
+                " where fac_user_id=? and day=?" +
+                "and class_id= classes._id and subjects._id=subject_id and " +
+                "classes.branch_id = branches._id and classes.college_id = colleges._id;";
+        return db.rawQuery(query, new String[]{facUserId, day});
     }
 }

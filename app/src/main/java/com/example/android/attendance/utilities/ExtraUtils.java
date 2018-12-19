@@ -1,9 +1,7 @@
 package com.example.android.attendance.utilities;
 
 import android.app.Activity;
-import android.app.Application;
 import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -69,7 +67,7 @@ public class ExtraUtils {
     public static String getCurrentDay() {
         SimpleDateFormat simpleDayFormat = new SimpleDateFormat("EEEE", Locale.US);
         String day = simpleDayFormat.format(Calendar.getInstance().getTime());
-        return day;
+        return day.toUpperCase();
     }
 
     public static String getCurrentDate() {

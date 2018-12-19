@@ -21,9 +21,7 @@ import com.example.android.attendance.contracts.AttendanceRecordContract.Attenda
 import com.example.android.attendance.contracts.BranchContract.BranchEntry;
 import com.example.android.attendance.contracts.ClassContract.ClassEntry;
 import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
-import com.example.android.attendance.contracts.LectureContract;
 import com.example.android.attendance.contracts.LectureContract.LectureEntry;
-import com.example.android.attendance.contracts.SubjectContract;
 import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
 import com.example.android.attendance.utilities.ExtraUtils;
 
@@ -105,7 +103,7 @@ public class MainListCursorAdapter extends CursorAdapter {
         int attendRecId = cursor.getInt(attendRecIdIndex);
 
 
-        TextView collegeTv = (TextView) view.findViewById(R.id.college_tv);
+        TextView collegeTv = (TextView) view.findViewById(R.id.sch_college_tv);
         collegeTv.setText(college);
 
         GradientDrawable collegeCircle = (GradientDrawable) collegeTv.getBackground();
@@ -116,16 +114,16 @@ public class MainListCursorAdapter extends CursorAdapter {
             collegeCircle.setColor(ContextCompat.getColor(context, R.color.colorGct));
         }
 
-        TextView semesterTv = (TextView) view.findViewById(R.id.semester_tv);
+        TextView semesterTv = (TextView) view.findViewById(R.id.sch_semester_tv);
         semesterTv.setText(ExtraUtils.getSemester(semester));
 
-        TextView branchTv = (TextView) view.findViewById(R.id.branch_tv);
+        TextView branchTv = (TextView) view.findViewById(R.id.sch_branch_tv);
         branchTv.setText(branch);
 
-        TextView sectionTv = (TextView) view.findViewById(R.id.section_tv);
+        TextView sectionTv = (TextView) view.findViewById(R.id.sch_section_tv);
         sectionTv.setText(section);
 
-        TextView subjectTv = (TextView) view.findViewById(R.id.subject_tv);
+        TextView subjectTv = (TextView) view.findViewById(R.id.sch_subject_tv);
         subjectTv.setText(subject);
 
         TextView dateTv = (TextView) view.findViewById(R.id.date_tv);
@@ -135,7 +133,7 @@ public class MainListCursorAdapter extends CursorAdapter {
 
         dayTv.setText(day.substring(0,3) + ",");
 
-        TextView lectureTv = (TextView) view.findViewById(R.id.lecture_tv);
+        TextView lectureTv = (TextView) view.findViewById(R.id.sch_lecture_tv);
         lectureTv.setText(ExtraUtils.getLecture(lectureNo));
 
         TextView studentsPresentTv = (TextView) view.findViewById(R.id.students_present_tv);
