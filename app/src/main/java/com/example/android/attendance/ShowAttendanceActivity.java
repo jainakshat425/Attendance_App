@@ -7,12 +7,14 @@ import android.os.Build;
 import android.os.Bundle;
 
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -24,6 +26,7 @@ import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
 import com.example.android.attendance.data.DatabaseHelper;
 import com.example.android.attendance.data.DbHelperMethods;
 import com.example.android.attendance.utilities.ExtraUtils;
+import com.example.android.attendance.utilities.PdfUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +34,7 @@ import java.util.List;
 public class ShowAttendanceActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
+    private FloatingActionButton savePdfFab;
 
     private DatabaseHelper mDbHelper;
     private SQLiteDatabase mDb;
@@ -48,27 +52,29 @@ public class ShowAttendanceActivity extends AppCompatActivity {
         mDbHelper = new DatabaseHelper(this);
         mDb = mDbHelper.openDatabaseForReadWrite();
 
-        Bundle classDetails = getIntent().getExtras();
+
+        savePdfFab = findViewById(R.id.save_pdf_fab);
+
+        final Bundle classDetails = getIntent().getExtras();
         String collegeId = classDetails.getString(ExtraUtils.EXTRA_COLLEGE_ID);
         String semester = classDetails.getString(ExtraUtils.EXTRA_SEMESTER);
         String branch = classDetails.getString(ExtraUtils.EXTRA_BRANCH);
         String section = classDetails.getString(ExtraUtils.EXTRA_SECTION);
-        boolean showCompleteReport = classDetails.getBoolean(ExtraUtils.EXTRA_SHOW_COMPLETE_REPORT);
+
 
         int branchId = DbHelperMethods.getBranchId(mDb, branch);
         int classId = DbHelperMethods.getClassId(mDb, Integer.parseInt(collegeId),
                 semester, String.valueOf(branchId),
                 section);
 
-        showTotalLecturesForEachSub(classId);
+        final List<Integer> totalLectForSub = showTotalLecturesForEachSub(classId);
 
         Cursor cursor = DbHelperMethods.getClassAttendanceCursor(mDb, classId);
 
-        List<StudentReport> stdReportList = setupStudentReportList(cursor);
-        ArrayList<String> subNameList = new ArrayList<>();
+        final List<StudentReport> stdReportList = setupStudentReportList(cursor);
+        final ArrayList<String> subNameList = new ArrayList<>();
 
         Cursor subjectCursor = DbHelperMethods.getSubjectCursor(mDb, semester, branchId);
-
         if (stdReportList != null) {
             if (subjectCursor.getCount() != 0 && subjectCursor.moveToFirst()) {
 
@@ -114,7 +120,7 @@ public class ShowAttendanceActivity extends AppCompatActivity {
             cursor.close();
             subjectCursor.close();
 
-            int totalClasses = DbHelperMethods.getTotalClasses(mDb, classId);
+            final int totalClasses = DbHelperMethods.getTotalClasses(mDb, classId);
 
             ShowAttendanceAdapter adapter = new ShowAttendanceAdapter(this, stdReportList,
                     subNameList, totalClasses);
@@ -125,13 +131,23 @@ public class ShowAttendanceActivity extends AppCompatActivity {
             mRecyclerView = findViewById(R.id.rv_show_attendance);
             mRecyclerView.setLayoutManager(layoutManager);
             mRecyclerView.setAdapter(adapter);
+
+            //setup savePdf button after getting attendance of all the students
+            savePdfFab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PdfUtils.generatePdf(ShowAttendanceActivity.this, mDb,
+                            stdReportList, subNameList,
+                            totalClasses, totalLectForSub, classDetails);
+                }
+            });
         } else {
             Toast.makeText(this, "Students Not Found!", Toast.LENGTH_SHORT).show();
         }
 
     }
 
-    private void showTotalLecturesForEachSub(int classId) {
+    private List<Integer> showTotalLecturesForEachSub(int classId) {
         TableLayout totalSubLectTable = findViewById(R.id.sub_total_lect_table);
         Cursor cursor = DbHelperMethods.getTotalLecturesForEachSub(mDb, classId);
 
@@ -144,6 +160,8 @@ public class ShowAttendanceActivity extends AppCompatActivity {
         row.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT));
 
+        List<Integer> totalLectForSub = new ArrayList<>();
+
         if (cursor.getCount() != 0 && cursor.moveToFirst()) {
 
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -155,6 +173,7 @@ public class ShowAttendanceActivity extends AppCompatActivity {
                 rowHeader.addView(subNameTv);
 
                 int subTotalLect = cursor.getInt(cursor.getColumnIndex("sub_total_lect"));
+                totalLectForSub.add(subTotalLect);
 
                 TextView tv = ExtraUtils.getTextView(this, 16);
                 tv.setText(String.valueOf(subTotalLect));
@@ -164,6 +183,7 @@ public class ShowAttendanceActivity extends AppCompatActivity {
             totalSubLectTable.addView(row);
         }
         cursor.close();
+        return totalLectForSub;
     }
 
     private List<StudentReport> setupStudentReportList(Cursor cursor) {
@@ -193,4 +213,5 @@ public class ShowAttendanceActivity extends AppCompatActivity {
         }
         return null;
     }
+
 }

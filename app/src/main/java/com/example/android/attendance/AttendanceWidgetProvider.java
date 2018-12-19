@@ -23,8 +23,6 @@ import com.example.android.attendance.data.DatabaseHelper;
 import com.example.android.attendance.data.DbHelperMethods;
 import com.example.android.attendance.utilities.ExtraUtils;
 
-import java.io.IOException;
-
 /**
  * Implementation of App Widget functionality.
  */
@@ -47,7 +45,7 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String facUserId = preferences.getString(ExtraUtils.EXTRA_FAC_USER_ID, null);
-        int currentTime = Integer.parseInt(ExtraUtils.getCurrentTime());
+        int currentTime = Integer.parseInt(ExtraUtils.getCurrentTimeInHour());
         if (facUserId == null) {
             views.setTextViewText(R.id.widget_header, "Not Logged In");
             views.setViewVisibility(R.id.widget_details, View.GONE);

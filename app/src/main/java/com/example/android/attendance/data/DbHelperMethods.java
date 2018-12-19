@@ -1,7 +1,6 @@
 package com.example.android.attendance.data;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -14,8 +13,6 @@ import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
 import com.example.android.attendance.contracts.LectureContract.LectureEntry;
 import com.example.android.attendance.contracts.StudentContract.StudentEntry;
 import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
-
-import java.util.List;
 
 import static com.example.android.attendance.utilities.ExtraUtils.getCurrentDay;
 
@@ -182,7 +179,7 @@ public class DbHelperMethods {
 
     public static Cursor getLectureCursor(SQLiteDatabase db, String facUserId) {
 
-        String time = ExtraUtils.getCurrentTime();
+        String time = ExtraUtils.getCurrentTimeInHour();
 
         String projection = LectureEntry.TABLE_NAME + "." + LectureEntry.ID + ","
                 + LectureEntry.TABLE_NAME + "." + LectureEntry.CLASS_ID + ","
@@ -379,5 +376,20 @@ public class DbHelperMethods {
                 " where lectures.class_id =? group by lectures.subject_id";
 
         return db.rawQuery(query, new String[]{String.valueOf(classId)});
+    }
+
+    public static String getCollegeFullName(SQLiteDatabase db, String collegeId) {
+
+        Cursor cursor = db.query(CollegeEntry.TABLE_NAME, new String[]{CollegeEntry.FULL_NAME},
+                CollegeEntry.ID +"=?", new String[]{collegeId}, null,
+                null,null);
+
+        String collegeName = "";
+        if (cursor != null && cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            collegeName = cursor.getString(cursor.getColumnIndex(CollegeEntry.FULL_NAME));
+        }
+        cursor.close();
+        return collegeName;
     }
 }

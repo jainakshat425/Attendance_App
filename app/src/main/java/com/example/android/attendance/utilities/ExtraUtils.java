@@ -39,8 +39,6 @@ public class ExtraUtils {
     public static final String EXTRA_FAC_USER_ID = "extra_fac_user_id";
     public static final String EXTRA_FAC_NAME = "extra_fac_name";
     public static final String EXTRA_FAC_DEPT = "extra_fac_dept";
-    public static final String EXTRA_SHOW_COMPLETE_REPORT = "extra_show_complete_report";
-
 
     public static String getLecture(String lecture) {
         if (Integer.parseInt(lecture) == 1) {
@@ -80,8 +78,14 @@ public class ExtraUtils {
         return date;
     }
 
-    public static String getCurrentTime() {
+    public static String getCurrentTimeInHour() {
         SimpleDateFormat timeFormat = new SimpleDateFormat("H", Locale.US);
+        String time = timeFormat.format(Calendar.getInstance().getTime());
+        return time;
+    }
+
+    public static String getCurrentTime() {
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.US);
         String time = timeFormat.format(Calendar.getInstance().getTime());
         return time;
     }

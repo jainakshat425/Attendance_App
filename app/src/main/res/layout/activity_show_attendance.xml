@@ -27,6 +27,18 @@
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
             android:scrollbars="vertical" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/save_pdf_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_margin="@dimen/fab_margin"
+            android:background="@color/colorPrimary"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_outline_save_24px" />
     </RelativeLayout>
+
 
 </LinearLayout>

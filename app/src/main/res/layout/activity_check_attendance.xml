@@ -58,17 +58,6 @@
             style="@style/SpinnerStyle" />
     </LinearLayout>
 
-    <LinearLayout
-        style="@style/SpinnerLayoutContainer">
-        <TextView
-            style="@style/SpinnerTextStyle"
-            android:text="Subject wise attendance" />
-        <CheckBox
-            android:id="@+id/cb_detailed_report"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
     <Button
         android:id="@+id/show_button"
         android:layout_width="wrap_content"

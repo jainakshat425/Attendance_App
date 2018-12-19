@@ -87,9 +87,6 @@ public class MainActivity extends AppCompatActivity
         } else {
             ExtraUtils.updateWidget(this);
 
-            PdfUtils.generatePdf(this, this);
-
-
             mDatabaseHelper = new DatabaseHelper(this);
             mDb = mDatabaseHelper.openDataBaseReadOnly();
 
@@ -217,6 +214,11 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_check_attendance:
                 Intent checkAttendanceIntent = new Intent(this, CheckAttendanceActivity.class);
                 startActivity(checkAttendanceIntent);
+                break;
+            case R.id.nav_schedule:
+                Intent scheduleIntent =  new Intent(this, ScheduleActivity.class);
+                startActivity(scheduleIntent);
+                break;
         }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

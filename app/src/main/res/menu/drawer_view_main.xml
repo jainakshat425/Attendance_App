@@ -9,6 +9,10 @@
             android:title="Check Attendance" />
 
         <item
+            android:id="@+id/nav_schedule"
+            android:title="Schedule" />
+
+        <item
             android:id="@+id/nav_settings"
             android:title="Settings" />
 
