@@ -50,6 +50,13 @@ public class NewAttendanceActivity extends AppCompatActivity {
      */
 
     /**
+     * College
+     */
+    private Spinner collegeSpinner;
+    private SpinnerArrayAdapter collegeAdapter;
+    private int collegeSelected = -1;
+
+    /**
      * semester
      */
     private Spinner semesterSpinner;
@@ -77,12 +84,6 @@ public class NewAttendanceActivity extends AppCompatActivity {
     private SpinnerArrayAdapter subjectAdapter;
     private String subjectSelected = null;
 
-
-    //declare switch and it's surrounding text views
-    private Switch collegeSwitch;
-    private int collegeSelected = CollegeEntry.COLLEGE_GIT;
-    private TextView gitTv;
-    private TextView gctTv;
 
     //declare date edit text
     private EditText dateEditText;
@@ -132,18 +133,26 @@ public class NewAttendanceActivity extends AppCompatActivity {
         setupBranchSpinner();
         setupSectionSpinner();
         setupSubjectSpinner();
+        setupCollegeSpinner();
 
         //setup fab button for TakeAttendanceActivity
         setupFabButton();
 
+        setDefaultDate();
+
         //setup date picker dialog
         setupDatePickerDialog();
 
-        //setup college switch
-        setupCollegeSwitch();
-
         //setup lecture chooser
         setupLectureChooser();
+    }
+
+    private void setDefaultDate() {
+        dateEditText = findViewById(R.id.edit_date);
+
+        currentDateString = ExtraUtils.getCurrentDate();
+        daySelected = ExtraUtils.getCurrentDay();
+        dateEditText.setText(currentDateString);
     }
 
 
@@ -211,38 +220,12 @@ public class NewAttendanceActivity extends AppCompatActivity {
     }
 
     /**
-     * setup college switch
-     */
-    private void setupCollegeSwitch() {
-        gitTv = findViewById(R.id.git_tv);
-        gctTv = findViewById(R.id.gct_tv);
-
-        //setup switch for selection of college
-        collegeSwitch = findViewById(R.id.college_switch);
-        collegeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                collegeSelected = isChecked ? CollegeEntry.COLLEGE_GCT : CollegeEntry.COLLEGE_GIT;
-
-                if (collegeSelected == CollegeEntry.COLLEGE_GCT) {
-                    gctTv.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
-                    gitTv.setTextColor(getResources().getColor(android.R.color.darker_gray));
-                } else {
-                    gctTv.setTextColor(getResources().getColor(android.R.color.darker_gray));
-                    gitTv.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
-                }
-            }
-        });
-    }
-
-    /**
      * opens date picker dialog when editText is clicked
      */
     private void setupDatePickerDialog() {
 
         myCalendar = Calendar.getInstance();
 
-        dateEditText = findViewById(R.id.edit_date);
         final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
 
             @Override
@@ -279,7 +262,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
         currentDateString = simpleDateFormat.format(myCalendar.getTime());
 
         SimpleDateFormat simpleDayFormat = new SimpleDateFormat("EEEE", Locale.US);
-        daySelected = simpleDayFormat.format(myCalendar.getTime());
+        daySelected = (simpleDayFormat.format(myCalendar.getTime())).toUpperCase();
         dateEditText.setText(currentDateString);
     }
 
@@ -362,6 +345,34 @@ public class NewAttendanceActivity extends AppCompatActivity {
         }
         return true;
     }
+
+    /**
+     * setup college spinner
+     */
+    private void setupCollegeSpinner() {
+        String[] collegeArray = getResources().getStringArray(R.array.colleges_array);
+        collegeSpinner = findViewById(R.id.college_spinner);
+        collegeAdapter = new SpinnerArrayAdapter(this,
+                android.R.layout.simple_spinner_dropdown_item, collegeArray);
+        collegeSpinner.setAdapter(collegeAdapter);
+        collegeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                if (position != 0) {
+                    collegeSelected = parent.getItemAtPosition(position).toString().equals("GIT") ?
+                            CollegeEntry.COLLEGE_GIT :
+                            CollegeEntry.COLLEGE_GCT;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
 
     /**
      * setup subject spinner

@@ -21,7 +21,7 @@ import com.example.android.attendance.utilities.ExtraUtils;
 
 public class CheckAttendanceActivity extends AppCompatActivity {
     /**
-     * semester
+     * College
      */
     private Spinner collegeSpinner;
     private SpinnerArrayAdapter collegeAdapter;
