@@ -64,7 +64,8 @@
                 android:resource="@xml/attendance_widget_provider_info" />
         </receiver>
 
-        <activity android:name=".ScheduleActivity"></activity>
+        <activity android:name=".ScheduleActivity"
+            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>

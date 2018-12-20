@@ -10,7 +10,8 @@
 
     <color name="colorDepartment">#00600f</color>
 
-    <color name="colorGct">#c51162</color>
-    <color name="colorGit">#3d5afe</color>
+    <color name="dayPressed">#00251a</color>
+    <color name="daySelected">#004d40</color>
+    <color name="dayDeselected">@android:color/darker_gray</color>
 
 </resources>

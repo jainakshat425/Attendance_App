@@ -106,14 +106,6 @@ public class MainListCursorAdapter extends CursorAdapter {
         TextView collegeTv = (TextView) view.findViewById(R.id.sch_college_tv);
         collegeTv.setText(college);
 
-        GradientDrawable collegeCircle = (GradientDrawable) collegeTv.getBackground();
-
-        if (college.equals(resources.getString(R.string.college_git))) {
-            collegeCircle.setColor(ContextCompat.getColor(context, R.color.colorGit));
-        } else {
-            collegeCircle.setColor(ContextCompat.getColor(context, R.color.colorGct));
-        }
-
         TextView semesterTv = (TextView) view.findViewById(R.id.sch_semester_tv);
         semesterTv.setText(ExtraUtils.getSemester(semester));
 

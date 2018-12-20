@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -25,11 +26,39 @@
         android:gravity="center">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/shc_lectures"
+            android:id="@+id/sch_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
             android:scrollbars="vertical" />
+
+        <RelativeLayout
+            android:visibility="gone"
+            android:id="@+id/sch_empty_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true">
+
+            <ImageView
+                android:id="@+id/empty_sch_list_iv"
+                app:srcCompat="@drawable/ic_empty_schedule"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:tint="@color/darkRedColor" />
+
+            <TextView
+                android:id="@+id/list_empty_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/empty_sch_list_iv"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="16dp"
+                android:alpha="0.70"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/lectures_not_scheduled"
+                android:textColor="@color/darkRedColor" />
+        </RelativeLayout>
     </RelativeLayout>
 
 </LinearLayout>

@@ -291,7 +291,7 @@ public class DbHelperMethods {
                 date};
 
         Cursor cursor = db.query(AttendanceRecordEntry.TABLE_NAME, null, selection,
-                        selectionArgs, null, null, null);
+                selectionArgs, null, null, null);
 
         return (cursor != null && cursor.getCount() > 0);
     }
@@ -372,7 +372,7 @@ public class DbHelperMethods {
         String table = "lectures left join attendance_records" +
                 " on lectures._id = attendance_records.lecture_id inner join subjects" +
                 " on lectures.subject_id = subjects._id";
-        String query = "select " +projection+ " from " +table+
+        String query = "select " + projection + " from " + table +
                 " where lectures.class_id =? group by lectures.subject_id";
 
         return db.rawQuery(query, new String[]{String.valueOf(classId)});
@@ -381,8 +381,8 @@ public class DbHelperMethods {
     public static String getCollegeFullName(SQLiteDatabase db, String collegeId) {
 
         Cursor cursor = db.query(CollegeEntry.TABLE_NAME, new String[]{CollegeEntry.FULL_NAME},
-                CollegeEntry.ID +"=?", new String[]{collegeId}, null,
-                null,null);
+                CollegeEntry.ID + "=?", new String[]{collegeId}, null,
+                null, null);
 
         String collegeName = "";
         if (cursor != null && cursor.getCount() > 0) {
@@ -395,12 +395,13 @@ public class DbHelperMethods {
 
     public static Cursor getScheduleCursor(SQLiteDatabase db, String facUserId, String day) {
 
-        String query = "select colleges.name, classes.sem, branches.b_name," +
-                " classes.section, lectures.lect_no, subjects.sub_name, lect_start_time, lect_end_time" +
-                "from lectures,subjects,classes,branches,colleges" +
-                " where fac_user_id=? and day=?" +
-                "and class_id= classes._id and subjects._id=subject_id and " +
+        String query = "select colleges.name, classes.sem, branches.b_name, " +
+                "classes.section, lectures.lect_no, subjects.sub_name, lect_start_time, lect_end_time " +
+                "from lectures, subjects, classes, branches, colleges " +
+                "where lectures.fac_user_id=? and lectures.day=? " +
+                "and class_id=classes._id and subjects._id=subject_id and " +
                 "classes.branch_id = branches._id and classes.college_id = colleges._id;";
+
         return db.rawQuery(query, new String[]{facUserId, day});
     }
 }
