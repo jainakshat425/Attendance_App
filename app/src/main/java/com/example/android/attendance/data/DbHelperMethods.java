@@ -1,9 +1,16 @@
 package com.example.android.attendance.data;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.example.android.attendance.contracts.AttendanceContract.AttendanceEntry;
 import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
 import com.example.android.attendance.contracts.BranchContract.BranchEntry;
@@ -12,7 +19,14 @@ import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
 import com.example.android.attendance.contracts.LectureContract.LectureEntry;
 import com.example.android.attendance.contracts.StudentContract.StudentEntry;
 import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
+import com.example.android.attendance.network.RequestHandler;
 import com.example.android.attendance.utilities.ExtraUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.example.android.attendance.utilities.ExtraUtils.getCurrentDay;
 
@@ -270,15 +284,44 @@ public class DbHelperMethods {
     }
 
 
-    public static int createAttendanceRecord(SQLiteDatabase db, String lectureId,
-                                             String date, String classId) {
+    public static int createAttendanceRecord(final Context context, final String lectureId,
+                                             final String date, final String classId) {
 
-        ContentValues values = new ContentValues();
-        values.put(AttendanceRecordEntry.LECTURE_ID_COL, lectureId);
-        values.put(AttendanceRecordEntry.DATE_COL, date);
-        values.put(AttendanceRecordEntry.CLASS_ID_COL, classId);
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.ADD_ATT_REC_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        JSONObject jObj = null;
+                        try {
+                            jObj = new JSONObject(response);
+                            Toast.makeText(context, jObj.getString("message"), Toast.LENGTH_SHORT).show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
 
-        return (int) db.insert(AttendanceRecordEntry.TABLE_NAME, null, values);
+                        Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put(AttendanceRecordEntry.LECTURE_ID_COL, lectureId);
+                params.put(AttendanceRecordEntry.CLASS_ID_COL, classId);
+                params.put(AttendanceRecordEntry.DATE_COL, date);
+
+                return params;
+            }
+        };
+
+        RequestHandler.getInstance(context).addToRequestQueue(request);
+
+        return 1;
     }
 
     public static boolean isAttendanceAlreadyExists(SQLiteDatabase db,

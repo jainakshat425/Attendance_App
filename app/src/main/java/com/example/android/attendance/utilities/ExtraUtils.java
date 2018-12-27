@@ -38,6 +38,8 @@ public class ExtraUtils {
     public static final String EXTRA_FAC_NAME = "extra_fac_name";
     public static final String EXTRA_FAC_DEPT = "extra_fac_dept";
 
+    public static final String ADD_ATT_REC_URL = "http://192.168.43.156/android/v1/addattendancerecord.php";
+
     public static String getLecture(String lecture) {
         if (Integer.parseInt(lecture) == 1) {
             lecture = lecture + "st Lecture";

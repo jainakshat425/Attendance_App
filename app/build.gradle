@@ -33,11 +33,19 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5';
 
-    implementation 'ca.antonious:materialdaypicker:0.4.0'
+
 
 
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+
+    //PDF operations
     implementation 'com.itextpdf:itextg:5.5.10'
+
+    //simplified networking
+    implementation 'com.android.volley:volley:1.1.1';
+
+    //day picker
+    implementation 'ca.antonious:materialdaypicker:0.4.0'
 
 
 }
