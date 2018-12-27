@@ -9,7 +9,7 @@ public class FacultyContract {
 
         public static final String _ID = BaseColumns._ID;
         public static final String F_NAME_COL = "fac_name";
-        public static final String F_USER_ID_COL = "fac_user_id";
+        public static final String F_USERNAME_COL = "fac_user_id";
         public static final String F_PASSWORD_COL = "fac_password";
         public static final String F_DEPARTMENT_COL = "fac_department";
 

@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity
             mDatabaseHelper = new DatabaseHelper(this);
             mDb = mDatabaseHelper.openDataBaseReadOnly();
 
-            String selection = FacultyEntry.F_USER_ID_COL + "=?";
+            String selection = FacultyEntry.F_USERNAME_COL + "=?";
             String[] selectionArgs = {facUserId};
             Cursor facCursor = mDatabaseHelper.openDataBaseReadOnly()
                     .query(FacultyEntry.TABLE_NAME,

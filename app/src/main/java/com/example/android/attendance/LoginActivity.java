@@ -1,26 +1,27 @@
 package com.example.android.attendance;
 
-import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-import android.preference.PreferenceManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.android.attendance.data.DatabaseHelper;
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.example.android.attendance.contracts.FacultyContract.FacultyEntry;
+import com.example.android.attendance.network.RequestHandler;
 import com.example.android.attendance.utilities.ExtraUtils;
 
-import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -28,11 +29,6 @@ public class LoginActivity extends AppCompatActivity {
     private EditText passwordEditText;
     private Button loginButton;
     private Button needHelpButton;
-
-    private int attempts = 5;
-    private  DatabaseHelper myDbHelper;
-
-    private Bundle intentBundle = new Bundle();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,79 +52,65 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent needHelpIntent = new Intent(Intent.ACTION_SEND);
                 needHelpIntent.setType("text/html");
-                needHelpIntent.putExtra(Intent.EXTRA_SUBJECT,"Need Help");
-                needHelpIntent.putExtra(Intent.EXTRA_TEXT,"Describe the problem");
-                startActivity(Intent.createChooser(needHelpIntent,"Send Email..."));
+                needHelpIntent.putExtra(Intent.EXTRA_SUBJECT, "Need Help");
+                needHelpIntent.putExtra(Intent.EXTRA_TEXT, "Describe the problem");
+                startActivity(Intent.createChooser(needHelpIntent, "Send Email..."));
             }
         });
-
-
-        myDbHelper = new DatabaseHelper(this);
-
-        try {
-            myDbHelper.createDataBase();
-        } catch (IOException ioe) {
-            throw new Error("Unable to create database");
-        }
-
-
     }
 
     private void login() {
-        String username = usernameEditText.getText().toString();
-        String password = passwordEditText.getText().toString();
+        final String username = usernameEditText.getText().toString().trim();
+        final String password = passwordEditText.getText().toString().trim();
 
-        SQLiteDatabase db;
-        try {
-            db = myDbHelper.openDataBaseReadOnly();
-        } catch (SQLException sqle) {
-            throw sqle;
-        }
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.FAC_LOGIN_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
 
-        String selection = FacultyEntry.F_USER_ID_COL + "=?" + " and " +
-                FacultyEntry.F_PASSWORD_COL + "=?";
-        String[] selectionArgs = {username, password};
-        Cursor cursor = db.query(FacultyEntry.TABLE_NAME, null, selection, selectionArgs,
-                null,null,null);
+                        try {
+                            JSONObject jObj = new JSONObject(response);
 
-        if ( cursor == null || !cursor.moveToFirst()) {
-            Toast.makeText(this,"Account doesn't Exist", Toast.LENGTH_SHORT ).show();
-        }
-        else {
-            String userId = cursor.getString(cursor.getColumnIndexOrThrow
-                    (FacultyEntry.F_USER_ID_COL));
+                            if (!jObj.getBoolean("error")) {
 
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            preferences.edit().putString(ExtraUtils.EXTRA_FAC_USER_ID, userId).apply();
-            cursor.close();
-            setResult(Activity.RESULT_OK);
-            finish();
-        }
-    }
+                                int facId = jObj.getInt(FacultyEntry._ID);
+                                String facName = jObj.getString(FacultyEntry.F_NAME_COL);
+                                String facUsername = jObj.getString(FacultyEntry.F_USERNAME_COL);
+                                String facDept = jObj.getString(FacultyEntry.F_DEPARTMENT_COL);
 
-    private void showAlertDialog() {
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Do you want to exit?")
-                .setPositiveButton("No",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        }).setNegativeButton("Yes",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                setResult(Activity.RESULT_CANCELED);
+                                SharedPrefManager.getInstance(LoginActivity.this)
+                                        .saveLoginUserDetails(facId, facName, facUsername, facDept);
+
                                 finish();
+                                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            } else {
+                                Toast.makeText(LoginActivity.this, jObj.getString("message"),
+                                        Toast.LENGTH_SHORT).show();
                             }
-                        }).create();
-        dialog.show();
-    }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
 
-    @Override
-    public void onBackPressed() {
-       showAlertDialog();
+                Toast.makeText(LoginActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+
+                params.put(FacultyEntry.F_USERNAME_COL, username);
+                params.put(FacultyEntry.F_PASSWORD_COL, password);
+
+                return params;
+            }
+        };
+
+        RequestHandler.getInstance(this).addToRequestQueue(request);
     }
 }
 
