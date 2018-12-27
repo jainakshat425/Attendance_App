@@ -45,4 +45,32 @@ public class SharedPrefManager {
         sharedPref.apply();
         return true;
     }
+
+    public int getFacId() {
+        SharedPreferences sharedPref = mCtx
+                .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
+
+        return sharedPref.getInt(FacultyEntry._ID, -1);
+    }
+
+    public String getFacUserId() {
+        SharedPreferences sharedPref = mCtx
+                .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
+
+        return sharedPref.getString(FacultyEntry.F_USERNAME_COL, null);
+    }
+
+    public String getFacName() {
+        SharedPreferences sharedPref = mCtx
+                .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
+
+        return sharedPref.getString(FacultyEntry.F_NAME_COL, null);
+    }
+
+    public String getFacDept() {
+        SharedPreferences sharedPref = mCtx
+                .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
+
+        return sharedPref.getString(FacultyEntry.F_DEPARTMENT_COL, null);
+    }
 }

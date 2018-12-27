@@ -1,13 +1,10 @@
 package com.example.android.attendance;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -45,13 +42,11 @@ public class MainActivity extends AppCompatActivity
 
     private static final int NEW_ATTENDANCE_REQUEST_CODE = 1;
     private static final int UPDATE_ATTENDANCE_REQ_CODE = 2;
-    private static final int LOGIN_REQUEST_CODE = 4;
+
+    private SharedPrefManager mSharedPref;
 
     private DatabaseHelper mDatabaseHelper;
     private SQLiteDatabase mDb;
-
-    private SharedPreferences mPreferences;
-    private String facUserId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,54 +57,57 @@ public class MainActivity extends AppCompatActivity
             this.getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
         }
 
-       setupMainActivity();
+        mSharedPref = SharedPrefManager.getInstance(this);
+        if (mSharedPref.isLoggedIn()) {
+            setupMainActivity();
+        } else {
+            finish();
+            startActivity(new Intent(this, LoginActivity.class));
+        }
     }
 
     private void setupMainActivity() {
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (mPreferences.contains(ExtraUtils.EXTRA_FAC_USER_ID)) {
-            facUserId = mPreferences.getString(ExtraUtils.EXTRA_FAC_USER_ID, "");
+
+        int facId = mSharedPref.getFacId();
+        String facUserId = mSharedPref.getFacUserId();
+        String facName = mSharedPref.getFacName();
+        String facDept = mSharedPref.getFacDept();
+
+        ExtraUtils.updateWidget(this);
+
+        mDatabaseHelper = new DatabaseHelper(this);
+        mDb = mDatabaseHelper.openDataBaseReadOnly();
+
+        String selection = FacultyEntry.F_USERNAME_COL + "=?";
+        String[] selectionArgs = {facUserId};
+        Cursor facCursor = mDatabaseHelper.openDataBaseReadOnly()
+                .query(FacultyEntry.TABLE_NAME,
+                        null,
+                        selection,
+                        selectionArgs, null, null, null);
+
+        if (facCursor.getCount() != 0 && facCursor.moveToFirst()) {
+            facCursor.moveToFirst();
+            String name = facCursor.getString(facCursor.getColumnIndexOrThrow(FacultyEntry.F_NAME_COL));
+            String dept = facCursor.getString(facCursor.getColumnIndexOrThrow
+                    (FacultyEntry.F_DEPARTMENT_COL));
+
+            setupNavigationDrawer(name, facUserId, dept);
+
+            mainListView = findViewById(R.id.main_list_view);
+
+            RelativeLayout emptyView = findViewById(R.id.empty_view_main);
+            mainListView.setEmptyView(emptyView);
+
+
+            Cursor cursor = DbHelperMethods.getAttendanceRecordsCursor(mDb, facUserId);
+            cursorAdapter = new MainListCursorAdapter(this, cursor);
+            mainListView.setAdapter(cursorAdapter);
+
+            setupFloatingActionButton(facUserId);
         }
-        if (facUserId.isEmpty() || facUserId.equals("")) {
-            Intent loginIntent = new Intent(this, LoginActivity.class);
-            startActivityForResult(loginIntent, LOGIN_REQUEST_CODE);
-        } else {
-            ExtraUtils.updateWidget(this);
+        facCursor.close();
 
-            mDatabaseHelper = new DatabaseHelper(this);
-            mDb = mDatabaseHelper.openDataBaseReadOnly();
-
-            String selection = FacultyEntry.F_USERNAME_COL + "=?";
-            String[] selectionArgs = {facUserId};
-            Cursor facCursor = mDatabaseHelper.openDataBaseReadOnly()
-                    .query(FacultyEntry.TABLE_NAME,
-                            null,
-                            selection,
-                            selectionArgs, null,null,null);
-
-            if (facCursor.getCount() != 0 && facCursor.moveToFirst()) {
-                facCursor.moveToFirst();
-                String name = facCursor.getString(facCursor.getColumnIndexOrThrow(FacultyEntry.F_NAME_COL));
-                String dept = facCursor.getString(facCursor.getColumnIndexOrThrow
-                        (FacultyEntry.F_DEPARTMENT_COL));
-
-                setupNavigationDrawer(name, facUserId, dept);
-
-                mainListView = findViewById(R.id.main_list_view);
-
-                RelativeLayout emptyView = findViewById(R.id.empty_view_main);
-                mainListView.setEmptyView(emptyView);
-
-
-                Cursor cursor = DbHelperMethods.getAttendanceRecordsCursor(mDb, facUserId);
-                cursorAdapter = new MainListCursorAdapter(this, cursor);
-                mainListView.setAdapter(cursorAdapter);
-
-                setupFloatingActionButton(facUserId);
-            }
-            facCursor.close();
-
-        }
     }
 
 
@@ -129,8 +127,8 @@ public class MainActivity extends AppCompatActivity
 
         View drawerFacDetails = navigationView.getHeaderView(0);
 
-        facNameTv =  drawerFacDetails.findViewById(R.id.fac_name_tv);
-        facDeptTv =  drawerFacDetails.findViewById(R.id.fac_dept_tv);
+        facNameTv = drawerFacDetails.findViewById(R.id.fac_name_tv);
+        facDeptTv = drawerFacDetails.findViewById(R.id.fac_dept_tv);
         facIdTv = drawerFacDetails.findViewById(R.id.fac_id_tv);
 
         facNameTv.setText(facName);
@@ -175,22 +173,17 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == LOGIN_REQUEST_CODE && resultCode == Activity.RESULT_OK)
-               setupMainActivity();
-        else if (requestCode == LOGIN_REQUEST_CODE && resultCode == Activity.RESULT_CANCELED)
-               finish();
-        else {
-            String userId = mPreferences.getString(ExtraUtils.EXTRA_FAC_USER_ID, "");
-            if (!userId.isEmpty() || !userId.equals("")) {
-                Cursor cursor = DbHelperMethods.getAttendanceRecordsCursor(mDb, userId);
-                cursorAdapter.swapCursor(cursor);
-                cursorAdapter.notifyDataSetChanged();
-            } else {
-                RelativeLayout parentLayout = findViewById(R.id.main_layout);
-                Snackbar.make(parentLayout, "Something Went Wrong!", Snackbar.LENGTH_LONG).show();
-            }
+        String userId = mSharedPref.getFacUserId();
+        if (!userId.isEmpty() || !userId.equals("")) {
+            Cursor cursor = DbHelperMethods.getAttendanceRecordsCursor(mDb, userId);
+            cursorAdapter.swapCursor(cursor);
+            cursorAdapter.notifyDataSetChanged();
+        } else {
+            RelativeLayout parentLayout = findViewById(R.id.main_layout);
+            Snackbar.make(parentLayout, "Something Went Wrong!", Snackbar.LENGTH_LONG).show();
         }
     }
+
 
     public static int getUpdateAttendanceReqCode() {
         return UPDATE_ATTENDANCE_REQ_CODE;
@@ -205,7 +198,8 @@ public class MainActivity extends AppCompatActivity
                 startActivity(checkAttendanceIntent);
                 break;
             case R.id.nav_schedule:
-                Intent scheduleIntent =  new Intent(this, ScheduleActivity.class);
+                String facUserId = mSharedPref.getFacUserId();
+                Intent scheduleIntent = new Intent(this, ScheduleActivity.class);
                 scheduleIntent.putExtra(ExtraUtils.EXTRA_FAC_USER_ID, facUserId);
                 startActivity(scheduleIntent);
                 break;

@@ -74,16 +74,19 @@ public class LoginActivity extends AppCompatActivity {
 
                             if (!jObj.getBoolean("error")) {
 
+                                Toast.makeText(LoginActivity.this, jObj.getString("message"),
+                                        Toast.LENGTH_SHORT).show();
                                 int facId = jObj.getInt(FacultyEntry._ID);
                                 String facName = jObj.getString(FacultyEntry.F_NAME_COL);
                                 String facUsername = jObj.getString(FacultyEntry.F_USERNAME_COL);
                                 String facDept = jObj.getString(FacultyEntry.F_DEPARTMENT_COL);
 
-                                SharedPrefManager.getInstance(LoginActivity.this)
+                                boolean saved = SharedPrefManager.getInstance(LoginActivity.this)
                                         .saveLoginUserDetails(facId, facName, facUsername, facDept);
-
-                                finish();
-                                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                if (saved) {
+                                    finish();
+                                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                }
                             } else {
                                 Toast.makeText(LoginActivity.this, jObj.getString("message"),
                                         Toast.LENGTH_SHORT).show();
