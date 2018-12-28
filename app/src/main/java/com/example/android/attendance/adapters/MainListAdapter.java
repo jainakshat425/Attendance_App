@@ -1,7 +1,9 @@
 package com.example.android.attendance.adapters;
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -11,7 +13,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.android.attendance.AttendanceRecord;
+import com.example.android.attendance.MainActivity;
 import com.example.android.attendance.R;
+import com.example.android.attendance.TakeAttendanceActivity;
 import com.example.android.attendance.utilities.ExtraUtils;
 
 import java.util.List;
@@ -83,8 +87,9 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
         intentBundle.putString(ExtraUtils.EXTRA_DAY, day);
         intentBundle.putString(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
         intentBundle.putString(ExtraUtils.EXTRA_COLLEGE_ID, String.valueOf(collegeId));
-    }
 
+        holder.itemView.setTag(intentBundle);
+    }
 
     @Override
     public int getItemCount() {
@@ -99,7 +104,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
         this.notifyDataSetChanged();
     }
 
-    public class MainViewHolder extends RecyclerView.ViewHolder {
+    public class MainViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView collegeTv;
         private TextView semesterTv;
@@ -115,6 +120,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
         public MainViewHolder(View view) {
             super(view);
 
+            view.setOnClickListener(this);
             collegeTv = view.findViewById(R.id.main_college_tv);
             semesterTv = view.findViewById(R.id.main_semester_tv);
             branchTv = view.findViewById(R.id.main_branch_tv);
@@ -125,6 +131,15 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
             lectureTv = view.findViewById(R.id.main_lecture_tv);
             studentsPresentTv = view.findViewById(R.id.main_students_present_tv);
             totalStudentsTv = view.findViewById(R.id.main_total_students_tv);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Intent takeAttendanceIntent = new Intent();
+            takeAttendanceIntent.setClass(mContext, TakeAttendanceActivity.class);
+            takeAttendanceIntent.putExtras((Bundle) v.getTag());
+            ((Activity) mContext).startActivityForResult(takeAttendanceIntent,
+                    MainActivity.getUpdateAttendanceReqCode());
         }
     }
 }
