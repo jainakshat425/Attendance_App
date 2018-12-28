@@ -2,10 +2,8 @@ package com.example.android.attendance;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -16,25 +14,35 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
-import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.example.android.attendance.adapters.SpinnerArrayAdapter;
+import com.example.android.attendance.contracts.BranchContract.BranchEntry;
 import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
 import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
-import com.example.android.attendance.data.DatabaseHelper;
-import com.example.android.attendance.data.DbHelperMethods;
+import com.example.android.attendance.network.RequestHandler;
 import com.example.android.attendance.utilities.ExtraUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class NewAttendanceActivity extends AppCompatActivity {
 
@@ -98,9 +106,6 @@ public class NewAttendanceActivity extends AppCompatActivity {
 
     private static final int TAKE_ATTENDANCE_REQ_CODE = 3;
 
-    DatabaseHelper databaseHelper;
-    SQLiteDatabase db;
-
     int branchId;
     int classId;
     int lectureId;
@@ -114,19 +119,6 @@ public class NewAttendanceActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
-
-        /**
-         * open the database for populating the spinner with subjects according to semester and
-         * branch
-         */
-        databaseHelper = new DatabaseHelper(this);
-
-        try {
-            db = databaseHelper.openDataBaseReadOnly();
-        } catch (SQLException sqle) {
-            throw sqle;
-        }
-
 
         //setup all spinners
         setupSemesterSpinner();
@@ -277,8 +269,8 @@ public class NewAttendanceActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if (allInputsProvided()) {
-                    int resultCode = allInputsValid();
-                    if (resultCode == ALL_INPUTS_VALID) {
+                   /* int resultCode = allInputsValid();
+                    if (resultCode == ALL_INPUTS_VALID) {*/
                         Intent takeAttendanceIntent = new Intent();
                         takeAttendanceIntent.setClass(NewAttendanceActivity.this,
                                 TakeAttendanceActivity.class);
@@ -298,12 +290,12 @@ public class NewAttendanceActivity extends AppCompatActivity {
                                 getIntent().getStringExtra(ExtraUtils.EXTRA_FAC_USER_ID));
                         startActivityForResult(takeAttendanceIntent, TAKE_ATTENDANCE_REQ_CODE);
                     } else {
-                        showError(resultCode);
+                    //  showError(resultCode);
                     }
-                } else {
+          /*      } else {
                     Toast.makeText(NewAttendanceActivity.this, "Complete all fields",
                             Toast.LENGTH_SHORT).show();
-                }
+                }*/
             }
 
         });
@@ -382,51 +374,85 @@ public class NewAttendanceActivity extends AppCompatActivity {
         subjectSpinner = findViewById(R.id.subject_spinner);
         if (semesterSelected != null && branchSelected != null) {
 
-            /**
-             * query the database and store result in cursor
-             */
-            String branchId = String.valueOf(DbHelperMethods.getBranchId(db, branchSelected));
-            String[] projection = {SubjectEntry.SUB_NAME_COL};
-            String selection = SubjectEntry.SUB_SEMESTER_COL + "=?" + " and "
-                    + SubjectEntry.BRANCH_ID_COL + "=?";
-            String[] selectionArgs = {semesterSelected, branchId};
 
-            Cursor subjectCursor = db.query(SubjectEntry.TABLE_NAME, projection, selection,
-                    selectionArgs, null, null, null);
-
-            String[] subject;
-            if (subjectCursor.getCount() > 0 && subjectCursor.moveToFirst()) {
-                subject = new String[subjectCursor.getCount() + 1];
-                subject[0] = "Subject";
-                subjectCursor.moveToFirst();
-                for (int i = 1; !subjectCursor.isAfterLast(); i++) {
-                    subject[i] = subjectCursor.getString(
-                            subjectCursor.getColumnIndex(SubjectEntry.SUB_NAME_COL));
-                    subjectCursor.moveToNext();
+            String[] subjects = getSubArray();
+            subjectAdapter = new SpinnerArrayAdapter(this,
+                    android.R.layout.simple_spinner_dropdown_item, subjects);
+            subjectSpinner.setAdapter(subjectAdapter);
+            subjectSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (position != 0) {
+                        subjectSelected = parent.getItemAtPosition(position).toString();
+                    }
                 }
-                subjectAdapter = new SpinnerArrayAdapter(this,
-                        android.R.layout.simple_spinner_dropdown_item, subject);
-                subjectSpinner.setAdapter(subjectAdapter);
-                subjectSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+        } else
+            emptySubjectSpinner();
+    }
+
+    private String[] getSubArray() {
+        final List<String> subArray = new ArrayList<>();
+        subArray.add("Subject");
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.GET_SUB_NAME_URL,
+                new Response.Listener<String>() {
                     @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        if (position != 0) {
-                            subjectSelected = parent.getItemAtPosition(position).toString();
+                    public void onResponse(String response) {
+
+                        try {
+                            JSONObject jObj = new JSONObject(response);
+
+                            if (!jObj.getBoolean("error")) {
+
+                                JSONArray subJSONArray = jObj.getJSONArray("subjects");
+                                for (int i = 0; i < subJSONArray.length(); i++) {
+                                    subArray.add(subJSONArray.getString(i));
+                                }
+                                subjectAdapter = new SpinnerArrayAdapter(NewAttendanceActivity.this,
+                                        android.R.layout.simple_spinner_dropdown_item,
+                                        subArray.toArray(new String[0]));
+                                subjectSpinner.setAdapter(subjectAdapter);
+                            } else {
+                                Toast.makeText(NewAttendanceActivity.this,
+                                        jObj.getString("message"),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } finally {
+                            progressDialog.dismiss();
                         }
                     }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
-                });
-                subjectCursor.close();
-            } else {
-                emptySubjectSpinner();
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(NewAttendanceActivity.this, error.getMessage(),
+                        Toast.LENGTH_LONG).show();
+                progressDialog.dismiss();
             }
-        } else {
-            emptySubjectSpinner();
-        }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+
+                params.put(BranchEntry.BRANCH_NAME, branchSelected);
+                params.put(SubjectEntry.SUB_SEMESTER_COL, semesterSelected);
+
+                return params;
+            }
+        };
+
+        RequestHandler.getInstance(this).addToRequestQueue(request);
+        return subArray.toArray(new String[0]);
     }
 
     /**
@@ -523,7 +549,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    private int allInputsValid() {
+  /*  private int allInputsValid() {
         branchId = DbHelperMethods.getBranchId(db, branchSelected);
         if (branchId > 0) {
             classId = DbHelperMethods.getClassId(db, collegeSelected,
@@ -551,5 +577,5 @@ public class NewAttendanceActivity extends AppCompatActivity {
         } else {
             return BRANCH_NOT_FOUND;
         }
-    }
+    }*/
 }

@@ -29,6 +29,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.example.android.attendance.adapters.MainListAdapter;
 import com.example.android.attendance.contracts.FacultyContract.FacultyEntry;
 import com.example.android.attendance.network.RequestHandler;
+import com.example.android.attendance.pojos.AttendanceRecord;
 import com.example.android.attendance.sync.ReminderUtilities;
 import com.example.android.attendance.utilities.ExtraUtils;
 import com.google.gson.Gson;

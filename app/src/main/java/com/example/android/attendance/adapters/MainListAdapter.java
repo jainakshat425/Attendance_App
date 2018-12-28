@@ -12,10 +12,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.android.attendance.AttendanceRecord;
 import com.example.android.attendance.MainActivity;
 import com.example.android.attendance.R;
 import com.example.android.attendance.TakeAttendanceActivity;
+import com.example.android.attendance.pojos.AttendanceRecord;
 import com.example.android.attendance.utilities.ExtraUtils;
 
 import java.util.List;

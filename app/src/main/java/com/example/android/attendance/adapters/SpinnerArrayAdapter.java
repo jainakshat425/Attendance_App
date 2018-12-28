@@ -1,15 +1,12 @@
 package com.example.android.attendance.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class SpinnerArrayAdapter extends ArrayAdapter<String> {
 
@@ -43,7 +40,6 @@ public class SpinnerArrayAdapter extends ArrayAdapter<String> {
         return view;
     }
 
-
-
+    
 }
 
