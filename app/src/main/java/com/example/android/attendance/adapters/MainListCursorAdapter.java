@@ -1,3 +1,4 @@
+/*
 package com.example.android.attendance.adapters;
 
 import android.app.Activity;
@@ -5,9 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +35,7 @@ public class MainListCursorAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        return LayoutInflater.from(context).inflate(R.layout.main_attendance_list_item,
+        return LayoutInflater.from(context).inflate(R.layout.main_list_item,
                 parent, false);
     }
 
@@ -45,45 +44,67 @@ public class MainListCursorAdapter extends CursorAdapter {
 
         Resources resources = context.getResources();
 
-        /**
-         * get column index from attendanceRecord table
-         */
+        */
+/**
+ * get column index from attendanceRecord table
+ * <p>
+ * get column index from lectures table
+ * <p>
+ * get column index from classes table
+ * <p>
+ * get column index from colleges table
+ * <p>
+ * get column index from branches table
+ * <p>
+ * get column index from subject table
+ *//*
+
         int attendRecIdIndex = cursor.getColumnIndex(AttendanceRecordEntry.ID);
         int lectureIdIndex = cursor.getColumnIndex(AttendanceRecordEntry.LECTURE_ID_COL);
         int dateIndex = cursor.getColumnIndex(AttendanceRecordEntry.DATE_COL);
         int stdPresentIndex = cursor.getColumnIndex(AttendanceRecordEntry.STUDENTS_PRESENT_COL);
         int totalStdIndex = cursor.getColumnIndex(AttendanceRecordEntry.TOTAL_STUDENTS_COL);
 
-        /**
-         * get column index from lectures table
-         */
+        */
+/**
+ * get column index from lectures table
+ *//*
+
         int facUserIdIndex = cursor.getColumnIndex(LectureEntry.FAC_USER_ID);
         int classIdIndex = cursor.getColumnIndex(LectureEntry.CLASS_ID);
         int subjectIndex = cursor.getColumnIndex(LectureEntry.SUBJECT_ID);
         int dayIndex = cursor.getColumnIndex(LectureEntry.LECTURE_DAY);
         int lectureNoIndex = cursor.getColumnIndex(LectureEntry.LECTURE_NUMBER);
 
-        /**
-         * get column index from classes table
-         */
+        */
+/**
+ * get column index from classes table
+ *//*
+
         int collegeIdIndex = cursor.getColumnIndex(ClassEntry.COLLEGE_ID);
         int semesterIndex = cursor.getColumnIndex(ClassEntry.SEMESTER);
         int branchIdIndex = cursor.getColumnIndex(ClassEntry.BRANCH_ID);
         int sectionIndex = cursor.getColumnIndex(ClassEntry.SECTION);
 
-        /**
-         * get column index from colleges table
-         */
+        */
+/**
+ * get column index from colleges table
+ *//*
+
         int collegeNameIndex = cursor.getColumnIndex(CollegeEntry.NAME);
 
-        /**
-         * get column index from branches table
-         */
+        */
+/**
+ * get column index from branches table
+ *//*
+
         int branchNameIndex = cursor.getColumnIndex(BranchEntry.BRANCH_NAME);
 
-        /**
-         * get column index from subject table
-         */
+        */
+/**
+ * get column index from subject table
+ *//*
+
         int subjectNameIndex = cursor.getColumnIndex(SubjectEntry.SUB_NAME_COL);
 
         int stdPresent = cursor.getInt(stdPresentIndex);
@@ -163,3 +184,4 @@ public class MainListCursorAdapter extends CursorAdapter {
     }
 
 }
+*/

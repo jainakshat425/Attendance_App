@@ -9,8 +9,8 @@ public class CollegeContract {
         public static final String TABLE_NAME = "colleges";
 
         public static final String ID = BaseColumns._ID;
-        public static final String NAME = "name";
-        public static final String FULL_NAME = "full_name";
+        public static final String NAME = "coll_name";
+        public static final String FULL_NAME = "coll_full_name";
 
         //constants representing college
         public static final int COLLEGE_GIT = 1;

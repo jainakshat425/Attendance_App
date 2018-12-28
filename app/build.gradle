@@ -47,5 +47,12 @@ dependencies {
     //day picker
     implementation 'ca.antonious:materialdaypicker:0.4.0'
 
+    //conversion of JSON to Java Object and vice-versa
+    implementation 'com.google.code.gson:gson:2.8.5'
+
+    //binds view with View Object
+    implementation 'com.jakewharton:butterknife:8.5.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+
 
 }

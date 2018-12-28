@@ -1,31 +1,49 @@
 package com.example.android.attendance;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.example.android.attendance.adapters.MainListCursorAdapter;
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.example.android.attendance.adapters.MainListAdapter;
 import com.example.android.attendance.contracts.FacultyContract.FacultyEntry;
-import com.example.android.attendance.data.DatabaseHelper;
-import com.example.android.attendance.data.DbHelperMethods;
+import com.example.android.attendance.network.RequestHandler;
 import com.example.android.attendance.sync.ReminderUtilities;
 import com.example.android.attendance.utilities.ExtraUtils;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 
 public class MainActivity extends AppCompatActivity
@@ -37,21 +55,25 @@ public class MainActivity extends AppCompatActivity
 
     private DrawerLayout mDrawerLayout;
 
-    private ListView mainListView;
-    private MainListCursorAdapter cursorAdapter;
+    @BindView(R.id.main_list_view)
+    RecyclerView mRecyclerView;
+
+    @BindView(R.id.empty_view_main)
+    RelativeLayout mEmptyView;
+
+    private MainListAdapter mAdapter;
 
     private static final int NEW_ATTENDANCE_REQUEST_CODE = 1;
     private static final int UPDATE_ATTENDANCE_REQ_CODE = 2;
 
     private SharedPrefManager mSharedPref;
 
-    private DatabaseHelper mDatabaseHelper;
-    private SQLiteDatabase mDb;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ButterKnife.bind(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             this.getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
@@ -69,45 +91,86 @@ public class MainActivity extends AppCompatActivity
     private void setupMainActivity() {
 
         int facId = mSharedPref.getFacId();
-        String facUserId = mSharedPref.getFacUserId();
+        final String facUserId = mSharedPref.getFacUserId();
         String facName = mSharedPref.getFacName();
         String facDept = mSharedPref.getFacDept();
 
         ExtraUtils.updateWidget(this);
+        setupNavigationDrawer(facName, facUserId, facDept);
 
-        mDatabaseHelper = new DatabaseHelper(this);
-        mDb = mDatabaseHelper.openDataBaseReadOnly();
+        mAdapter = new MainListAdapter(this, new ArrayList<AttendanceRecord>());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        DividerItemDecoration divider = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.addItemDecoration(divider);
+        mRecyclerView.setAdapter(mAdapter);
 
-        String selection = FacultyEntry.F_USERNAME_COL + "=?";
-        String[] selectionArgs = {facUserId};
-        Cursor facCursor = mDatabaseHelper.openDataBaseReadOnly()
-                .query(FacultyEntry.TABLE_NAME,
-                        null,
-                        selection,
-                        selectionArgs, null, null, null);
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.GET_ATT_REC_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
 
-        if (facCursor.getCount() != 0 && facCursor.moveToFirst()) {
-            facCursor.moveToFirst();
-            String name = facCursor.getString(facCursor.getColumnIndexOrThrow(FacultyEntry.F_NAME_COL));
-            String dept = facCursor.getString(facCursor.getColumnIndexOrThrow
-                    (FacultyEntry.F_DEPARTMENT_COL));
+                        try {
+                            JSONObject jObj = new JSONObject(response);
 
-            setupNavigationDrawer(name, facUserId, dept);
+                            if (!jObj.getBoolean("error")) {
 
-            mainListView = findViewById(R.id.main_list_view);
+                                Toast.makeText(MainActivity.this, jObj.getString("message"),
+                                        Toast.LENGTH_SHORT).show();
 
-            RelativeLayout emptyView = findViewById(R.id.empty_view_main);
-            mainListView.setEmptyView(emptyView);
+                                List<AttendanceRecord> records = extractRecordsFromJSON(jObj);
 
+                                mAdapter.swapList(records);
 
-            Cursor cursor = DbHelperMethods.getAttendanceRecordsCursor(mDb, facUserId);
-            cursorAdapter = new MainListCursorAdapter(this, cursor);
-            mainListView.setAdapter(cursorAdapter);
+                                setupFloatingActionButton(facUserId);
 
-            setupFloatingActionButton(facUserId);
+                            } else {
+                                Toast.makeText(MainActivity.this, jObj.getString("message"),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        progressDialog.dismiss();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+
+                params.put(FacultyEntry.F_USERNAME_COL, facUserId);
+
+                return params;
+            }
+        };
+
+        RequestHandler.getInstance(this).addToRequestQueue(request);
+    }
+
+    private List<AttendanceRecord> extractRecordsFromJSON(JSONObject jObj) {
+
+        try {
+            String recordsArray = jObj.getString("attendanceRecord");
+
+            Gson gson = new Gson();
+            AttendanceRecord[] targetArray = gson.fromJson(recordsArray, AttendanceRecord[].class);
+
+            return Arrays.asList(targetArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
         }
-        facCursor.close();
-
     }
 
 
@@ -149,7 +212,6 @@ public class MainActivity extends AppCompatActivity
                 return true;
 
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -173,15 +235,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        String userId = mSharedPref.getFacUserId();
-        if (!userId.isEmpty() || !userId.equals("")) {
-            Cursor cursor = DbHelperMethods.getAttendanceRecordsCursor(mDb, userId);
-            cursorAdapter.swapCursor(cursor);
-            cursorAdapter.notifyDataSetChanged();
-        } else {
-            RelativeLayout parentLayout = findViewById(R.id.main_layout);
-            Snackbar.make(parentLayout, "Something Went Wrong!", Snackbar.LENGTH_LONG).show();
-        }
+
     }
 
 
