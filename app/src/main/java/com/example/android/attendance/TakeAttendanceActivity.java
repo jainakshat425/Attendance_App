@@ -1,38 +1,51 @@
 package com.example.android.attendance;
 
 import android.app.Activity;
-import android.content.ContentValues;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.attendance.adapters.TakeAttendanceAdapter;
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.example.android.attendance.adapters.TakeAttendAdapter;
 import com.example.android.attendance.contracts.AttendanceContract.AttendanceEntry;
 import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
 import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
-import com.example.android.attendance.contracts.StudentContract.StudentEntry;
-import com.example.android.attendance.data.DatabaseHelper;
-import com.example.android.attendance.data.DbHelperMethods;
+import com.example.android.attendance.contracts.LectureContract.LectureEntry;
+import com.example.android.attendance.network.RequestHandler;
+import com.example.android.attendance.pojos.Attendance;
 import com.example.android.attendance.utilities.ExtraUtils;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class TakeAttendanceActivity extends AppCompatActivity {
 
-    private static final int PRESENT = 1;
-    private static final int ABSENT = 0;
+    private Context mContext;
 
     private TextView collegeTv;
     private TextView semesterTv;
@@ -43,18 +56,13 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     private TextView lectureTv;
     private TextView dayTv;
 
-    private ListView stdListView;
-    private TakeAttendanceAdapter takeAttendanceAdapter;
-    private Cursor currentTableCursor = null;
+    private RecyclerView mRecyclerView;
+    private TakeAttendAdapter mAdapter;
 
     private Bundle bundle;
     private String attendRecId;
 
     private boolean isUpdateMode = false;
-
-    private DatabaseHelper mDatabaseHelper;
-    private SQLiteDatabase mDb;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,10 +74,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
 
-        mDatabaseHelper = new DatabaseHelper(this);
-        mDb = mDatabaseHelper.openDatabaseForReadWrite();
-
-
+        mContext = this;
         /**
          * initialize all text views
          */
@@ -105,73 +110,137 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         semesterTv.setText(ExtraUtils.getSemester(semester));
         lectureTv.setText(ExtraUtils.getLecture(lecture));
 
+        mAdapter = new TakeAttendAdapter(this, new ArrayList<Attendance>());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        DividerItemDecoration divider = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.addItemDecoration(divider);
+        mRecyclerView.setAdapter(mAdapter);
+
         if (attendRecId != null) {
             //changes activity title
             setTitle(getString(R.string.update_attendance_title));
             isUpdateMode = true;
-            setupAttendance(attendRecId, classId);
+            setupForUpdateAttendance(attendRecId);
         } else {
             setTitle(R.string.take_attendance_title);
             isUpdateMode = false;
-            String lectureId = String.valueOf(DbHelperMethods
-                    .getLectureId(mDb, classId, lecture, day));
 
-            attendRecId = String.valueOf(DbHelperMethods
-                    .createAttendanceRecord(this, lectureId, date, classId));
-            setupAttendance(attendRecId, classId);
+            setupForNewAttendance(lecture, classId, date, day);
+
         }
 
     }
 
-    private void setupAttendance(String attendRecId, String classId) {
+    private void setupForUpdateAttendance(final String attendRecId) {
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.SETUP_UPDATE_ATTEND_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
 
-        ArrayList<Integer> attendanceStatesList;
-        int attendanceState, attendanceIndex;
+                        try {
+                            JSONObject jObj = new JSONObject(response);
 
-        if (isUpdateMode) {
-            currentTableCursor = DbHelperMethods.getStudentForUpdateAttendance(mDb, attendRecId);
-        } else {
-            currentTableCursor = DbHelperMethods.getStudentForNewAttendance(mDb, classId);
+                            if (!jObj.getBoolean("error")) {
 
-        }
+                                List<Attendance> records = extractAttendanceFromJSON(jObj);
+                                mAdapter.swapList(records);
 
-        if (currentTableCursor.getCount() != 0 && currentTableCursor.moveToFirst()) {
-            attendanceStatesList = new ArrayList<>();
-
-            currentTableCursor.moveToFirst();
-            if (isUpdateMode) {
-                //get attendanceState index so as to find out present attendanceStates
-                attendanceIndex = currentTableCursor.getColumnIndexOrThrow
-                        (AttendanceEntry.ATTENDANCE_STATE);
-                for (int i = 0; i < currentTableCursor.getCount(); i++) {
-                    // initializes array with existing attendance States
-                    attendanceState = currentTableCursor.getInt(attendanceIndex);
-                    attendanceStatesList.add(i, attendanceState);
-                    currentTableCursor.moveToNext();
-                }
-            } else {
-                // initializes all items value with 0
-                for (int i = 0; i < currentTableCursor.getCount(); i++) {
-                    attendanceStatesList.add(i, 0);
-                    currentTableCursor.moveToNext();
-                }
+                            } else {
+                                Toast.makeText(TakeAttendanceActivity.this, jObj.getString("message"),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        progressDialog.dismiss();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(TakeAttendanceActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
             }
-            takeAttendanceAdapter = new TakeAttendanceAdapter(this, currentTableCursor,
-                    attendanceStatesList);
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
 
-            stdListView.setAdapter(takeAttendanceAdapter);
-        } else {
-            Toast.makeText(this, "Students Not Exist!", Toast.LENGTH_SHORT).show();
-        }
+                params.put(AttendanceEntry.ATTENDANCE_RECORD_ID, attendRecId);
 
+                return params;
+            }
+        };
+        RequestHandler.getInstance(this).addToRequestQueue(request);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    private void setupForNewAttendance(final String lectureNo, final String classId,
+                                       final String date, final String day) {
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.SETUP_NEW_ATTEND_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
 
-        getMenuInflater().inflate(R.menu.menu_take_attendance_activity, menu);
+                        try {
+                            JSONObject jObj = new JSONObject(response);
 
-        return super.onCreateOptionsMenu(menu);
+                            if (!jObj.getBoolean("error")) {
+
+                                List<Attendance> records = extractAttendanceFromJSON(jObj);
+                                mAdapter.swapList(records);
+
+                            } else {
+                                Toast.makeText(TakeAttendanceActivity.this, jObj.getString("message"),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        progressDialog.dismiss();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(TakeAttendanceActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+
+                params.put(LectureEntry.CLASS_ID, classId);
+                params.put(LectureEntry.LECTURE_NUMBER, lectureNo);
+                params.put(LectureEntry.LECTURE_DAY, day);
+                params.put(AttendanceRecordEntry.DATE_COL, date);
+
+                return params;
+            }
+        };
+        RequestHandler.getInstance(this).addToRequestQueue(request);
+    }
+
+    private List<Attendance> extractAttendanceFromJSON(JSONObject jObj) {
+        try {
+            String recordsArray = jObj.getString("attendance");
+
+            Gson gson = new Gson();
+            Attendance[] targetArray = gson.fromJson(recordsArray, Attendance[].class);
+
+            return Arrays.asList(targetArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
@@ -179,15 +248,6 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.save_attendance:
                 saveAttendance();
-                updateAttendanceRecord();
-                ExtraUtils.updateWidget(this);
-
-                Intent intent = new Intent();
-                intent.putExtras(bundle);
-
-                setResult(Activity.RESULT_OK, intent);
-                finish();
-                break;
             case android.R.id.home:
                 if (isUpdateMode) finish();
                 else undoAttendanceAndFinish();
@@ -196,95 +256,169 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void initializeAllViews() {
-        collegeTv = findViewById(R.id.college_text_view);
-        semesterTv = findViewById(R.id.semester_text_view);
-        branchTv = findViewById(R.id.branch_text_view);
-        sectionTv = findViewById(R.id.section_text_view);
-        subjectTv = findViewById(R.id.subject_text_view);
-        dateTv = findViewById(R.id.date_text_view);
-        lectureTv = findViewById(R.id.lecture_text_view);
-        dayTv = findViewById(R.id.day_text_view);
+    private void undoAttendanceAndFinish() {
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
 
-        stdListView = findViewById(R.id.students_list_view);
+        final int recId = TakeAttendAdapter.getAttendanceList()[1].getAttendanceRecordId();
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.DELETE_RECORD_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        try {
+                            JSONObject jObj = new JSONObject(response);
+
+                            if (!jObj.getBoolean("error")) {
+                                finish();
+                            } else {
+                                Toast.makeText(TakeAttendanceActivity.this,
+                                        jObj.getString("message"),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        progressDialog.dismiss();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(TakeAttendanceActivity.this,
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+
+                params.put(AttendanceRecordEntry.ID, String.valueOf(recId));
+
+                return params;
+            }
+        };
+        RequestHandler.getInstance(this).addToRequestQueue(request);
     }
 
     private void saveAttendance() {
-        ContentValues newValues;
-        int attendanceState;
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
+
+        Gson gson = new Gson();
+        Attendance[] attendances = TakeAttendAdapter.getAttendanceList();
+        final String attJsonObj = gson.toJson(attendances);
 
         if (isUpdateMode) {
-            if (currentTableCursor.moveToFirst()) {
-                currentTableCursor.moveToFirst();
-                int idIndex = currentTableCursor.getColumnIndex(AttendanceEntry.ID);
+            StringRequest request = new StringRequest(Request.Method.POST,
+                    ExtraUtils.UPDATE_ATTEND_URL,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
 
-                String currentId;
-                for (int i = 0; i < currentTableCursor.getCount(); i++) {
+                            try {
+                                JSONObject jObj = new JSONObject(response);
 
-                    currentId = String.valueOf(currentTableCursor.getInt(idIndex));
-                    attendanceState = TakeAttendanceAdapter.getAttendanceState(i);
+                                if (!jObj.getBoolean("error")) {
 
-                    newValues = new ContentValues();
-                    newValues.put(AttendanceEntry.ATTENDANCE_STATE, attendanceState);
+                                    // ExtraUtils.updateWidget(this);
+                                    Intent intent = new Intent();
+                                    intent.putExtras(bundle);
 
-                    mDb.update(AttendanceEntry.TABLE_NAME,
-                            newValues, AttendanceEntry.ID + "=?", new String[]{currentId});
-                    currentTableCursor.moveToNext();
+                                    setResult(Activity.RESULT_OK, intent);
+                                    finish();
+
+                                } else {
+                                    Toast.makeText(TakeAttendanceActivity.this,
+                                            jObj.getString("message"),
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            progressDialog.dismiss();
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    progressDialog.dismiss();
+                    Toast.makeText(TakeAttendanceActivity.this,
+                            error.getMessage(), Toast.LENGTH_LONG).show();
                 }
-            }
+            }) {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    Map<String, String> params = new HashMap<>();
+
+                    params.put("update_attendance", attJsonObj);
+
+                    return params;
+                }
+            };
+            RequestHandler.getInstance(this).addToRequestQueue(request);
         } else {
-            if (currentTableCursor.moveToFirst()) {
-                currentTableCursor.moveToFirst();
-                int idIndex = currentTableCursor.getColumnIndex(StudentEntry.ID);
+            StringRequest request = new StringRequest(Request.Method.POST,
+                    ExtraUtils.SAVE_NEW_ATTEND_URL,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
 
-                String studentId;
-                for (int i = 0; i < currentTableCursor.getCount(); i++) {
+                            try {
+                                JSONObject jObj = new JSONObject(response);
 
-                    studentId = String.valueOf(currentTableCursor.getInt(idIndex));
-                    attendanceState = TakeAttendanceAdapter.getAttendanceState(i);
+                                if (!jObj.getBoolean("error")) {
+                                    // ExtraUtils.updateWidget(this);
+                                    Intent intent = new Intent();
+                                    intent.putExtras(bundle);
 
-                    newValues = new ContentValues();
-                    newValues.put(AttendanceEntry.STUDENT_ID, studentId);
-                    newValues.put(AttendanceEntry.ATTENDANCE_STATE, attendanceState);
-                    newValues.put(AttendanceEntry.ATTENDANCE_RECORD_ID, attendRecId);
-
-                    mDb.insert(AttendanceEntry.TABLE_NAME, null, newValues);
-                    currentTableCursor.moveToNext();
+                                    setResult(Activity.RESULT_OK, intent);
+                                    finish();
+                                } else {
+                                    Toast.makeText(TakeAttendanceActivity.this,
+                                            jObj.getString("message"),
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            progressDialog.dismiss();
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    progressDialog.dismiss();
+                    Toast.makeText(TakeAttendanceActivity.this,
+                            error.getMessage(), Toast.LENGTH_LONG).show();
                 }
-            }
+            }) {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    Map<String, String> params = new HashMap<>();
+
+                    params.put("new_attendance", attJsonObj);
+
+                    return params;
+                }
+            };
+            RequestHandler.getInstance(this).addToRequestQueue(request);
         }
     }
 
-    private void updateAttendanceRecord() {
-
-        ContentValues record = new ContentValues();
-
-        record.put(AttendanceRecordEntry.TOTAL_STUDENTS_COL, getTotalStudentCount());
-        record.put(AttendanceRecordEntry.STUDENTS_PRESENT_COL, studentsPresent());
-
-        String where = AttendanceRecordEntry.ID + "=?";
-        String[] whereArgs = new String[]{attendRecId};
-
-        int rowUpdated = mDb.update(AttendanceRecordEntry.TABLE_NAME, record, where, whereArgs);
-
-        Toast.makeText(this, "Rows Updated: " + rowUpdated, Toast.LENGTH_SHORT).show();
+    @Override
+    public void onBackPressed() {
+        showAlertDialog();
     }
 
-    private int getTotalStudentCount() {
-        return currentTableCursor.getCount();
-    }
 
-    private int studentsPresent() {
-        String selection = AttendanceEntry.ATTENDANCE_RECORD_ID + "=?" + " and "
-                + AttendanceEntry.ATTENDANCE_STATE + "=?";
-        String[] selectionArgs = {attendRecId, String.valueOf(PRESENT)};
-        Cursor cursor = mDb.query(AttendanceEntry.TABLE_NAME, null, selection, selectionArgs,
-                null, null, null);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
 
-        int stdPresent = cursor.getCount();
+        getMenuInflater().inflate(R.menu.menu_take_attendance_activity, menu);
 
-        cursor.close();
-        return stdPresent;
+        return super.onCreateOptionsMenu(menu);
     }
 
     private void showAlertDialog() {
@@ -304,28 +438,25 @@ public class TakeAttendanceActivity extends AppCompatActivity {
                                 setResult(Activity.RESULT_CANCELED);
                                 if (isUpdateMode)
                                     finish();
-                                else
-                                    undoAttendanceAndFinish();
+                                // else
+                                //undoAttendanceAndFinish();
                             }
                         }).create();
         dialog.show();
     }
 
-    private void undoAttendanceAndFinish() {
-        int rowDeleted = mDb.delete(AttendanceRecordEntry.TABLE_NAME,
-                AttendanceRecordEntry.ID + "=?",
-                new String[]{attendRecId});
-        if (rowDeleted > 0) {
-            Toast.makeText(this, "Attendance not saved!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Something Went Wrong!", Toast.LENGTH_SHORT).show();
-        }
-        finish();
+    private void initializeAllViews() {
+        collegeTv = findViewById(R.id.college_text_view);
+        semesterTv = findViewById(R.id.semester_text_view);
+        branchTv = findViewById(R.id.branch_text_view);
+        sectionTv = findViewById(R.id.section_text_view);
+        subjectTv = findViewById(R.id.subject_text_view);
+        dateTv = findViewById(R.id.date_text_view);
+        lectureTv = findViewById(R.id.lecture_text_view);
+        dayTv = findViewById(R.id.day_text_view);
+
+        mRecyclerView = findViewById(R.id.students_list_view);
     }
 
-    @Override
-    public void onBackPressed() {
-        showAlertDialog();
-    }
 
 }

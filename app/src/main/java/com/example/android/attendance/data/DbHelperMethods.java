@@ -1,17 +1,9 @@
 package com.example.android.attendance.data;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.example.android.attendance.contracts.AttendanceContract.AttendanceEntry;
 import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
 import com.example.android.attendance.contracts.BranchContract.BranchEntry;
 import com.example.android.attendance.contracts.ClassContract.ClassEntry;
@@ -19,14 +11,7 @@ import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
 import com.example.android.attendance.contracts.LectureContract.LectureEntry;
 import com.example.android.attendance.contracts.StudentContract.StudentEntry;
 import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
-import com.example.android.attendance.network.RequestHandler;
 import com.example.android.attendance.utilities.ExtraUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.example.android.attendance.utilities.ExtraUtils.getCurrentDay;
 
@@ -123,73 +108,6 @@ public class DbHelperMethods {
         return subjectId;
     }
 
-    public static int getLectureId(SQLiteDatabase db, String classId, String lectureNo,
-                                   String daySelected) {
-        int lectureId = -1;
-
-        String[] projection = new String[]{LectureEntry.ID};
-        String selection = LectureEntry.CLASS_ID + "=?" + " and "
-                + LectureEntry.LECTURE_NUMBER + "=?" + " and "
-                + LectureEntry.LECTURE_DAY + "=?";
-        String[] selectionArgs = new String[]{classId, lectureNo, daySelected};
-
-        Cursor cursor = db.query(LectureEntry.TABLE_NAME,
-                projection,
-                selection,
-                selectionArgs, null, null, null);
-
-        if (cursor.getCount() != 0 && cursor.moveToFirst()) {
-            cursor.moveToFirst();
-            lectureId = cursor.getInt(cursor.getColumnIndex(LectureEntry.ID));
-        }
-        cursor.close();
-        return lectureId;
-    }
-
-    public static Cursor getAttendanceRecordsCursor(SQLiteDatabase db, String facUserId) {
-
-        String projection = AttendanceRecordEntry.TABLE_NAME + "." + AttendanceRecordEntry.ID + ","
-                + AttendanceRecordEntry.LECTURE_ID_COL + ","
-                + AttendanceRecordEntry.DATE_COL + ","
-                + AttendanceRecordEntry.STUDENTS_PRESENT_COL + ","
-                + AttendanceRecordEntry.TOTAL_STUDENTS_COL + ","
-                + LectureEntry.FAC_USER_ID + ","
-                + LectureEntry.TABLE_NAME + "." + LectureEntry.CLASS_ID + ","
-                + LectureEntry.SUBJECT_ID + ","
-                + LectureEntry.LECTURE_DAY + ","
-                + LectureEntry.LECTURE_NUMBER + ","
-                + ClassEntry.COLLEGE_ID + ","
-                + ClassEntry.SEMESTER + ","
-                + ClassEntry.TABLE_NAME + "." + ClassEntry.BRANCH_ID + ","
-                + ClassEntry.SECTION + ","
-                + CollegeEntry.NAME + ","
-                + BranchEntry.BRANCH_NAME + ","
-                + SubjectEntry.SUB_NAME_COL;
-
-
-        String tableName = AttendanceRecordEntry.TABLE_NAME
-                + " INNER JOIN " + LectureEntry.TABLE_NAME
-                + " ON " + LectureEntry.TABLE_NAME + "." + LectureEntry.ID + " = "
-                + AttendanceRecordEntry.LECTURE_ID_COL
-                + " INNER JOIN " + ClassEntry.TABLE_NAME
-                + " ON " + ClassEntry.TABLE_NAME + "." + ClassEntry.ID + " = "
-                + LectureEntry.TABLE_NAME + "." + LectureEntry.CLASS_ID
-                + " INNER JOIN " + CollegeEntry.TABLE_NAME
-                + " ON " + CollegeEntry.TABLE_NAME + "." + CollegeEntry.ID + " = "
-                + ClassEntry.COLLEGE_ID
-                + " INNER JOIN " + BranchEntry.TABLE_NAME
-                + " ON " + BranchEntry.TABLE_NAME + "." + BranchEntry.ID + " = "
-                + ClassEntry.TABLE_NAME + "." + ClassEntry.BRANCH_ID
-                + " INNER JOIN " + SubjectEntry.TABLE_NAME
-                + " ON " + SubjectEntry.TABLE_NAME + "." + SubjectEntry._ID + " = "
-                + LectureEntry.SUBJECT_ID;
-
-
-        String query = "SELECT " + projection + " FROM " + tableName + " WHERE "
-                + LectureEntry.FAC_USER_ID + "=?";
-
-        return db.rawQuery(query, new String[]{facUserId});
-    }
 
     public static Cursor getLectureCursor(SQLiteDatabase db, String facUserId) {
 
@@ -238,29 +156,6 @@ public class DbHelperMethods {
     }
 
 
-    public static Cursor getStudentForUpdateAttendance(SQLiteDatabase db, String attendRecId) {
-        String tableName = AttendanceEntry.TABLE_NAME
-                + " INNER JOIN " + StudentEntry.TABLE_NAME
-                + " ON " + StudentEntry.TABLE_NAME + "." + StudentEntry.ID + " = "
-                + AttendanceEntry.STUDENT_ID;
-
-        String projection = AttendanceEntry.TABLE_NAME + "." + AttendanceEntry.ID + ","
-                + StudentEntry.S_NAME_COL + ","
-                + StudentEntry.S_ROLL_NO_COL + ","
-                + AttendanceEntry.ATTENDANCE_STATE;
-
-        String selection = AttendanceEntry.ATTENDANCE_RECORD_ID + "=?";
-
-        String[] selectionArgs = new String[]{attendRecId};
-
-        String orderBy = StudentEntry.S_ROLL_NO_COL + " ASC";
-
-        String query = "SELECT " + projection + " FROM " + tableName + " WHERE " + selection +
-                " ORDER BY " + orderBy;
-
-        return db.rawQuery(query, selectionArgs);
-    }
-
     public static Cursor getStudentForNewAttendance(SQLiteDatabase db, String classId) {
         String tableName = StudentEntry.TABLE_NAME
                 + " INNER JOIN " + ClassEntry.TABLE_NAME
@@ -284,45 +179,6 @@ public class DbHelperMethods {
     }
 
 
-    public static int createAttendanceRecord(final Context context, final String lectureId,
-                                             final String date, final String classId) {
-
-        StringRequest request = new StringRequest(Request.Method.POST,
-                ExtraUtils.ADD_ATT_REC_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        JSONObject jObj = null;
-                        try {
-                            jObj = new JSONObject(response);
-                            Toast.makeText(context, jObj.getString("message"), Toast.LENGTH_SHORT).show();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                        Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put(AttendanceRecordEntry.LECTURE_ID_COL, lectureId);
-                params.put(AttendanceRecordEntry.CLASS_ID_COL, classId);
-                params.put(AttendanceRecordEntry.DATE_COL, date);
-
-                return params;
-            }
-        };
-
-        RequestHandler.getInstance(context).addToRequestQueue(request);
-
-        return 1;
-    }
 
     public static boolean isAttendanceAlreadyExists(SQLiteDatabase db,
                                                     int lectureId, String date) {

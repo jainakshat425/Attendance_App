@@ -107,7 +107,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
     private static final int TAKE_ATTENDANCE_REQ_CODE = 3;
 
     int branchId;
-    int classId;
+    int classId = 3;
     int lectureId;
 
     @Override
@@ -549,7 +549,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
-  /*  private int allInputsValid() {
+  /* private int allInputsValid() {
         branchId = DbHelperMethods.getBranchId(db, branchSelected);
         if (branchId > 0) {
             classId = DbHelperMethods.getClassId(db, collegeSelected,

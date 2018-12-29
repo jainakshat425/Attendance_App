@@ -30,7 +30,6 @@ import com.example.android.attendance.adapters.MainListAdapter;
 import com.example.android.attendance.contracts.FacultyContract.FacultyEntry;
 import com.example.android.attendance.network.RequestHandler;
 import com.example.android.attendance.pojos.AttendanceRecord;
-import com.example.android.attendance.sync.ReminderUtilities;
 import com.example.android.attendance.utilities.ExtraUtils;
 import com.google.gson.Gson;
 
@@ -128,8 +127,6 @@ public class MainActivity extends AppCompatActivity
 
                                 mAdapter.swapList(records);
 
-                                setupFloatingActionButton(facUserId);
-
                             } else {
                                 Toast.makeText(MainActivity.this, jObj.getString("message"),
                                         Toast.LENGTH_SHORT).show();
@@ -157,6 +154,7 @@ public class MainActivity extends AppCompatActivity
         };
 
         RequestHandler.getInstance(this).addToRequestQueue(request);
+        setupFloatingActionButton(facUserId);
     }
 
     private List<AttendanceRecord> extractRecordsFromJSON(JSONObject jObj) {
@@ -199,7 +197,7 @@ public class MainActivity extends AppCompatActivity
         facDeptTv.setText(facDept);
         facIdTv.setText(facUserId);
 
-        ReminderUtilities.scheduleAttendanceReminder(this);
+        //ReminderUtilities.scheduleAttendanceReminder(this);
 
     }
 

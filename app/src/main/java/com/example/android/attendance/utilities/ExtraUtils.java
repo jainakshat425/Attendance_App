@@ -39,11 +39,19 @@ public class ExtraUtils {
     public static final String EXTRA_FAC_DEPT = "extra_fac_dept";
 
 
+
     private static final String DB_URL = "http://192.168.43.156/android/v1/";
     public static final String ADD_ATT_REC_URL = DB_URL + "addAttendanceRecord.php";
     public static final String FAC_LOGIN_URL = DB_URL + "facLogin.php";
     public static final String GET_ATT_REC_URL = DB_URL + "getAttendanceRecords.php";
     public static final String GET_SUB_NAME_URL = DB_URL + "getSubjectsName.php";
+    public static final String GET_LECT_ID_URL = DB_URL + "getLectureId.php";
+    public static final String SETUP_NEW_ATTEND_URL = DB_URL + "setupNewAttendance.php";
+    public static final String SETUP_UPDATE_ATTEND_URL = DB_URL + "setupUpdateAttendance.php";
+    public static final String SAVE_NEW_ATTEND_URL = DB_URL + "saveNewAttendance.php";
+    public static final String UPDATE_ATTEND_URL = DB_URL + "updateAttendance.php";
+    public static final String DELETE_RECORD_URL = DB_URL + "deleteAttendRecord.php";
+
 
     public static String getLecture(String lecture) {
         if (Integer.parseInt(lecture) == 1) {

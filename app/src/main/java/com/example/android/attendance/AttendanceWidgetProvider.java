@@ -6,21 +6,12 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.example.android.attendance.contracts.BranchContract.BranchEntry;
-import com.example.android.attendance.contracts.ClassContract.ClassEntry;
-import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
-import com.example.android.attendance.contracts.LectureContract.LectureEntry;
-import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
-import com.example.android.attendance.data.DatabaseHelper;
-import com.example.android.attendance.data.DbHelperMethods;
 import com.example.android.attendance.utilities.ExtraUtils;
 
 /**
@@ -55,14 +46,14 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
             views.setViewVisibility(R.id.widget_details, View.GONE);
             views.setViewVisibility(R.id.take_button, View.GONE);
         } else {
-            setupLectureDetails(context, views, facUserId);
+            //  setupLectureDetails(context, views, facUserId);
         }
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
-    private static void setupLectureDetails(Context context, RemoteViews views,
+  /*  private static void setupLectureDetails(Context context, RemoteViews views,
                                             String facUserId) {
 
         DatabaseHelper dbHelper = new DatabaseHelper(context);
@@ -137,7 +128,7 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
             views.setViewVisibility(R.id.take_button, View.GONE);
         }
     }
-
+*/
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
