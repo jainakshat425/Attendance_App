@@ -1,7 +1,5 @@
 package com.example.android.attendance.adapters;
 
-
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.android.attendance.MainActivity;
 import com.example.android.attendance.R;
 import com.example.android.attendance.TakeAttendanceActivity;
 import com.example.android.attendance.pojos.AttendanceRecord;
@@ -24,7 +21,6 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
 
     private Context mContext;
     private List<AttendanceRecord> mRecords;
-    private Bundle intentBundle;
 
     public MainListAdapter(Context context, List<AttendanceRecord> records) {
 
@@ -74,7 +70,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
         String collegeId = String.valueOf(record.getCollegeId());
 
 
-        intentBundle = new Bundle();
+        Bundle intentBundle = new Bundle();
         intentBundle.putString(ExtraUtils.EXTRA_ATTEND_REC_ID, attendRecId);
         intentBundle.putString(ExtraUtils.EXTRA_FAC_USER_ID, facUserId);
         intentBundle.putString(ExtraUtils.EXTRA_DATE, date);
@@ -138,8 +134,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
             Intent takeAttendanceIntent = new Intent();
             takeAttendanceIntent.setClass(mContext, TakeAttendanceActivity.class);
             takeAttendanceIntent.putExtras((Bundle) v.getTag());
-            ((Activity) mContext).startActivityForResult(takeAttendanceIntent,
-                    MainActivity.getUpdateAttendanceReqCode());
+            mContext.startActivity(takeAttendanceIntent);
         }
     }
 }

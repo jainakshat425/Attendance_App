@@ -1,6 +1,5 @@
 package com.example.android.attendance;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,28 +18,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.example.android.attendance.adapters.MainListAdapter;
-import com.example.android.attendance.contracts.FacultyContract.FacultyEntry;
-import com.example.android.attendance.network.RequestHandler;
 import com.example.android.attendance.pojos.AttendanceRecord;
 import com.example.android.attendance.utilities.ExtraUtils;
-import com.google.gson.Gson;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.example.android.attendance.utilities.VolleyUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -48,10 +32,6 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
-    private TextView facNameTv;
-    private TextView facDeptTv;
-    private TextView facIdTv;
 
     private DrawerLayout mDrawerLayout;
 
@@ -62,9 +42,6 @@ public class MainActivity extends AppCompatActivity
     RelativeLayout mEmptyView;
 
     private MainListAdapter mAdapter;
-
-    private static final int NEW_ATTENDANCE_REQUEST_CODE = 1;
-    private static final int UPDATE_ATTENDANCE_REQ_CODE = 2;
 
     private SharedPrefManager mSharedPref;
 
@@ -81,94 +58,28 @@ public class MainActivity extends AppCompatActivity
 
         mSharedPref = SharedPrefManager.getInstance(this);
         if (mSharedPref.isLoggedIn()) {
-            setupMainActivity();
+
+            int facId = mSharedPref.getFacId();
+            final String facUserId = mSharedPref.getFacUserId();
+            String facName = mSharedPref.getFacName();
+            String facDept = mSharedPref.getFacDept();
+
+            ExtraUtils.updateWidget(this);
+            setupNavigationDrawer(facName, facUserId, facDept);
+            setupFloatingActionButton(facUserId);
+
+            mAdapter = new MainListAdapter(this, new ArrayList<AttendanceRecord>());
+            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            DividerItemDecoration divider = new DividerItemDecoration(this,
+                    LinearLayoutManager.VERTICAL);
+            mRecyclerView.setLayoutManager(layoutManager);
+            mRecyclerView.addItemDecoration(divider);
+            mRecyclerView.setAdapter(mAdapter);
+            VolleyUtils.setupMainActivity(this, facUserId, mAdapter);
         } else {
             finish();
             startActivity(new Intent(this, LoginActivity.class));
-        }
-    }
-
-    private void setupMainActivity() {
-
-        int facId = mSharedPref.getFacId();
-        final String facUserId = mSharedPref.getFacUserId();
-        String facName = mSharedPref.getFacName();
-        String facDept = mSharedPref.getFacDept();
-
-        ExtraUtils.updateWidget(this);
-        setupNavigationDrawer(facName, facUserId, facDept);
-
-        mAdapter = new MainListAdapter(this, new ArrayList<AttendanceRecord>());
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        DividerItemDecoration divider = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
-        mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.addItemDecoration(divider);
-        mRecyclerView.setAdapter(mAdapter);
-
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
-        StringRequest request = new StringRequest(Request.Method.POST,
-                ExtraUtils.GET_ATT_REC_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        try {
-                            JSONObject jObj = new JSONObject(response);
-
-                            if (!jObj.getBoolean("error")) {
-
-                                Toast.makeText(MainActivity.this, jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
-
-                                List<AttendanceRecord> records = extractRecordsFromJSON(jObj);
-
-                                mAdapter.swapList(records);
-
-                            } else {
-                                Toast.makeText(MainActivity.this, jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        progressDialog.dismiss();
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                progressDialog.dismiss();
-                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-
-                params.put(FacultyEntry.F_USERNAME_COL, facUserId);
-
-                return params;
-            }
-        };
-
-        RequestHandler.getInstance(this).addToRequestQueue(request);
-        setupFloatingActionButton(facUserId);
-    }
-
-    private List<AttendanceRecord> extractRecordsFromJSON(JSONObject jObj) {
-
-        try {
-            String recordsArray = jObj.getString("attendanceRecord");
-
-            Gson gson = new Gson();
-            AttendanceRecord[] targetArray = gson.fromJson(recordsArray, AttendanceRecord[].class);
-
-            return Arrays.asList(targetArray);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
         }
     }
 
@@ -183,15 +94,16 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-
+        if (actionbar != null) {
+            actionbar.setDisplayHomeAsUpEnabled(true);
+            actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        }
 
         View drawerFacDetails = navigationView.getHeaderView(0);
 
-        facNameTv = drawerFacDetails.findViewById(R.id.fac_name_tv);
-        facDeptTv = drawerFacDetails.findViewById(R.id.fac_dept_tv);
-        facIdTv = drawerFacDetails.findViewById(R.id.fac_id_tv);
+        TextView facNameTv = drawerFacDetails.findViewById(R.id.fac_name_tv);
+        TextView facDeptTv = drawerFacDetails.findViewById(R.id.fac_dept_tv);
+        TextView facIdTv = drawerFacDetails.findViewById(R.id.fac_id_tv);
 
         facNameTv.setText(facName);
         facDeptTv.setText(facDept);
@@ -199,19 +111,6 @@ public class MainActivity extends AppCompatActivity
 
         //ReminderUtilities.scheduleAttendanceReminder(this);
 
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                mDrawerLayout.openDrawer(GravityCompat.START);
-                return true;
-
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -227,19 +126,9 @@ public class MainActivity extends AppCompatActivity
                 newAttendanceIntent.setClass
                         (MainActivity.this, NewAttendanceActivity.class);
                 newAttendanceIntent.putExtra(ExtraUtils.EXTRA_FAC_USER_ID, facUserId);
-                startActivityForResult(newAttendanceIntent, NEW_ATTENDANCE_REQUEST_CODE);
+                startActivity(newAttendanceIntent);
             }
         });
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-    }
-
-
-    public static int getUpdateAttendanceReqCode() {
-        return UPDATE_ATTENDANCE_REQ_CODE;
     }
 
     @Override
@@ -262,5 +151,21 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        VolleyUtils.setupMainActivity(this, mSharedPref.getFacUserId(), mAdapter);
+    }
 }
