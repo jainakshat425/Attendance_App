@@ -41,28 +41,22 @@
             android:inputType="date" />
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/college_layout"
-        style="@style/SpinnerLayoutContainer"
-        android:layout_below="@id/date_layout">
-
-        <TextView
-            style="@style/SpinnerTextStyle"
-            android:text="Select" />
-
-        <Spinner
-            android:id="@+id/college_spinner"
-            style="@style/SpinnerStyle"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="8dp"/>
-    </LinearLayout>
+    <TextView
+        android:id="@+id/select_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/date_layout"
+        android:layout_margin="16dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="Select"
+        android:textColor="@color/colorAccent" />
 
     <!-- Spinners category -->
     <LinearLayout
         android:id="@+id/spinner_layout_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/college_layout"
+        android:layout_below="@id/select_text"
         android:layout_marginLeft="32dp"
         android:layout_marginTop="16dp"
         android:layout_marginRight="32dp"
@@ -132,9 +126,9 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@id/minus_lecture_button"
+                android:inputType="number"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
-                android:inputType="number"
                 tools:text="1" />
 
             <Button

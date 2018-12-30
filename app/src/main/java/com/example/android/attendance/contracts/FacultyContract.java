@@ -12,6 +12,7 @@ public class FacultyContract {
         public static final String F_USERNAME_COL = "fac_user_id";
         public static final String F_PASSWORD_COL = "fac_password";
         public static final String F_DEPARTMENT_COL = "fac_department";
+        public static final String F_COLLEGE_ID = "college_id";
 
     }
 }

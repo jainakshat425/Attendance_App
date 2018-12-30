@@ -79,7 +79,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
         intentBundle.putString(ExtraUtils.EXTRA_SECTION, section);
         intentBundle.putString(ExtraUtils.EXTRA_SUBJECT, subject);
         intentBundle.putString(ExtraUtils.EXTRA_COLLEGE, college);
-        intentBundle.putString(ExtraUtils.EXTRA_LECTURE, lectureNo);
+        intentBundle.putString(ExtraUtils.EXTRA_LECTURE_NO, lectureNo);
         intentBundle.putString(ExtraUtils.EXTRA_DAY, day);
         intentBundle.putString(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
         intentBundle.putString(ExtraUtils.EXTRA_COLLEGE_ID, String.valueOf(collegeId));

@@ -80,9 +80,11 @@ public class LoginActivity extends AppCompatActivity {
                                 String facName = jObj.getString(FacultyEntry.F_NAME_COL);
                                 String facUsername = jObj.getString(FacultyEntry.F_USERNAME_COL);
                                 String facDept = jObj.getString(FacultyEntry.F_DEPARTMENT_COL);
+                                int fCollId = jObj.getInt(FacultyEntry.F_COLLEGE_ID);
 
                                 boolean saved = SharedPrefManager.getInstance(LoginActivity.this)
-                                        .saveLoginUserDetails(facId, facName, facUsername, facDept);
+                                        .saveLoginUserDetails(facId, facName, facUsername,
+                                                facDept, fCollId);
                                 if (saved) {
                                     finish();
                                     startActivity(new Intent(LoginActivity.this, MainActivity.class));

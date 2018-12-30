@@ -112,7 +112,7 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
                 intent.putExtra(ExtraUtils.EXTRA_SUBJECT, subject);
                 intent.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
                 intent.putExtra(ExtraUtils.EXTRA_BRANCH_ID, String.valueOf(branchId));
-                intent.putExtra(ExtraUtils.EXTRA_LECTURE, String.valueOf(lecture));
+                intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, String.valueOf(lecture));
                 intent.putExtra(ExtraUtils.EXTRA_FAC_USER_ID, facUserId);
                 PendingIntent pendingIntent = PendingIntent.getActivity(context,
                         WIDGET_REQUEST_CODE, intent, 0);

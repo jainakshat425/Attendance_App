@@ -7,10 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.view.Gravity;
+import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.example.android.attendance.AttendanceWidgetProvider;
+import com.example.android.attendance.adapters.SpinnerArrayAdapter;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -32,7 +34,7 @@ public class ExtraUtils {
     public static final String EXTRA_DATE = "extra_date";
     public static final String EXTRA_DAY = "extra_day";
     public static final String EXTRA_SUBJECT = "extra_subject";
-    public static final String EXTRA_LECTURE = "extra_lecture";
+    public static final String EXTRA_LECTURE_NO = "extra_lecture";
 
     public static final String EXTRA_FAC_USER_ID = "extra_fac_user_id";
     public static final String EXTRA_FAC_NAME = "extra_fac_name";
@@ -45,12 +47,15 @@ public class ExtraUtils {
     public static final String FAC_LOGIN_URL = DB_URL + "facLogin.php";
     public static final String GET_ATT_REC_URL = DB_URL + "getAttendanceRecords.php";
     public static final String GET_SUB_NAME_URL = DB_URL + "getSubjectsName.php";
-    public static final String GET_LECT_ID_URL = DB_URL + "getLectureId.php";
+    public static final String CHECK_ATTEND_ALREADY_EXIST = DB_URL + "checkAttendAlreadyExist.php";
     public static final String SETUP_NEW_ATTEND_URL = DB_URL + "setupNewAttendance.php";
     public static final String SETUP_UPDATE_ATTEND_URL = DB_URL + "setupUpdateAttendance.php";
     public static final String SAVE_NEW_ATTEND_URL = DB_URL + "saveNewAttendance.php";
     public static final String UPDATE_ATTEND_URL = DB_URL + "updateAttendance.php";
     public static final String DELETE_RECORD_URL = DB_URL + "deleteAttendRecord.php";
+    public static final String GET_BRANCHES_URL = DB_URL + "getBranches.php";
+    public static final String GET_SEMS_URL = DB_URL + "getSemesters.php";
+    public static final String GET_SECS_URL = DB_URL + "getSections.php";
 
 
     public static String getLecture(String lecture) {
@@ -127,5 +132,27 @@ public class ExtraUtils {
         tv.setPadding(4, 4, 4, 4);
         return tv;
     }
+
+
+    /**
+     * empties the subject spinner
+     */
+    public static void emptySubjectSpinner(Context context, Spinner subSpinner) {
+        String[] subject = {"Subject"};
+        SpinnerArrayAdapter subjectAdapter = new SpinnerArrayAdapter(context,
+                android.R.layout.simple_spinner_dropdown_item, subject);
+        subSpinner.setAdapter(subjectAdapter);
+    }
+
+    /**
+     * empties the section spinner
+     */
+    public static void emptySectionSpinner(Context context, Spinner secSpinner) {
+        String[] section = {"Section"};
+        SpinnerArrayAdapter sectionAdapter = new SpinnerArrayAdapter(context,
+                android.R.layout.simple_spinner_dropdown_item, section);
+        secSpinner.setAdapter(sectionAdapter);
+    }
+
 }
 

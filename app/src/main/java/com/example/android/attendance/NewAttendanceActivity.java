@@ -1,8 +1,8 @@
 package com.example.android.attendance;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -10,7 +10,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -18,33 +17,20 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
-import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.example.android.attendance.adapters.SpinnerArrayAdapter;
-import com.example.android.attendance.contracts.BranchContract.BranchEntry;
-import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
-import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
-import com.example.android.attendance.network.RequestHandler;
 import com.example.android.attendance.utilities.ExtraUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.example.android.attendance.utilities.VolleyUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class NewAttendanceActivity extends AppCompatActivity {
+
+    private Context mContext;
 
     public static final int LECTURE_NOT_FOUND = 1;
     public static final int BRANCH_NOT_FOUND = 2;
@@ -56,59 +42,51 @@ public class NewAttendanceActivity extends AppCompatActivity {
     /**
      * Declare all spinners, there adapters and variable for storing selected item
      */
-
-    /**
-     * College
-     */
-    private Spinner collegeSpinner;
-    private SpinnerArrayAdapter collegeAdapter;
-    private int collegeSelected = -1;
-
     /**
      * semester
      */
-    private Spinner semesterSpinner;
-    private SpinnerArrayAdapter semesterAdapter;
-    private String semesterSelected = null;
+    @BindView(R.id.semester_spinner)
+    Spinner semesterSpinner;
+    private String semester = null;
 
     /**
      * branch
      */
-    private Spinner branchSpinner;
-    private SpinnerArrayAdapter branchAdapter;
-    private String branchSelected = null;
+    @BindView(R.id.branch_spinner)
+    Spinner branchSpinner;
+    private String branch = null;
 
     /**
      * section
      */
-    private Spinner sectionSpinner;
-    private SpinnerArrayAdapter sectionAdapter;
-    private String sectionSelected = null;
+    @BindView(R.id.section_spinner)
+    Spinner sectionSpinner;
+    private String section = null;
 
     /**
      * subject
      */
-    private Spinner subjectSpinner;
-    private SpinnerArrayAdapter subjectAdapter;
-    private String subjectSelected = null;
+    @BindView(R.id.subject_spinner)
+    Spinner subjectSpinner;
+    private String subject = null;
 
 
     //declare date edit text
     private EditText dateEditText;
     private Calendar myCalendar;
-    private String currentDateString = null;
-    private String daySelected = null;
+    private String date = null;
+    private String day = null;
 
     //declare buttons and edit text field for lecture selection
     private EditText lectureEt;
     private Button plusButton;
     private Button minusButton;
+    ProgressDialog progressDialog;
 
-    private static final int TAKE_ATTENDANCE_REQ_CODE = 3;
+    public static final int TAKE_ATTENDANCE_REQ_CODE = 3;
 
-    int branchId;
-    int classId = 3;
-    int lectureId;
+    SharedPrefManager sharedPrefManager;
+    int collegeId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,14 +96,88 @@ public class NewAttendanceActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
+        if (actionbar != null) {
+            actionbar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        mContext = this;
+        ButterKnife.bind(this);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Setting up...");
+        progressDialog.show();
+
+        sharedPrefManager = SharedPrefManager.getInstance(mContext);
+        collegeId = sharedPrefManager.getCollId();
 
         //setup all spinners
-        setupSemesterSpinner();
-        setupBranchSpinner();
-        setupSectionSpinner();
-        setupSubjectSpinner();
-        setupCollegeSpinner();
+        VolleyUtils.setupSemesterSpinner(mContext, semesterSpinner, progressDialog);
+        VolleyUtils.setupBranchSpinner(mContext, branchSpinner, progressDialog);
+        ExtraUtils.emptySectionSpinner(mContext, sectionSpinner);
+        ExtraUtils.emptySubjectSpinner(mContext, subjectSpinner);
+
+        //set click listeners on spinners
+        semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                subject = null;
+                if (position != 0) {
+                    semester = parent.getItemAtPosition(position).toString();
+                    VolleyUtils.setupSubjectSpinner(mContext, subjectSpinner, progressDialog,
+                            branch, semester);
+                    VolleyUtils.setupSectionSpinner(mContext, sectionSpinner, progressDialog,
+                            branch, semester);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        branchSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                subject = null;
+                if (position != 0) {
+                    branch = parent.getItemAtPosition(position).toString();
+                    VolleyUtils.setupSubjectSpinner(mContext, subjectSpinner, progressDialog,
+                            branch, semester);
+                    VolleyUtils.setupSectionSpinner(mContext, sectionSpinner, progressDialog,
+                            branch, semester);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        sectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position != 0) {
+                    section = parent.getItemAtPosition(position).toString();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        subjectSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position != 0) {
+                    subject = parent.getItemAtPosition(position).toString();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         //setup fab button for TakeAttendanceActivity
         setupFabButton();
@@ -142,32 +194,9 @@ public class NewAttendanceActivity extends AppCompatActivity {
     private void setDefaultDate() {
         dateEditText = findViewById(R.id.edit_date);
 
-        currentDateString = ExtraUtils.getCurrentDate();
-        daySelected = ExtraUtils.getCurrentDay();
-        dateEditText.setText(currentDateString);
-    }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK) {
-            setResult(Activity.RESULT_OK, data);
-            finish();
-        } else if (resultCode == Activity.RESULT_CANCELED) {
-            setResult(Activity.RESULT_CANCELED);
-            finish();
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                setResult(Activity.RESULT_CANCELED);
-                finish();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
+        date = ExtraUtils.getCurrentDate();
+        day = ExtraUtils.getCurrentDay();
+        dateEditText.setText(date);
     }
 
     /**
@@ -238,7 +267,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                new DatePickerDialog(NewAttendanceActivity.this, date, myCalendar
+                new DatePickerDialog(mContext, date, myCalendar
                         .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
                         myCalendar.get(Calendar.DAY_OF_MONTH)).show();
             }
@@ -251,11 +280,11 @@ public class NewAttendanceActivity extends AppCompatActivity {
     private void updateLabel() {
         String dateFormat = "dd-MM-yyyy"; //In which you need put here
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
-        currentDateString = simpleDateFormat.format(myCalendar.getTime());
+        date = simpleDateFormat.format(myCalendar.getTime());
 
         SimpleDateFormat simpleDayFormat = new SimpleDateFormat("EEEE", Locale.US);
-        daySelected = (simpleDayFormat.format(myCalendar.getTime())).toUpperCase();
-        dateEditText.setText(currentDateString);
+        day = (simpleDayFormat.format(myCalendar.getTime())).toUpperCase();
+        dateEditText.setText(date);
     }
 
     /**
@@ -267,315 +296,30 @@ public class NewAttendanceActivity extends AppCompatActivity {
         takeAttendanceFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 if (allInputsProvided()) {
-                   /* int resultCode = allInputsValid();
-                    if (resultCode == ALL_INPUTS_VALID) {*/
-                        Intent takeAttendanceIntent = new Intent();
-                        takeAttendanceIntent.setClass(NewAttendanceActivity.this,
-                                TakeAttendanceActivity.class);
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_COLLEGE_ID,
-                                String.valueOf(collegeSelected));
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_DATE, currentDateString);
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_DAY, daySelected);
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_SEMESTER, semesterSelected);
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_BRANCH, branchSelected);
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_SECTION, sectionSelected);
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_SUBJECT, subjectSelected);
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_BRANCH_ID, String.valueOf(branchId));
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_LECTURE,
-                                lectureEt.getText().toString());
-                        takeAttendanceIntent.putExtra(ExtraUtils.EXTRA_FAC_USER_ID,
-                                getIntent().getStringExtra(ExtraUtils.EXTRA_FAC_USER_ID));
-                        startActivityForResult(takeAttendanceIntent, TAKE_ATTENDANCE_REQ_CODE);
-                    } else {
-                    //  showError(resultCode);
-                    }
-          /*      } else {
-                    Toast.makeText(NewAttendanceActivity.this, "Complete all fields",
-                            Toast.LENGTH_SHORT).show();
-                }*/
+                    VolleyUtils.takeNewAttendance(mContext, date, day, semester, branch,
+                            section, subject, lectureEt.getText().toString().trim(), collegeId);
+                } else {
+                    RelativeLayout parentLayout = findViewById(R.id.relative_layout);
+                    Snackbar.make(parentLayout, "Complete all fields.",
+                            Snackbar.LENGTH_LONG).show();
+                }
             }
 
         });
     }
 
-    private void showError(int resultCode) {
-        String error;
-        switch (resultCode) {
-            case LECTURE_NOT_FOUND:
-                error = "Lecture Not Found!";
-                break;
-            case CLASS_NOT_FOUND:
-                error = "Class Not Found!";
-                break;
-            case BRANCH_NOT_FOUND:
-                error = "Branch Not Found!";
-                break;
-            case ATTENDANCE_ALREADY_EXISTS:
-                error = "Attendance Already Exists!";
-                break;
-            default:
-                error = "Unknown Error!";
-                break;
-        }
-        RelativeLayout parentLayout = findViewById(R.id.relative_layout);
-        Snackbar.make(parentLayout, error, Snackbar.LENGTH_LONG).show();
-
-    }
 
     /**
      * check all inputs are valid or not
      */
     private boolean allInputsProvided() {
         int currentLectureValue = Integer.parseInt(lectureEt.getText().toString());
-        if (collegeSelected < 1 || collegeSelected > 2 || currentDateString == null ||
-                semesterSelected == null || branchSelected == null || subjectSelected == null ||
-                sectionSelected == null || currentLectureValue > 8 || currentLectureValue < 1) {
+        if (date == null || semester == null ||
+                branch == null || subject == null ||
+                section == null || currentLectureValue > 8 || currentLectureValue < 1) {
             return false;
         }
         return true;
     }
-
-    /**
-     * setup college spinner
-     */
-    private void setupCollegeSpinner() {
-        String[] collegeArray = getResources().getStringArray(R.array.colleges_array);
-        collegeSpinner = findViewById(R.id.college_spinner);
-        collegeAdapter = new SpinnerArrayAdapter(this,
-                android.R.layout.simple_spinner_dropdown_item, collegeArray);
-        collegeSpinner.setAdapter(collegeAdapter);
-        collegeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                if (position != 0) {
-                    collegeSelected = parent.getItemAtPosition(position).toString().equals("GIT") ?
-                            CollegeEntry.COLLEGE_GIT :
-                            CollegeEntry.COLLEGE_GCT;
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
-
-
-    /**
-     * setup subject spinner
-     */
-    private void setupSubjectSpinner() {
-
-        subjectSpinner = findViewById(R.id.subject_spinner);
-        if (semesterSelected != null && branchSelected != null) {
-
-
-            String[] subjects = getSubArray();
-            subjectAdapter = new SpinnerArrayAdapter(this,
-                    android.R.layout.simple_spinner_dropdown_item, subjects);
-            subjectSpinner.setAdapter(subjectAdapter);
-            subjectSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if (position != 0) {
-                        subjectSelected = parent.getItemAtPosition(position).toString();
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-        } else
-            emptySubjectSpinner();
-    }
-
-    private String[] getSubArray() {
-        final List<String> subArray = new ArrayList<>();
-        subArray.add("Subject");
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
-        StringRequest request = new StringRequest(Request.Method.POST,
-                ExtraUtils.GET_SUB_NAME_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        try {
-                            JSONObject jObj = new JSONObject(response);
-
-                            if (!jObj.getBoolean("error")) {
-
-                                JSONArray subJSONArray = jObj.getJSONArray("subjects");
-                                for (int i = 0; i < subJSONArray.length(); i++) {
-                                    subArray.add(subJSONArray.getString(i));
-                                }
-                                subjectAdapter = new SpinnerArrayAdapter(NewAttendanceActivity.this,
-                                        android.R.layout.simple_spinner_dropdown_item,
-                                        subArray.toArray(new String[0]));
-                                subjectSpinner.setAdapter(subjectAdapter);
-                            } else {
-                                Toast.makeText(NewAttendanceActivity.this,
-                                        jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        } finally {
-                            progressDialog.dismiss();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(NewAttendanceActivity.this, error.getMessage(),
-                        Toast.LENGTH_LONG).show();
-                progressDialog.dismiss();
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-
-                params.put(BranchEntry.BRANCH_NAME, branchSelected);
-                params.put(SubjectEntry.SUB_SEMESTER_COL, semesterSelected);
-
-                return params;
-            }
-        };
-
-        RequestHandler.getInstance(this).addToRequestQueue(request);
-        return subArray.toArray(new String[0]);
-    }
-
-    /**
-     * empties the subject spinner
-     */
-    private void emptySubjectSpinner() {
-        String[] subject = {"Subject"};
-        subjectAdapter = new SpinnerArrayAdapter(this,
-                android.R.layout.simple_spinner_dropdown_item, subject);
-        subjectSpinner.setAdapter(subjectAdapter);
-    }
-
-    /**
-     * setup semester spinner
-     */
-    private void setupSemesterSpinner() {
-        String[] semesterArray = getResources().getStringArray(R.array.semester_array);
-        semesterSpinner = findViewById(R.id.semester_spinner);
-        semesterAdapter = new SpinnerArrayAdapter(this,
-                android.R.layout.simple_spinner_dropdown_item, semesterArray);
-        semesterSpinner.setAdapter(semesterAdapter);
-        semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                subjectSelected = null;
-                if (position != 0) {
-                    semesterSelected = parent.getItemAtPosition(position).toString();
-                    setupSubjectSpinner();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
-
-    /**
-     * setup section spinner
-     */
-    private void setupSectionSpinner() {
-
-        String[] sectionArray = getResources().getStringArray(R.array.section_array);
-        sectionSpinner = findViewById(R.id.section_spinner);
-        sectionAdapter = new SpinnerArrayAdapter(this,
-                android.R.layout.simple_spinner_dropdown_item, sectionArray);
-        sectionSpinner.setAdapter(sectionAdapter);
-        sectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != 0) {
-                    sectionSelected = parent.getItemAtPosition(position).toString();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
-
-    /**
-     * setup branch spinner
-     */
-    private void setupBranchSpinner() {
-
-        String[] branchArray = getResources().getStringArray(R.array.branch_array);
-        branchSpinner = findViewById(R.id.branch_spinner);
-        branchAdapter = new SpinnerArrayAdapter(this,
-                android.R.layout.simple_spinner_dropdown_item, branchArray);
-        branchSpinner.setAdapter(branchAdapter);
-        branchSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                subjectSelected = null;
-                if (position != 0) {
-                    branchSelected = parent.getItemAtPosition(position).toString();
-                    setupSubjectSpinner();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
-
-    @Override
-    public void onBackPressed() {
-        setResult(Activity.RESULT_CANCELED);
-        super.onBackPressed();
-    }
-
-  /* private int allInputsValid() {
-        branchId = DbHelperMethods.getBranchId(db, branchSelected);
-        if (branchId > 0) {
-            classId = DbHelperMethods.getClassId(db, collegeSelected,
-                    semesterSelected,
-                    String.valueOf(branchId),
-                    sectionSelected);
-            if (classId > 0) {
-                lectureId = DbHelperMethods.getLectureId(db, String.valueOf(classId),
-                        lectureEt.getText().toString(), daySelected);
-
-                if (lectureId > 0) {
-
-                    boolean attendanceAlreadyExist = DbHelperMethods.isAttendanceAlreadyExists
-                            (db, lectureId, dateEditText.getText().toString());
-
-                    if (attendanceAlreadyExist) return ATTENDANCE_ALREADY_EXISTS;
-                    else return ALL_INPUTS_VALID;
-
-                } else {
-                    return LECTURE_NOT_FOUND;
-                }
-            } else {
-                return CLASS_NOT_FOUND;
-            }
-        } else {
-            return BRANCH_NOT_FOUND;
-        }
-    }*/
 }
