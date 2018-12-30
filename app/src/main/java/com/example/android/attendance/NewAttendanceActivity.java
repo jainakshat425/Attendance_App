@@ -31,17 +31,6 @@ import butterknife.ButterKnife;
 public class NewAttendanceActivity extends AppCompatActivity {
 
     private Context mContext;
-
-    public static final int LECTURE_NOT_FOUND = 1;
-    public static final int BRANCH_NOT_FOUND = 2;
-    public static final int CLASS_NOT_FOUND = 3;
-    public static final int INVALID_INPUTS = 4;
-    public static final int ATTENDANCE_ALREADY_EXISTS = 5;
-    private static final int ALL_INPUTS_VALID = 0;
-
-    /**
-     * Declare all spinners, there adapters and variable for storing selected item
-     */
     /**
      * semester
      */

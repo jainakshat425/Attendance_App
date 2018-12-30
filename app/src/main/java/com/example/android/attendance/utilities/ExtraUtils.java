@@ -57,6 +57,7 @@ public class ExtraUtils {
     public static final String GET_SEMS_URL = DB_URL + "getSemesters.php";
     public static final String GET_SECS_URL = DB_URL + "getSections.php";
     public static final String GET_FAC_SCH_URL = DB_URL + "getFacSchedules.php";
+    public static final String CHECK_VALID_CLASS_URL = DB_URL + "checkValidClass.php";
 
 
     public static String getLecture(String lecture) {

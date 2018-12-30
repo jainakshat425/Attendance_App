@@ -14,18 +14,8 @@
         android:background="@color/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark" />
 
-    <LinearLayout style="@style/SpinnerLayoutContainer">
-
-        <TextView
-            style="@style/SpinnerTextStyle"
-            android:text="College" />
-
-        <Spinner
-            android:id="@+id/college_spin"
-            style="@style/SpinnerStyle" />
-    </LinearLayout>
-
-    <LinearLayout style="@style/SpinnerLayoutContainer">
+    <LinearLayout style="@style/SpinnerLayoutContainer"
+        >
 
         <TextView
             style="@style/SpinnerTextStyle"

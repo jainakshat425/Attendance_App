@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -15,9 +16,11 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.example.android.attendance.CheckAttendanceActivity;
 import com.example.android.attendance.NewAttendanceActivity;
 import com.example.android.attendance.R;
 import com.example.android.attendance.ScheduleActivity;
+import com.example.android.attendance.ShowAttendanceActivity;
 import com.example.android.attendance.TakeAttendanceActivity;
 import com.example.android.attendance.adapters.MainListAdapter;
 import com.example.android.attendance.adapters.ScheduleAdapter;
@@ -634,5 +637,67 @@ public class VolleyUtils {
             }
         };
         RequestHandler.getInstance(context).addToRequestQueue(request);
+    }
+
+    public static void checkValidClass(final Context mContext, final int collegeId, final String semester,
+                                       final String branch, final String section) {
+        final ProgressDialog progressDialog = new ProgressDialog(mContext);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.CHECK_VALID_CLASS_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        try {
+                            JSONObject jObj = new JSONObject(response);
+
+                            if (!jObj.getBoolean("error")) {
+
+                                int classId = jObj.getInt("class_id");
+                                int branchId = jObj.getInt("branch_id");
+
+                                Intent i = new Intent();
+                                i.setClass(mContext, ShowAttendanceActivity.class);
+                                i.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
+                                i.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
+                                i.putExtra(ExtraUtils.EXTRA_SECTION, section);
+                                i.putExtra(ExtraUtils.EXTRA_CLASS_ID, classId);
+                                i.putExtra(ExtraUtils.EXTRA_BRANCH_ID, branchId);
+
+                                mContext.startActivity(i);
+                            } else {
+                                LinearLayout parentLayout = ((CheckAttendanceActivity) mContext)
+                                        .findViewById(R.id.check_attendance_linear_layout);
+                                Snackbar.make(parentLayout, jObj.getString("message"),
+                                        Snackbar.LENGTH_LONG).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(mContext, "Something went wrong.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        progressDialog.dismiss();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(mContext, error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put(BranchEntry.BRANCH_NAME, branch);
+                params.put(ClassEntry.COLLEGE_ID, String.valueOf(collegeId));
+                params.put(ClassEntry.SEMESTER, semester);
+                params.put(ClassEntry.SECTION, section);
+                return params;
+            }
+        };
+
+        RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.android.attendance;
 
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -12,42 +13,45 @@ import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 
 import com.example.android.attendance.adapters.SpinnerArrayAdapter;
 import com.example.android.attendance.contracts.CollegeContract.CollegeEntry;
 import com.example.android.attendance.utilities.ExtraUtils;
+import com.example.android.attendance.utilities.VolleyUtils;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 
 public class CheckAttendanceActivity extends AppCompatActivity {
-    /**
-     * College
-     */
-    private Spinner collegeSpinner;
-    private SpinnerArrayAdapter collegeAdapter;
-    private int collegeSelected = -1;
-
 
     /**
      * semester
      */
-    private Spinner semesterSpinner;
-    private SpinnerArrayAdapter semesterAdapter;
-    private String semesterSelected = null;
+    @BindView(R.id.semester_spin)
+    Spinner semesterSpinner;
+    private String semester = null;
 
     /**
      * branch
      */
-    private Spinner branchSpinner;
-    private SpinnerArrayAdapter branchAdapter;
-    private String branchSelected = null;
+    @BindView(R.id.branch_spin)
+    Spinner branchSpinner;
+    private String branch = null;
 
     /**
      * section
      */
-    private Spinner sectionSpinner;
-    private SpinnerArrayAdapter sectionAdapter;
-    private String sectionSelected = null;
+    @BindView(R.id.section_spin)
+    Spinner sectionSpinner;
+    private String section = null;
+
+    ProgressDialog progressDialog;
+
+    SharedPrefManager sharedPrefManager;
+    int collegeId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,32 +61,79 @@ public class CheckAttendanceActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
+        if (actionbar != null) {
+            actionbar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        ButterKnife.bind(this);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Setting up...");
+        progressDialog.show();
+
+        sharedPrefManager = SharedPrefManager.getInstance(this);
+        collegeId = sharedPrefManager.getCollId();
 
         //setup all spinners
-        setupCollegeSpinner();
-        setupSemesterSpinner();
-        setupBranchSpinner();
-        setupSectionSpinner();
+        //setup all spinners
+        VolleyUtils.setupSemesterSpinner(this, semesterSpinner, progressDialog);
+        VolleyUtils.setupBranchSpinner(this, branchSpinner, progressDialog);
+        ExtraUtils.emptySectionSpinner(this, sectionSpinner);
+
+
+        //set click listeners on spinners
+        semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position != 0) {
+                    semester = parent.getItemAtPosition(position).toString();
+                    VolleyUtils.setupSectionSpinner(CheckAttendanceActivity.this,
+                            sectionSpinner, progressDialog,
+                            branch, semester);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        branchSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position != 0) {
+                    branch = parent.getItemAtPosition(position).toString();
+                    VolleyUtils.setupSectionSpinner(CheckAttendanceActivity.this,
+                            sectionSpinner, progressDialog,
+                            branch, semester);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        sectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position != 0) {
+                    section = parent.getItemAtPosition(position).toString();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
 
         (findViewById(R.id.show_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (allInputsProvided()) {
-                    Intent showAttendanceIntent = new Intent(CheckAttendanceActivity.this,
-                            ShowAttendanceActivity.class);
-
-                    showAttendanceIntent.putExtra(ExtraUtils.EXTRA_COLLEGE_ID,
-                            String.valueOf(collegeSelected));
-                    showAttendanceIntent.putExtra(ExtraUtils.EXTRA_SEMESTER,
-                            String.valueOf(semesterSelected));
-                    showAttendanceIntent.putExtra(ExtraUtils.EXTRA_BRANCH,
-                            String.valueOf(branchSelected));
-                    showAttendanceIntent.putExtra(ExtraUtils.EXTRA_SECTION,
-                            String.valueOf(sectionSelected));
-
-                    startActivity(showAttendanceIntent);
+                    VolleyUtils.checkValidClass(CheckAttendanceActivity.this, collegeId,
+                            semester, branch, section);
                 } else {
                     LinearLayout parentLayout = findViewById(R.id.check_attendance_linear_layout);
                     Snackbar.make(parentLayout, "Complete all fields!",
@@ -92,114 +143,12 @@ public class CheckAttendanceActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * setup college spinner
-     */
-    private void setupCollegeSpinner() {
-        String[] collegeArray = getResources().getStringArray(R.array.colleges_array);
-        collegeSpinner = findViewById(R.id.college_spin);
-        collegeAdapter = new SpinnerArrayAdapter(this,
-                android.R.layout.simple_spinner_dropdown_item, collegeArray);
-        collegeSpinner.setAdapter(collegeAdapter);
-        collegeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                if (position != 0) {
-                    collegeSelected = parent.getItemAtPosition(position).toString().equals("GIT") ?
-                            CollegeEntry.COLLEGE_GIT :
-                            CollegeEntry.COLLEGE_GCT;
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
-
-    /**
-     * setup semester spinner
-     */
-    private void setupSemesterSpinner() {
-        String[] semesterArray = getResources().getStringArray(R.array.semester_array);
-        semesterSpinner = findViewById(R.id.semester_spin);
-        semesterAdapter = new SpinnerArrayAdapter(this,
-                android.R.layout.simple_spinner_dropdown_item, semesterArray);
-        semesterSpinner.setAdapter(semesterAdapter);
-        semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                if (position != 0) {
-                    semesterSelected = parent.getItemAtPosition(position).toString();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
-
-    /**
-     * setup section spinner
-     */
-    private void setupSectionSpinner() {
-
-        String[] sectionArray = getResources().getStringArray(R.array.section_array);
-        sectionSpinner = findViewById(R.id.section_spin);
-        sectionAdapter = new SpinnerArrayAdapter(this,
-                android.R.layout.simple_spinner_dropdown_item, sectionArray);
-        sectionSpinner.setAdapter(sectionAdapter);
-        sectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != 0) {
-                    sectionSelected = parent.getItemAtPosition(position).toString();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
-
-    /**
-     * setup branch spinner
-     */
-    private void setupBranchSpinner() {
-
-        String[] branchArray = getResources().getStringArray(R.array.branch_array);
-        branchSpinner = findViewById(R.id.branch_spin);
-        branchAdapter = new SpinnerArrayAdapter(this,
-                android.R.layout.simple_spinner_dropdown_item, branchArray);
-        branchSpinner.setAdapter(branchAdapter);
-        branchSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != 0) {
-                    branchSelected = parent.getItemAtPosition(position).toString();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
 
     /**
      * check all inputs are valid or not
      */
     private boolean allInputsProvided() {
-        if (collegeSelected < 1 || collegeSelected > 2 || semesterSelected == null ||
-                branchSelected == null || sectionSelected == null) {
+        if (semester == null || branch == null || section == null) {
             return false;
         }
         return true;

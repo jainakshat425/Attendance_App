@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.TableLayout;
@@ -49,10 +50,6 @@ public class ShowAttendanceActivity extends AppCompatActivity {
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
 
-        mDbHelper = new DatabaseHelper(this);
-        mDb = mDbHelper.openDatabaseForReadWrite();
-
-
         savePdfFab = findViewById(R.id.save_pdf_fab);
 
         final Bundle classDetails = getIntent().getExtras();
@@ -61,11 +58,10 @@ public class ShowAttendanceActivity extends AppCompatActivity {
         String branch = classDetails.getString(ExtraUtils.EXTRA_BRANCH);
         String section = classDetails.getString(ExtraUtils.EXTRA_SECTION);
 
-
-        int branchId = DbHelperMethods.getBranchId(mDb, branch);
-        int classId = DbHelperMethods.getClassId(mDb, Integer.parseInt(collegeId),
-                semester, String.valueOf(branchId),
-                section);
+        int branchId = classDetails.getInt(ExtraUtils.EXTRA_BRANCH_ID);
+        int classId = classDetails.getInt(ExtraUtils.EXTRA_CLASS_ID);
+        Log.i("ShowAttendanceActivity", "classID:"+String.valueOf(classId)
+                +" branchID:"+String.valueOf(branchId));
 
         final List<Integer> totalLectForSub = showTotalLecturesForEachSub(classId);
 
