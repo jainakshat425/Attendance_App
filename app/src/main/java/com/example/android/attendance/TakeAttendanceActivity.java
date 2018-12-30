@@ -69,7 +69,6 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     @BindView(R.id.students_list_view)
     RecyclerView mRecyclerView;
 
-    private Context mContext;
     private boolean isUpdateMode = false;
 
     @Override
@@ -82,7 +81,6 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
 
-        mContext = this;
         ButterKnife.bind(this);
 
         Bundle bundle = getIntent().getExtras();

@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
+import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -16,12 +17,13 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.android.attendance.NewAttendanceActivity;
 import com.example.android.attendance.R;
+import com.example.android.attendance.ScheduleActivity;
 import com.example.android.attendance.TakeAttendanceActivity;
 import com.example.android.attendance.adapters.MainListAdapter;
+import com.example.android.attendance.adapters.ScheduleAdapter;
 import com.example.android.attendance.adapters.SpinnerArrayAdapter;
 
 import com.example.android.attendance.adapters.TakeAttendAdapter;
-import com.example.android.attendance.contracts.AttendanceContract;
 import com.example.android.attendance.contracts.AttendanceContract.AttendanceEntry;
 import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
 import com.example.android.attendance.contracts.BranchContract.BranchEntry;
@@ -33,6 +35,7 @@ import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
 import com.example.android.attendance.network.RequestHandler;
 import com.example.android.attendance.pojos.Attendance;
 import com.example.android.attendance.pojos.AttendanceRecord;
+import com.example.android.attendance.pojos.Schedule;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -66,15 +69,9 @@ public class VolleyUtils {
                             JSONObject jObj = new JSONObject(response);
 
                             if (!jObj.getBoolean("error")) {
-
-                                Toast.makeText(context, jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
-
                                 List<AttendanceRecord> records =
                                         GsonUtils.extractRecordsFromJSON(jObj);
-
                                 mAdapter.swapList(records);
-
                             } else {
                                 Toast.makeText(context, jObj.getString("message"),
                                         Toast.LENGTH_SHORT).show();
@@ -100,7 +97,6 @@ public class VolleyUtils {
                 return params;
             }
         };
-
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
@@ -579,6 +575,61 @@ public class VolleyUtils {
                 params.put(LectureEntry.LECTURE_DAY, day);
                 params.put(AttendanceRecordEntry.DATE_COL, date);
 
+                return params;
+            }
+        };
+        RequestHandler.getInstance(context).addToRequestQueue(request);
+    }
+
+    public static void showSchedule(final Context context, final String facUserId, final String day,
+                                         final ScheduleAdapter mAdapter, final RelativeLayout emptyView) {
+
+        final ProgressDialog progressDialog = new ProgressDialog(context);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.GET_FAC_SCH_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        List<Schedule> schedules = null;
+                        try {
+                            JSONObject jObj = new JSONObject(response);
+
+                            if (!jObj.getBoolean("error")) {
+                                schedules = GsonUtils.extractScheduleFromJSON(jObj);
+                            } else {
+                                Toast.makeText(context, jObj.getString("message"),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(context, "Something went wrong.",
+                                    Toast.LENGTH_SHORT).show();
+                        } finally {
+                            mAdapter.swapList(schedules);
+
+                            if(schedules == null || schedules.size() < 1)
+                                emptyView.setVisibility(View.VISIBLE);
+                            else
+                                emptyView.setVisibility(View.GONE);
+                            progressDialog.dismiss();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                mAdapter.swapList(null);
+                Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put(LectureEntry.FAC_USER_ID, facUserId);
+                params.put(LectureEntry.LECTURE_DAY, day);
                 return params;
             }
         };

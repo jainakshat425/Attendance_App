@@ -136,7 +136,8 @@ public class MainActivity extends AppCompatActivity
 
         switch (item.getItemId()) {
             case R.id.nav_check_attendance:
-                Intent checkAttendanceIntent = new Intent(this, CheckAttendanceActivity.class);
+                Intent checkAttendanceIntent = new Intent(this,
+                        CheckAttendanceActivity.class);
                 startActivity(checkAttendanceIntent);
                 break;
             case R.id.nav_schedule:
