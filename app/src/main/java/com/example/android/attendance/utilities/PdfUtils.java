@@ -1,7 +1,6 @@
 package com.example.android.attendance.utilities;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
@@ -9,8 +8,6 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.android.attendance.StudentReport;
-import com.example.android.attendance.data.DbHelperMethods;
 import com.example.android.attendance.pojos.Report;
 import com.example.android.attendance.pojos.SubReport;
 import com.itextpdf.text.BaseColor;

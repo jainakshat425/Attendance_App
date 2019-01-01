@@ -3,7 +3,6 @@ package com.example.android.attendance;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -61,9 +60,11 @@ public class NewAttendanceActivity extends AppCompatActivity {
 
 
     //declare date edit text
-    private EditText dateEditText;
+    @BindView(R.id.edit_date)
+    EditText dateEditText;
     private Calendar myCalendar;
     private String date = null;
+    private String dateDisplay = null;
     private String day = null;
 
     //declare buttons and edit text field for lecture selection
@@ -171,21 +172,22 @@ public class NewAttendanceActivity extends AppCompatActivity {
         //setup fab button for TakeAttendanceActivity
         setupFabButton();
 
-        setDefaultDate();
+
 
         //setup date picker dialog
         setupDatePickerDialog();
+        setDefaultDate();
 
         //setup lecture chooser
         setupLectureChooser();
     }
 
     private void setDefaultDate() {
-        dateEditText = findViewById(R.id.edit_date);
-
         date = ExtraUtils.getCurrentDate();
         day = ExtraUtils.getCurrentDay();
-        dateEditText.setText(date);
+
+        dateDisplay = ExtraUtils.dateDisplayFormat.format(myCalendar.getTime());
+        dateEditText.setText(dateDisplay);
     }
 
     /**
@@ -246,7 +248,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
                 myCalendar.set(Calendar.MONTH, monthOfYear);
                 myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                updateLabel();
+                updateDateEt();
             }
 
         };
@@ -256,9 +258,11 @@ public class NewAttendanceActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                new DatePickerDialog(mContext, date, myCalendar
+                DatePickerDialog dpDialog = new DatePickerDialog(mContext, date, myCalendar
                         .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+                        myCalendar.get(Calendar.DAY_OF_MONTH));
+                dpDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
+                dpDialog.show();
             }
         });
     }
@@ -266,14 +270,15 @@ public class NewAttendanceActivity extends AppCompatActivity {
     /**
      * updates the editText with selected date
      */
-    private void updateLabel() {
-        String dateFormat = "dd-MM-yyyy"; //In which you need put here
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
+    private void updateDateEt() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         date = simpleDateFormat.format(myCalendar.getTime());
 
         SimpleDateFormat simpleDayFormat = new SimpleDateFormat("EEEE", Locale.US);
         day = (simpleDayFormat.format(myCalendar.getTime())).toUpperCase();
-        dateEditText.setText(date);
+
+        dateDisplay = ExtraUtils.dateDisplayFormat.format(myCalendar.getTime());
+        dateEditText.setText(dateDisplay);
     }
 
     /**
@@ -287,7 +292,8 @@ public class NewAttendanceActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (allInputsProvided()) {
                     VolleyUtils.takeNewAttendance(mContext, date, day, semester, branch,
-                            section, subject, lectureEt.getText().toString().trim(), collegeId);
+                            section, subject, lectureEt.getText().toString().trim(),
+                            collegeId, dateDisplay);
                 } else {
                     RelativeLayout parentLayout = findViewById(R.id.relative_layout);
                     Snackbar.make(parentLayout, "Complete all fields.",

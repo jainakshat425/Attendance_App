@@ -85,47 +85,49 @@ public class TakeAttendanceActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
 
-        String date = bundle.getString(ExtraUtils.EXTRA_DATE);
-        String day = bundle.getString(ExtraUtils.EXTRA_DAY);
-        String semester = bundle.getString(ExtraUtils.EXTRA_SEMESTER);
-        String branch = bundle.getString(ExtraUtils.EXTRA_BRANCH);
-        String section = bundle.getString(ExtraUtils.EXTRA_SECTION);
-        String subject = bundle.getString(ExtraUtils.EXTRA_SUBJECT);
-        String lectNo = bundle.getString(ExtraUtils.EXTRA_LECTURE_NO);
-        String classId = bundle.getString(ExtraUtils.EXTRA_CLASS_ID);
-        String attendRecId = bundle.getString(ExtraUtils.EXTRA_ATTEND_REC_ID);
+        if (bundle != null) {
+            String date = bundle.getString(ExtraUtils.EXTRA_DATE);
+            String dateDisplay = bundle.getString(ExtraUtils.EXTRA_DISPLAY_DATE);
+            String day = bundle.getString(ExtraUtils.EXTRA_DAY);
+            String semester = bundle.getString(ExtraUtils.EXTRA_SEMESTER);
+            String branch = bundle.getString(ExtraUtils.EXTRA_BRANCH);
+            String section = bundle.getString(ExtraUtils.EXTRA_SECTION);
+            String subject = bundle.getString(ExtraUtils.EXTRA_SUBJECT);
+            String lectNo = bundle.getString(ExtraUtils.EXTRA_LECTURE_NO);
+            String classId = bundle.getString(ExtraUtils.EXTRA_CLASS_ID);
+            String attendRecId = bundle.getString(ExtraUtils.EXTRA_ATTEND_REC_ID);
 
 
-        /**
-         * populate the text views with the data from the intent
-         */
-        collegeTv.setText("GIT");
-        branchTv.setText(branch);
-        sectionTv.setText(section);
-        subjectTv.setText(subject);
-        dateTv.setText(date);
-        dayTv.setText(String.format("%s,", day));
-        semesterTv.setText(ExtraUtils.getSemester(semester));
-        lectureTv.setText(ExtraUtils.getLecture(lectNo));
+            /**
+             * populate the text views with the data from the intent
+             */
+            collegeTv.setText("GIT");
+            branchTv.setText(branch);
+            sectionTv.setText(section);
+            subjectTv.setText(subject);
+            dateTv.setText(dateDisplay);
+            dayTv.setText(String.format("%s,", day));
+            semesterTv.setText(ExtraUtils.getSemester(semester));
+            lectureTv.setText(ExtraUtils.getLecture(lectNo));
 
-        TakeAttendAdapter mAdapter = new TakeAttendAdapter(this, new ArrayList<Attendance>());
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        DividerItemDecoration divider = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
-        mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.addItemDecoration(divider);
-        mRecyclerView.setAdapter(mAdapter);
+            TakeAttendAdapter mAdapter = new TakeAttendAdapter(this, new ArrayList<Attendance>());
+            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            DividerItemDecoration divider = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
+            mRecyclerView.setLayoutManager(layoutManager);
+            mRecyclerView.addItemDecoration(divider);
+            mRecyclerView.setAdapter(mAdapter);
 
-        if (attendRecId != null) {
-            setTitle(getString(R.string.update_attendance_title));
-            isUpdateMode = true;
-            VolleyUtils.setupForUpdateAttendance(this, attendRecId, mAdapter);
-        } else {
-            setTitle(R.string.take_attendance_title);
-            isUpdateMode = false;
-            VolleyUtils.setupForNewAttendance(this, lectNo, classId, date, day, mAdapter);
+            if (attendRecId != null) {
+                setTitle(getString(R.string.update_attendance_title));
+                isUpdateMode = true;
+                VolleyUtils.setupForUpdateAttendance(this, attendRecId, mAdapter);
+            } else {
+                setTitle(R.string.take_attendance_title);
+                isUpdateMode = false;
+                VolleyUtils.setupForNewAttendance(this, lectNo, classId, date, day, mAdapter);
+            }
         }
-
     }
 
     @Override

@@ -20,6 +20,9 @@ import java.util.Locale;
 
 public class ExtraUtils {
 
+    public static final  SimpleDateFormat dateDisplayFormat =
+            new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
+
     public static final String EXTRA_COLLEGE_ID = "extra_college_id";
     public static final String EXTRA_CLASS_ID = "extra_class_id";
     public static final String EXTRA_BRANCH_ID = "extra_branch_id";
@@ -39,7 +42,7 @@ public class ExtraUtils {
     public static final String EXTRA_FAC_USER_ID = "extra_fac_user_id";
     public static final String EXTRA_FAC_NAME = "extra_fac_name";
     public static final String EXTRA_FAC_DEPT = "extra_fac_dept";
-
+    public static final String EXTRA_DISPLAY_DATE = "extra_display_date" ;
 
 
     private static final String DB_URL = "http://192.168.43.156/android/v1/";
@@ -94,7 +97,7 @@ public class ExtraUtils {
     }
 
     public static String getCurrentDate() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         String date = simpleDateFormat.format(Calendar.getInstance().getTime());
         return date;
     }

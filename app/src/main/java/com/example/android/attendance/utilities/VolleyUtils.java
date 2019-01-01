@@ -313,7 +313,8 @@ public class VolleyUtils {
 
     public static void takeNewAttendance(final Context mContext, final String date, final String day,
                                          final String semester, final String branch, final String section,
-                                         final String subject, final String lectNo, final int collegeId) {
+                                         final String subject, final String lectNo, final int collegeId,
+                                         final String dateDisplay) {
 
         final ProgressDialog progressDialog = new ProgressDialog(mContext);
         progressDialog.setMessage("Loading...");
@@ -336,6 +337,7 @@ public class VolleyUtils {
                                 Intent i = new Intent();
                                 i.setClass(mContext, TakeAttendanceActivity.class);
                                 i.putExtra(ExtraUtils.EXTRA_DATE, date);
+                                i.putExtra(ExtraUtils.EXTRA_DISPLAY_DATE, dateDisplay);
                                 i.putExtra(ExtraUtils.EXTRA_DAY, day);
                                 i.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
                                 i.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
