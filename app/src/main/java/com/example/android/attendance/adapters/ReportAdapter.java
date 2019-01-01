@@ -4,12 +4,10 @@ import android.content.Context;
 
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,57 +18,55 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.example.android.attendance.R;
-import com.example.android.attendance.StudentReport;
+import com.example.android.attendance.pojos.Report;
 import com.example.android.attendance.utilities.ExtraUtils;
 
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
-public class ShowAttendanceAdapter extends
-        RecyclerView.Adapter<ShowAttendanceAdapter.AttendanceViewHolder> {
+public class ReportAdapter extends
+        RecyclerView.Adapter<ReportAdapter.ReportViewHolder> {
 
     private Context mContext;
-    private List<StudentReport> mStdReportList;
-    private ArrayList<String> mSubNameList;
-    private int mTotalClasses;
+    private List<Report> mReports;
+    private int mAttendTaken;
 
 
-    public ShowAttendanceAdapter(Context context, List<StudentReport> stdReportList,
-                                 ArrayList<String> subNameList, int totalClasses) {
+    public ReportAdapter(Context context, List<Report> mReports, int mAttendTaken) {
         this.mContext = context;
-        this.mStdReportList = stdReportList;
-        this.mSubNameList = subNameList;
-        this.mTotalClasses = totalClasses;
+        this.mReports = mReports;
+        this.mAttendTaken = mAttendTaken;
     }
 
     @NonNull
     @Override
-    public AttendanceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ReportViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(mContext)
                 .inflate(R.layout.show_attendance_list_item, parent, false);
 
-        return new AttendanceViewHolder(view);
+        return new ReportViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull AttendanceViewHolder holder, int position) {
-        StudentReport currentStdReport = mStdReportList.get(position);
+    public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
+        Report report = mReports.get(position);
 
-        String name = currentStdReport.getmName();
+        String name = report.getStdName();
         holder.nameTv.setText(name);
 
-        String rollNo = currentStdReport.getmRollNo();
+        String rollNo = report.getStdRollNo();
         holder.rollNoTv.setText(rollNo);
 
-        int totalPresent = currentStdReport.getmTotalPresent();
-        holder.totalPresentTv.setText(String.valueOf(totalPresent));
+        String totalPresent = report.getTotalPresent();
+        holder.totalPresentTv.setText(totalPresent);
 
-        holder.totalClassesTv.setText(String.valueOf(mTotalClasses));
+        holder.totalClassesTv.setText(String.valueOf(mAttendTaken));
 
-        float attendancePercent = ((float) totalPresent / (float) mTotalClasses) * 100;
-        holder.percentTv.setText(String.format("%.1f%%", attendancePercent));
+        float attendancePercent = (Float.valueOf(totalPresent) / (float) mAttendTaken) * 100;
+        holder.percentTv.setText(String.format(Locale.US,"%.1f%%", attendancePercent));
 
         holder.serialNoTv.setText(String.valueOf(++position));
 
@@ -81,27 +77,31 @@ public class ShowAttendanceAdapter extends
         } else {
             attendanceLevelCircle.setColor(ContextCompat.getColor(mContext, R.color.serialNoBgColor));
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            holder.serialNoTv.setBackground(attendanceLevelCircle);
-        }
+        holder.serialNoTv.setBackground(attendanceLevelCircle);
 
         // dara rows
 
-        Integer[] colText = currentStdReport.getmSubAttendance().toArray(new Integer[0]);
-        for (int text : colText) {
+        String[] colText = report.getSubWiseAttend().toArray(new String[0]);
+        for (String text : colText) {
             TextView tv = ExtraUtils.getTextView(mContext, 16);
-            tv.setText(String.valueOf(text));
+            tv.setText(text);
             holder.row.addView(tv);
         }
     }
 
     @Override
     public int getItemCount() {
-        if (null == mStdReportList) return 0;
-        return mStdReportList.size();
+        if (null == mReports) return 0;
+        return mReports.size();
     }
 
-    public class AttendanceViewHolder extends RecyclerView.ViewHolder {
+    public void swapList(List<Report> reports, int attendTaken) {
+        this.mReports = reports;
+        this.mAttendTaken = attendTaken;
+        this.notifyDataSetChanged();
+    }
+
+    public class ReportViewHolder extends RecyclerView.ViewHolder {
 
         final TextView serialNoTv;
         final TextView nameTv;
@@ -110,10 +110,9 @@ public class ShowAttendanceAdapter extends
         final TextView totalClassesTv;
         final TextView percentTv;
         final TableLayout subWiseAttendTable;
-        final TableRow rowHeader;
         final TableRow row;
 
-        public AttendanceViewHolder(View view) {
+        public ReportViewHolder(View view) {
             super(view);
 
             serialNoTv = view.findViewById(R.id.tv_serial_no);
@@ -124,25 +123,12 @@ public class ShowAttendanceAdapter extends
             percentTv = view.findViewById(R.id.tv_attendance_percent);
             subWiseAttendTable = view.findViewById(R.id.sub_wise_attend_table);
 
-            rowHeader = new TableRow(mContext);
-            rowHeader.setBackgroundColor(Color.parseColor("#c0c0c0"));
-            rowHeader.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
-                    TableLayout.LayoutParams.WRAP_CONTENT));
-            String[] headerText = mSubNameList.toArray(new String[0]);
-            for (String c : headerText) {
-                TextView tv = ExtraUtils.getTextView(mContext, 14);
-                tv.setText(c);
-                rowHeader.addView(tv);
-            }
-            subWiseAttendTable.addView(rowHeader);
-
             row = new TableRow(mContext);
+            row.setBackgroundColor(Color.parseColor("#c0c0c0"));
             row.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
                     TableLayout.LayoutParams.WRAP_CONTENT));
             subWiseAttendTable.addView(row);
 
         }
     }
-
-
 }

@@ -11,6 +11,8 @@ import android.widget.Toast;
 
 import com.example.android.attendance.StudentReport;
 import com.example.android.attendance.data.DbHelperMethods;
+import com.example.android.attendance.pojos.Report;
+import com.example.android.attendance.pojos.SubReport;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -28,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class PdfUtils {
 
@@ -35,22 +38,18 @@ public class PdfUtils {
     private static BaseColor colorLtGrey = new BaseColor(Color.LTGRAY);
     private static BaseColor colorWhite = new BaseColor(Color.WHITE);
 
-    public static void generatePdf(Context context, SQLiteDatabase db, List<StudentReport> stdReportList,
-                                   ArrayList<String> subNameList, int totalClasses,
-                                   List<Integer> totalLectForSub, Bundle classDetails) {
+    public static void generatePdf(Context context, List<Report> reports,
+                                   List<SubReport> subReports, int attendTaken,
+                                   String collName, Bundle classDetails) {
 
         //First Check if the external storage is writable
         String state = Environment.getExternalStorageState();
         if (!Environment.MEDIA_MOUNTED.equals(state)) {
             Toast.makeText(context, "Storage cannot be written!", Toast.LENGTH_SHORT).show();
         } else {
-
-            String collegeId = classDetails.getString(ExtraUtils.EXTRA_COLLEGE_ID);
             String semester = classDetails.getString(ExtraUtils.EXTRA_SEMESTER);
             String branch = classDetails.getString(ExtraUtils.EXTRA_BRANCH);
             String section = classDetails.getString(ExtraUtils.EXTRA_SECTION);
-
-            String collegeFullName = DbHelperMethods.getCollegeFullName(db, collegeId);
 
             //Create a directory for your PDF
             File pdfFile = new File(context.getExternalFilesDir("pdf"), "myPdfFile.pdf");
@@ -60,9 +59,7 @@ public class PdfUtils {
 
             try {
                 PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
-            } catch (DocumentException e) {
-                e.printStackTrace();
-            } catch (FileNotFoundException e) {
+            } catch (DocumentException | FileNotFoundException e) {
                 e.printStackTrace();
             }
 
@@ -100,7 +97,7 @@ public class PdfUtils {
                 pCell.setPhrase(new Phrase("Attendance Report"));
                 parentTable.addCell(pCell);
 
-                pCell.setPhrase(new Phrase(collegeFullName));
+                pCell.setPhrase(new Phrase(collName));
                 parentTable.addCell(pCell);
 
                 String phrase = ExtraUtils.getSemester(semester) + "  " + branch + "  " + section;
@@ -111,7 +108,7 @@ public class PdfUtils {
                 parentTable.addCell(pCell);
 
                 //setup child table
-                int numColumns = NO_OF_FIX_COL + subNameList.size();
+                int numColumns = NO_OF_FIX_COL + subReports.size();
                 PdfPTable table = new PdfPTable(numColumns);
 
                 table.setTotalWidth(PageSize.A4.getWidth() - 12);
@@ -124,8 +121,8 @@ public class PdfUtils {
                 widthList.add(25f);
                 widthList.add(20f);
                 widthList.add(8f);
-                widthList.add(10f);
-                for (int i = 0; i < subNameList.size(); i++) widthList.add(10f);
+                widthList.add(8f);
+                for (int i = 0; i < subReports.size(); i++) widthList.add(10f);
 
                 float[] columnWidth = new float[widthList.size()];
                 int j = 0;
@@ -161,37 +158,35 @@ public class PdfUtils {
                 table.addCell(cell);
 
                 //header for each sub name
-                String[] subNames = subNameList.toArray(new String[0]);
-                for (String subName : subNames) {
-                    cell.setPhrase(new Phrase(subName));
+                for (SubReport subReport : subReports) {
+                    cell.setPhrase(new Phrase(subReport.getSubName()));
                     table.addCell(cell);
                 }
                 //header representing total classes and sub wise total classes
-                cell.setPhrase(new Phrase("(" + String.valueOf(totalClasses) + ")"));
+                cell.setPhrase(new Phrase("(" + String.valueOf(attendTaken) + ")"));
                 table.addCell(cell);
 
                 cell.setPhrase(new Phrase("(" + String.valueOf(100) + ")"));
                 table.addCell(cell);
 
-                Integer[] subTotalLect = totalLectForSub.toArray(new Integer[0]);
-                for (int i : subTotalLect) {
-                    cell.setPhrase(new Phrase("(" + String.valueOf(i) + ")"));
+                for (SubReport subReport : subReports) {
+                    cell.setPhrase(new Phrase("(" + subReport.getSubTotalLect() + ")"));
                     table.addCell(cell);
                 }
 
                 //row entries for each student
-                for (int i = 0; i < stdReportList.size(); i++) {
+                for (int i = 0; i < reports.size(); i++) {
 
-                    StudentReport currentStdReport = stdReportList.get(i);
+                    Report currentStdReport = reports.get(i);
 
-                    String stdName = currentStdReport.getmName();
-                    String stdRollNo = currentStdReport.getmRollNo();
-                    String stdTotalPresent = String.valueOf(currentStdReport.getmTotalPresent());
+                    String stdName = currentStdReport.getStdName();
+                    String stdRollNo = currentStdReport.getStdRollNo();
+                    String stdTotalPresent = currentStdReport.getTotalPresent();
                     float totalPercentage =
-                            (Float.parseFloat(stdTotalPresent) / (float) totalClasses) * 100;
+                            (Float.parseFloat(stdTotalPresent) / (float) attendTaken) * 100;
 
-                    Integer[] subWisePresents =
-                            currentStdReport.getmSubAttendance().toArray(new Integer[0]);
+                    String[] subWisePresents =
+                            currentStdReport.getSubWiseAttend().toArray(new String[0]);
 
                     cell.setPhrase(new Phrase(String.valueOf(i + 1)));
                     table.addCell(cell);
@@ -202,7 +197,7 @@ public class PdfUtils {
                     cell.setPhrase(new Phrase(stdTotalPresent));
                     table.addCell(cell);
                     if (totalPercentage < 75) cell.setBackgroundColor(colorLtGrey);
-                    String percentage = String.format("%.1f", totalPercentage);
+                    String percentage = String.format(Locale.US, "%.1f", totalPercentage);
                     cell.setPhrase(new Phrase(percentage));
                     table.addCell(cell);
 
@@ -212,10 +207,10 @@ public class PdfUtils {
                     int k = 0;
                     int subTotalLecture;
 
-                    for (int noOfPresent : subWisePresents) {
+                    for (String noOfPresent : subWisePresents) {
 
-                        subTotalLecture = totalLectForSub.get(k);
-                        float subWisePercent = ((float) noOfPresent / (float) subTotalLecture) * 100;
+                        subTotalLecture = subReports.get(k).getSubTotalLect();
+                        float subWisePercent=(Float.valueOf(noOfPresent)/(float)subTotalLecture)*100;
 
                         if (subWisePercent < 75) cell.setBackgroundColor(colorLtGrey);
                         else cell.setBackgroundColor(colorWhite);

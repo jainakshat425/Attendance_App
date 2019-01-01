@@ -120,7 +120,6 @@ public class CheckAttendanceActivity extends AppCompatActivity {
                     section = parent.getItemAtPosition(position).toString();
                 }
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 

@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -19,11 +21,11 @@ import com.android.volley.toolbox.StringRequest;
 import com.example.android.attendance.CheckAttendanceActivity;
 import com.example.android.attendance.NewAttendanceActivity;
 import com.example.android.attendance.R;
-import com.example.android.attendance.ScheduleActivity;
-import com.example.android.attendance.ShowAttendanceActivity;
+import com.example.android.attendance.StudentReportActivity;
 import com.example.android.attendance.TakeAttendanceActivity;
 import com.example.android.attendance.adapters.MainListAdapter;
 import com.example.android.attendance.adapters.ScheduleAdapter;
+import com.example.android.attendance.adapters.ReportAdapter;
 import com.example.android.attendance.adapters.SpinnerArrayAdapter;
 
 import com.example.android.attendance.adapters.TakeAttendAdapter;
@@ -38,7 +40,9 @@ import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
 import com.example.android.attendance.network.RequestHandler;
 import com.example.android.attendance.pojos.Attendance;
 import com.example.android.attendance.pojos.AttendanceRecord;
+import com.example.android.attendance.pojos.Report;
 import com.example.android.attendance.pojos.Schedule;
+import com.example.android.attendance.pojos.SubReport;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -49,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 /**
  * Created by Akshat Jain on 29-Dec-18.
  */
@@ -270,7 +273,8 @@ public class VolleyUtils {
 
                                     JSONArray subJSONArray = jObj.getJSONArray("subjects");
                                     for (int i = 0; i < subJSONArray.length(); i++) {
-                                        subArray.add(subJSONArray.getString(i));
+                                        JSONObject subObj = subJSONArray.getJSONObject(i);
+                                        subArray.add(subObj.getString("sub_name"));
                                     }
                                     SpinnerArrayAdapter subjectAdapter = new SpinnerArrayAdapter(mContext,
                                             android.R.layout.simple_spinner_dropdown_item,
@@ -659,10 +663,11 @@ public class VolleyUtils {
                                 int branchId = jObj.getInt("branch_id");
 
                                 Intent i = new Intent();
-                                i.setClass(mContext, ShowAttendanceActivity.class);
+                                i.setClass(mContext, StudentReportActivity.class);
                                 i.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
                                 i.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
                                 i.putExtra(ExtraUtils.EXTRA_SECTION, section);
+                                i.putExtra(ExtraUtils.EXTRA_COLLEGE_ID, collegeId);
                                 i.putExtra(ExtraUtils.EXTRA_CLASS_ID, classId);
                                 i.putExtra(ExtraUtils.EXTRA_BRANCH_ID, branchId);
 
@@ -699,5 +704,73 @@ public class VolleyUtils {
         };
 
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
+    }
+
+    public static void showReport(final Context context, final Bundle classDetails,
+                                  final ReportAdapter mAdapter, final FloatingActionButton saveFab) {
+
+        final ProgressDialog progressDialog = new ProgressDialog(context);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
+
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.GET_STD_REPORT_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            final JSONObject jObj = new JSONObject(response);
+
+                            if (!jObj.getBoolean("error")) {
+                                final List<Report> reports = GsonUtils.extractReportsFromJson(jObj);
+                                final List<SubReport> subReports = GsonUtils.extractSubReportsFromJson(jObj);
+                                final int attendTaken = jObj.getInt("attend_taken");
+                                final String collName = jObj.getString("coll_full_name");
+
+                                ((StudentReportActivity)context).showSubReport(subReports);
+                                mAdapter.swapList(reports, attendTaken);
+
+                                //setup savePdf button after getting report of all the students
+                                saveFab.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        PdfUtils.generatePdf(context, reports, subReports,
+                                                attendTaken, collName, classDetails);
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(context, jObj.getString("message"),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(context, "Something went wrong.",
+                                    Toast.LENGTH_SHORT).show();
+                        } finally {
+                            progressDialog.dismiss();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                int branchId = classDetails.getInt(ExtraUtils.EXTRA_BRANCH_ID);
+                int classId = classDetails.getInt(ExtraUtils.EXTRA_CLASS_ID);
+                int collId = classDetails.getInt(ExtraUtils.EXTRA_COLLEGE_ID);
+
+                Map<String, String> params = new HashMap<>();
+                params.put("class_id", String.valueOf(classId));
+                params.put("branch_id", String.valueOf(branchId));
+                params.put("college_id", String.valueOf(collId));
+                return params;
+            }
+        };
+        RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 }

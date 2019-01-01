@@ -2,7 +2,9 @@ package com.example.android.attendance.utilities;
 
 import com.example.android.attendance.pojos.Attendance;
 import com.example.android.attendance.pojos.AttendanceRecord;
+import com.example.android.attendance.pojos.Report;
 import com.example.android.attendance.pojos.Schedule;
+import com.example.android.attendance.pojos.SubReport;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -51,6 +53,34 @@ public class GsonUtils {
 
             Gson gson = new Gson();
             Schedule[] targetArray = gson.fromJson(recordsArray, Schedule[].class);
+
+            return Arrays.asList(targetArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static List<Report> extractReportsFromJson(JSONObject jObj) {
+        try {
+            String reportArr = jObj.getString("report");
+
+            Gson gson = new Gson();
+            Report[] targetArray = gson.fromJson(reportArr, Report[].class);
+
+            return Arrays.asList(targetArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static List<SubReport> extractSubReportsFromJson(JSONObject jObj) {
+        try {
+            String subReportArr = jObj.getString("sub_report");
+
+            Gson gson = new Gson();
+            SubReport[] targetArray = gson.fromJson(subReportArr, SubReport[].class);
 
             return Arrays.asList(targetArray);
         } catch (JSONException e) {

@@ -23,63 +23,6 @@ public class DbHelperMethods {
      * **********************************************
      ************************************************/
 
-    public static int getClassId(SQLiteDatabase db, int collegeId, String semester,
-                                 String branchId, String section) {
-
-        String[] projection = new String[]{ClassEntry.ID};
-        String selections = ClassEntry.COLLEGE_ID + "=?" + " and "
-                + ClassEntry.SEMESTER + "=?" + " and "
-                + ClassEntry.BRANCH_ID + "=?" + " and "
-                + ClassEntry.SECTION + "=?";
-
-        String[] selectionArgs = {String.valueOf(collegeId),
-                String.valueOf(semester),
-                String.valueOf(branchId),
-                String.valueOf(section)};
-
-        Cursor cursor = db.query(ClassEntry.TABLE_NAME, projection, selections, selectionArgs,
-                null, null, null);
-        int classIdIndex = cursor.getColumnIndex(ClassEntry.ID);
-
-        if (cursor.getCount() != 0 && cursor.moveToFirst()) {
-            //if class is found
-            int classId = cursor.getInt(classIdIndex);
-            cursor.close();
-            return classId;
-        } else {
-            //if class is not found insert new class
-            ContentValues values = new ContentValues();
-            values.put(ClassEntry.COLLEGE_ID, collegeId);
-            values.put(ClassEntry.SEMESTER, semester);
-            values.put(ClassEntry.BRANCH_ID, branchId);
-            values.put(ClassEntry.SECTION, section);
-            long newRowId = db.insert(ClassEntry.TABLE_NAME, null, values);
-            return (int) newRowId;
-        }
-    }
-
-    public static int getBranchId(SQLiteDatabase db, String branchName) {
-        int branchId = -1;
-
-        Cursor cursor = db.query(BranchEntry.TABLE_NAME,
-                new String[]{BranchEntry.ID},
-                BranchEntry.BRANCH_NAME + "=?",
-                new String[]{branchName},
-                null,
-                null,
-                null
-        );
-
-        int branchIdIndex = cursor.getColumnIndex(BranchEntry.ID);
-
-        if (cursor.getCount() != 0 && cursor.moveToFirst()) {
-            branchId = cursor.getInt(branchIdIndex);
-        }
-
-        cursor.close();
-        return branchId;
-    }
-
     public static Cursor getClassAttendanceCursor(SQLiteDatabase db, int classId) {
 
         String projectionString = "students.std_roll_no, students.std_name, " +
