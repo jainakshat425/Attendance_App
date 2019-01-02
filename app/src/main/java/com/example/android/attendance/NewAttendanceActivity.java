@@ -271,11 +271,9 @@ public class NewAttendanceActivity extends AppCompatActivity {
      * updates the editText with selected date
      */
     private void updateDateEt() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        date = simpleDateFormat.format(myCalendar.getTime());
+        date = ExtraUtils.dateFormat.format(myCalendar.getTime());
 
-        SimpleDateFormat simpleDayFormat = new SimpleDateFormat("EEEE", Locale.US);
-        day = (simpleDayFormat.format(myCalendar.getTime())).toUpperCase();
+        day = (ExtraUtils.dayFormat.format(myCalendar.getTime())).toUpperCase();
 
         dateDisplay = ExtraUtils.dateDisplayFormat.format(myCalendar.getTime());
         dateEditText.setText(dateDisplay);

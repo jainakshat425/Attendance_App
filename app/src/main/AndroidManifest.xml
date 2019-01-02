@@ -40,6 +40,8 @@
             android:name=".CheckAttendanceActivity"
             android:label="Attendance"
             android:parentActivityName=".MainActivity" />
+        <activity android:name=".ScheduleActivity"
+            android:parentActivityName=".MainActivity"/>
 
         <!-- This is required for immediate syncs -->
         <service
@@ -47,13 +49,13 @@
             android:exported="false" />
 
         <!-- This is the Service declaration used in conjunction with FirebaseJobDispatcher -->
-        <service
+        <!--<service
             android:name=".sync.AttendanceReminderFirebaseJobService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
             </intent-filter>
-        </service>
+        </service>-->
 
         <receiver android:name=".AttendanceWidgetProvider">
             <intent-filter>
@@ -65,8 +67,16 @@
                 android:resource="@xml/attendance_widget_provider_info" />
         </receiver>
 
-        <activity android:name=".ScheduleActivity"
-            android:parentActivityName=".MainActivity"/>
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:grantUriPermissions="true"
+            android:enabled="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
     </application>
 
 </manifest>

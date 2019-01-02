@@ -736,8 +736,11 @@ public class VolleyUtils {
                                 saveFab.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
+                                        ProgressDialog writingDialog = new ProgressDialog(context);
+                                        writingDialog.setMessage("Writing...");
+                                        writingDialog.show();
                                         PdfUtils.generatePdf(context, reports, subReports,
-                                                attendTaken, collName, classDetails);
+                                                attendTaken, collName, classDetails, writingDialog);
                                     }
                                 });
                             } else {

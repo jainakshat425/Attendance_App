@@ -15,6 +15,8 @@ import com.example.android.attendance.TakeAttendanceActivity;
 import com.example.android.attendance.pojos.AttendanceRecord;
 import com.example.android.attendance.utilities.ExtraUtils;
 
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainViewHolder> {
@@ -47,18 +49,27 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
         String branch = record.getBName();
         String section = record.getSection();
         String subject = record.getSubName();
-        String date = record.getDate();
+        String dateString = record.getDate();
         String day = record.getDay();
         String lectureNo = String.valueOf(record.getLectNo());
         String stdPresent = String.valueOf(record.getStudentsPresent());
         String totalStudents = String.valueOf(record.getTotalStudents());
+
+        Date date = null;
+        try {
+            date = ExtraUtils.dateFormat.parse(dateString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        String displayDate = dateString;
+        if (date != null)  displayDate = ExtraUtils.dateDisplayFormat.format(date);
 
         holder.collegeTv.setText(college);
         holder.semesterTv.setText(ExtraUtils.getSemester(semester));
         holder.branchTv.setText(branch);
         holder.sectionTv.setText(section);
         holder.subjectTv.setText(subject);
-        holder.dateTv.setText(date);
+        holder.dateTv.setText(displayDate);
         holder.dayTv.setText(day.substring(0, 3) + ",");
         holder.lectureTv.setText(ExtraUtils.getLecture(lectureNo));
         holder.studentsPresentTv.setText(stdPresent);
@@ -73,7 +84,8 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
         Bundle intentBundle = new Bundle();
         intentBundle.putString(ExtraUtils.EXTRA_ATTEND_REC_ID, attendRecId);
         intentBundle.putString(ExtraUtils.EXTRA_FAC_USER_ID, facUserId);
-        intentBundle.putString(ExtraUtils.EXTRA_DATE, date);
+        intentBundle.putString(ExtraUtils.EXTRA_DATE, dateString);
+        intentBundle.putString(ExtraUtils.EXTRA_DISPLAY_DATE, displayDate);
         intentBundle.putString(ExtraUtils.EXTRA_SEMESTER, semester);
         intentBundle.putString(ExtraUtils.EXTRA_BRANCH, branch);
         intentBundle.putString(ExtraUtils.EXTRA_SECTION, section);

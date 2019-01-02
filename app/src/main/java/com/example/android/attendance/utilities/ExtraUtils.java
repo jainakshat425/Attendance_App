@@ -23,6 +23,12 @@ public class ExtraUtils {
     public static final  SimpleDateFormat dateDisplayFormat =
             new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
 
+    public static final SimpleDateFormat dateFormat =
+            new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+
+    public static final SimpleDateFormat dayFormat =
+            new SimpleDateFormat("EEEE", Locale.US);
+
     public static final String EXTRA_COLLEGE_ID = "extra_college_id";
     public static final String EXTRA_CLASS_ID = "extra_class_id";
     public static final String EXTRA_BRANCH_ID = "extra_branch_id";
@@ -91,14 +97,12 @@ public class ExtraUtils {
     }
 
     public static String getCurrentDay() {
-        SimpleDateFormat simpleDayFormat = new SimpleDateFormat("EEEE", Locale.US);
-        String day = simpleDayFormat.format(Calendar.getInstance().getTime());
+        String day = dayFormat.format(Calendar.getInstance().getTime());
         return day.toUpperCase();
     }
 
     public static String getCurrentDate() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        String date = simpleDateFormat.format(Calendar.getInstance().getTime());
+        String date = dateFormat.format(Calendar.getInstance().getTime());
         return date;
     }
 

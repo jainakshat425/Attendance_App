@@ -1,13 +1,32 @@
 package com.example.android.attendance.utilities;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 
+import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
+import android.text.InputType;
 import android.util.Log;
+import android.util.Size;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.example.android.attendance.BuildConfig;
+import com.example.android.attendance.R;
+import com.example.android.attendance.StudentReportActivity;
 import com.example.android.attendance.pojos.Report;
 import com.example.android.attendance.pojos.SubReport;
 import com.itextpdf.text.BaseColor;
@@ -26,6 +45,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -37,8 +57,7 @@ public class PdfUtils {
 
     public static void generatePdf(Context context, List<Report> reports,
                                    List<SubReport> subReports, int attendTaken,
-                                   String collName, Bundle classDetails) {
-
+                                   String collName, Bundle classDetails, ProgressDialog writingDialog) {
         //First Check if the external storage is writable
         String state = Environment.getExternalStorageState();
         if (!Environment.MEDIA_MOUNTED.equals(state)) {
@@ -49,8 +68,9 @@ public class PdfUtils {
             String section = classDetails.getString(ExtraUtils.EXTRA_SECTION);
 
             //Create a directory for your PDF
-            File pdfFile = new File(context.getExternalFilesDir("pdf"), "myPdfFile.pdf");
-
+            String pdfName = semester + branch + section + "_" +
+                    String.valueOf(Calendar.getInstance().getTimeInMillis()) + ".pdf";
+            File pdfFile = new File(context.getExternalFilesDir("pdf"), pdfName);
 
             Document document = new Document();
 
@@ -207,7 +227,7 @@ public class PdfUtils {
                     for (String noOfPresent : subWisePresents) {
 
                         subTotalLecture = subReports.get(k).getSubTotalLect();
-                        float subWisePercent=(Float.valueOf(noOfPresent)/(float)subTotalLecture)*100;
+                        float subWisePercent = (Float.valueOf(noOfPresent) / (float) subTotalLecture) * 100;
 
                         if (subWisePercent < 75) cell.setBackgroundColor(colorLtGrey);
                         else cell.setBackgroundColor(colorWhite);
@@ -229,14 +249,99 @@ public class PdfUtils {
                 pCell.setPhrase(new Phrase(moment));
                 parentTable.addCell(pCell);
 
-                document.add(parentTable);
-                Toast.makeText(context, "created PDF", Toast.LENGTH_LONG).show();
+                if (document.add(parentTable)) {
+                    writingDialog.dismiss();
+                    renameFileDialog(context, pdfFile);
+                }
             } catch (DocumentException de) {
                 Log.e("PDFCreator", "DocumentException:" + de);
             } finally {
                 document.close();
+                writingDialog.dismiss();
             }
         }
+    }
+
+    private static void renameFileDialog(final Context context, final File pdfFile) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("PDF Created.");
+        View dialogView = View.inflate(context, R.layout.input_dialog_layout, null);
+        // Set up the input
+        final EditText input = dialogView.findViewById(R.id.new_pdf_name_et);
+        input.setText(pdfFile.getName());
+        builder.setView(dialogView);
+
+        // Set up the buttons
+        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                String newName = input.getText().toString().trim();
+
+                if (newName.equals("") || newName.startsWith(" ")) {
+
+                    builder.show();
+                    input.setError("Enter valid Filename.");
+                } else {
+                    File newFile = new File(context.getExternalFilesDir("pdf"),
+                            newName + ".pdf");
+
+                    boolean renamed = pdfFile.renameTo(newFile);
+                    dialog.cancel();
+                    if (renamed) {
+                        Toast.makeText(context, "saved at " + newFile.getAbsolutePath(),
+                                Toast.LENGTH_LONG)
+                                .show();
+                        showShareDialog(context, newFile);
+                    }
+                    else {
+                        Toast.makeText(context, "saved at " + pdfFile.getAbsolutePath(),
+                                Toast.LENGTH_LONG)
+                                .show();
+                        showShareDialog(context, pdfFile);
+                    }
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(context, "saved at " + pdfFile.getAbsolutePath(),
+                        Toast.LENGTH_LONG)
+                        .show();
+                showShareDialog(context, pdfFile);
+            }
+        });
+        builder.show();
+    }
+
+    private static void showShareDialog(final Context context, final File pdfFile) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Share file?");
+
+        // Set up the buttons
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Uri uri = FileProvider.getUriForFile(context,
+                        BuildConfig.APPLICATION_ID + ".fileprovider",
+                        pdfFile);
+
+                Intent share = new Intent();
+                share.setAction(Intent.ACTION_SEND);
+                share.setType("application/pdf");
+                share.putExtra(Intent.EXTRA_STREAM, uri);
+                share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                context.startActivity(share);
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
     }
 }
 

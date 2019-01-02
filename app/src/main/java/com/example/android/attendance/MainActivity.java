@@ -41,6 +41,9 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.empty_view_main)
     RelativeLayout mEmptyView;
 
+    @BindView(R.id.fab_main_activity)
+    FloatingActionButton newAttendFab;
+
     private MainListAdapter mAdapter;
 
     private SharedPrefManager mSharedPref;
@@ -66,7 +69,13 @@ public class MainActivity extends AppCompatActivity
 
             ExtraUtils.updateWidget(this);
             setupNavigationDrawer(facName, facUserId, facDept);
-            setupFloatingActionButton(facUserId);
+            newAttendFab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    startActivity(new Intent(MainActivity.this,
+                            NewAttendanceActivity.class));
+                }
+            });
 
             mAdapter = new MainListAdapter(this, new ArrayList<AttendanceRecord>());
             LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -77,6 +86,9 @@ public class MainActivity extends AppCompatActivity
             mRecyclerView.addItemDecoration(divider);
             mRecyclerView.setAdapter(mAdapter);
             VolleyUtils.setupMainActivity(this, facUserId, mAdapter);
+
+            //ReminderUtilities.scheduleAttendanceReminder(this);
+
         } else {
             finish();
             startActivity(new Intent(this, LoginActivity.class));
@@ -108,27 +120,6 @@ public class MainActivity extends AppCompatActivity
         facNameTv.setText(facName);
         facDeptTv.setText(facDept);
         facIdTv.setText(facUserId);
-
-        //ReminderUtilities.scheduleAttendanceReminder(this);
-
-    }
-
-    /**
-     * initialise floatingActionButton and link it to newAttendanceActivity
-     */
-    private void setupFloatingActionButton(final String facUserId) {
-
-        FloatingActionButton newAttendanceFab = findViewById(R.id.fab_main_activity);
-        newAttendanceFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent newAttendanceIntent = new Intent();
-                newAttendanceIntent.setClass
-                        (MainActivity.this, NewAttendanceActivity.class);
-                newAttendanceIntent.putExtra(ExtraUtils.EXTRA_FAC_USER_ID, facUserId);
-                startActivity(newAttendanceIntent);
-            }
-        });
     }
 
     @Override
@@ -166,7 +157,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onResume() {
-        super.onResume();
         VolleyUtils.setupMainActivity(this, mSharedPref.getFacUserId(), mAdapter);
+        super.onResume();
     }
 }
