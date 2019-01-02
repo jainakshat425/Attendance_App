@@ -1,34 +1,27 @@
-package com.example.android.attendance.utilities;
+package com.example.android.attendance;
 
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.net.Uri;
-import android.os.Build;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
-import android.text.InputType;
 import android.util.Log;
-import android.util.Size;
-import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.example.android.attendance.BuildConfig;
 import com.example.android.attendance.R;
-import com.example.android.attendance.StudentReportActivity;
 import com.example.android.attendance.pojos.Report;
 import com.example.android.attendance.pojos.SubReport;
+import com.example.android.attendance.utilities.ExtraUtils;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -44,28 +37,69 @@ import com.itextpdf.text.pdf.PdfWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-public class PdfUtils {
+public class CreatePdf extends AsyncTask<String, Void, File> {
 
     private static final int NO_OF_FIX_COL = 5;
     private static BaseColor colorLtGrey = new BaseColor(Color.LTGRAY);
     private static BaseColor colorWhite = new BaseColor(Color.WHITE);
+    private ProgressDialog writingDialog;
 
-    public static void generatePdf(Context context, List<Report> reports,
-                                   List<SubReport> subReports, int attendTaken,
-                                   String collName, Bundle classDetails, ProgressDialog writingDialog) {
+    private WeakReference<Context> mContextRef;
+    private List<Report> mReports;
+    private List<SubReport> mSubReports;
+    private int mAttendTaken;
+    private String mCollegeName;
+    private Bundle mClassDetails;
+
+    public CreatePdf(Context context, List<Report> mReports, List<SubReport> mSubReports,
+                     int mAttendTaken, String mCollegeName, Bundle mClassDetails) {
+        this.mContextRef = new WeakReference<>(context);
+        this.mReports = mReports;
+        this.mSubReports = mSubReports;
+        this.mAttendTaken = mAttendTaken;
+        this.mCollegeName = mCollegeName;
+        this.mClassDetails = mClassDetails;
+    }
+
+    @Override
+    protected File doInBackground(String... params) {
+        return generatePdf();
+    }
+
+    @Override
+    protected void onPreExecute() {
+        Context context = mContextRef.get();
+        writingDialog = new ProgressDialog(context);
+        writingDialog.setMessage("Writing...");
+        writingDialog.show();
+    }
+
+    protected void onPostExecute(File pdfFile) {
+        Context context = mContextRef.get();
+        writingDialog.dismiss();
+        if (pdfFile != null)
+            renameFileDialog(context, pdfFile);
+        else
+            Toast.makeText(context, "Error generating Pdf.",Toast.LENGTH_SHORT).show();
+
+    }
+
+    private File generatePdf() {
+        Context context = mContextRef.get();
         //First Check if the external storage is writable
         String state = Environment.getExternalStorageState();
         if (!Environment.MEDIA_MOUNTED.equals(state)) {
             Toast.makeText(context, "Storage cannot be written!", Toast.LENGTH_SHORT).show();
         } else {
-            String semester = classDetails.getString(ExtraUtils.EXTRA_SEMESTER);
-            String branch = classDetails.getString(ExtraUtils.EXTRA_BRANCH);
-            String section = classDetails.getString(ExtraUtils.EXTRA_SECTION);
+            String semester = mClassDetails.getString(ExtraUtils.EXTRA_SEMESTER);
+            String branch = mClassDetails.getString(ExtraUtils.EXTRA_BRANCH);
+            String section = mClassDetails.getString(ExtraUtils.EXTRA_SECTION);
 
             //Create a directory for your PDF
             String pdfName = semester + branch + section + "_" +
@@ -114,7 +148,7 @@ public class PdfUtils {
                 pCell.setPhrase(new Phrase("Attendance Report"));
                 parentTable.addCell(pCell);
 
-                pCell.setPhrase(new Phrase(collName));
+                pCell.setPhrase(new Phrase(mCollegeName));
                 parentTable.addCell(pCell);
 
                 String phrase = ExtraUtils.getSemester(semester) + "  " + branch + "  " + section;
@@ -125,7 +159,7 @@ public class PdfUtils {
                 parentTable.addCell(pCell);
 
                 //setup child table
-                int numColumns = NO_OF_FIX_COL + subReports.size();
+                int numColumns = NO_OF_FIX_COL + mSubReports.size();
                 PdfPTable table = new PdfPTable(numColumns);
 
                 table.setTotalWidth(PageSize.A4.getWidth() - 12);
@@ -139,7 +173,7 @@ public class PdfUtils {
                 widthList.add(20f);
                 widthList.add(8f);
                 widthList.add(8f);
-                for (int i = 0; i < subReports.size(); i++) widthList.add(10f);
+                for (int i = 0; i < mSubReports.size(); i++) widthList.add(10f);
 
                 float[] columnWidth = new float[widthList.size()];
                 int j = 0;
@@ -175,32 +209,32 @@ public class PdfUtils {
                 table.addCell(cell);
 
                 //header for each sub name
-                for (SubReport subReport : subReports) {
+                for (SubReport subReport : mSubReports) {
                     cell.setPhrase(new Phrase(subReport.getSubName()));
                     table.addCell(cell);
                 }
                 //header representing total classes and sub wise total classes
-                cell.setPhrase(new Phrase("(" + String.valueOf(attendTaken) + ")"));
+                cell.setPhrase(new Phrase("(" + String.valueOf(mAttendTaken) + ")"));
                 table.addCell(cell);
 
                 cell.setPhrase(new Phrase("(" + String.valueOf(100) + ")"));
                 table.addCell(cell);
 
-                for (SubReport subReport : subReports) {
+                for (SubReport subReport : mSubReports) {
                     cell.setPhrase(new Phrase("(" + subReport.getSubTotalLect() + ")"));
                     table.addCell(cell);
                 }
 
                 //row entries for each student
-                for (int i = 0; i < reports.size(); i++) {
+                for (int i = 0; i < mReports.size(); i++) {
 
-                    Report currentStdReport = reports.get(i);
+                    Report currentStdReport = mReports.get(i);
 
                     String stdName = currentStdReport.getStdName();
                     String stdRollNo = currentStdReport.getStdRollNo();
                     String stdTotalPresent = currentStdReport.getTotalPresent();
                     float totalPercentage =
-                            (Float.parseFloat(stdTotalPresent) / (float) attendTaken) * 100;
+                            (Float.parseFloat(stdTotalPresent) / (float) mAttendTaken) * 100;
 
                     String[] subWisePresents =
                             currentStdReport.getSubWiseAttend().toArray(new String[0]);
@@ -226,7 +260,7 @@ public class PdfUtils {
 
                     for (String noOfPresent : subWisePresents) {
 
-                        subTotalLecture = subReports.get(k).getSubTotalLect();
+                        subTotalLecture = mSubReports.get(k).getSubTotalLect();
                         float subWisePercent = (Float.valueOf(noOfPresent) / (float) subTotalLecture) * 100;
 
                         if (subWisePercent < 75) cell.setBackgroundColor(colorLtGrey);
@@ -242,7 +276,7 @@ public class PdfUtils {
                 //moment at which report is generated
                 String moment = ExtraUtils.getCurrentTime()
                         + " "
-                        + ExtraUtils.getCurrentDate()
+                        + ExtraUtils.getCurrentDateDisplay()
                         + ", "
                         + ExtraUtils.getCurrentDay();
                 pCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -250,19 +284,20 @@ public class PdfUtils {
                 parentTable.addCell(pCell);
 
                 if (document.add(parentTable)) {
-                    writingDialog.dismiss();
-                    renameFileDialog(context, pdfFile);
+                    return pdfFile;
                 }
             } catch (DocumentException de) {
-                Log.e("PDFCreator", "DocumentException:" + de);
+                Log.e("CreatePdf", "DocumentException:" + de);
+                writingDialog.dismiss();
+                return null;
             } finally {
                 document.close();
-                writingDialog.dismiss();
             }
         }
+        return null;
     }
 
-    private static void renameFileDialog(final Context context, final File pdfFile) {
+    private void renameFileDialog(final Context context, final File pdfFile) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("PDF Created.");
         View dialogView = View.inflate(context, R.layout.input_dialog_layout, null);
@@ -293,8 +328,7 @@ public class PdfUtils {
                                 Toast.LENGTH_LONG)
                                 .show();
                         showShareDialog(context, newFile);
-                    }
-                    else {
+                    } else {
                         Toast.makeText(context, "saved at " + pdfFile.getAbsolutePath(),
                                 Toast.LENGTH_LONG)
                                 .show();
@@ -315,7 +349,7 @@ public class PdfUtils {
         builder.show();
     }
 
-    private static void showShareDialog(final Context context, final File pdfFile) {
+    private void showShareDialog(final Context context, final File pdfFile) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Share file?");
 
@@ -343,6 +377,8 @@ public class PdfUtils {
         });
         builder.show();
     }
+
 }
+
 
 

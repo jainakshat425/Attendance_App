@@ -19,6 +19,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.android.attendance.CheckAttendanceActivity;
+import com.example.android.attendance.CreatePdf;
 import com.example.android.attendance.NewAttendanceActivity;
 import com.example.android.attendance.R;
 import com.example.android.attendance.StudentReportActivity;
@@ -736,11 +737,10 @@ public class VolleyUtils {
                                 saveFab.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        ProgressDialog writingDialog = new ProgressDialog(context);
-                                        writingDialog.setMessage("Writing...");
-                                        writingDialog.show();
-                                        PdfUtils.generatePdf(context, reports, subReports,
-                                                attendTaken, collName, classDetails, writingDialog);
+
+                                        CreatePdf createPdf = new CreatePdf(context, reports, subReports,
+                                                attendTaken, collName, classDetails);
+                                        createPdf.execute();
                                     }
                                 });
                             } else {

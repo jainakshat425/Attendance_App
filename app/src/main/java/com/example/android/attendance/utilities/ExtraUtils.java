@@ -106,6 +106,11 @@ public class ExtraUtils {
         return date;
     }
 
+    public static String getCurrentDateDisplay() {
+        String date = dateDisplayFormat.format(Calendar.getInstance().getTime());
+        return date;
+    }
+
     public static String getCurrentTimeInHour() {
         SimpleDateFormat timeFormat = new SimpleDateFormat("H", Locale.US);
         String time = timeFormat.format(Calendar.getInstance().getTime());
