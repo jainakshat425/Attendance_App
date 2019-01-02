@@ -36,7 +36,7 @@ public class AttendanceWidgetProvider extends AppWidgetProvider {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String facUserId = preferences.getString(ExtraUtils.EXTRA_FAC_USER_ID, null);
-        int currentTime = Integer.parseInt(ExtraUtils.getCurrentTimeInHour());
+        int currentTime = Integer.parseInt(ExtraUtils.getCurrentTime());
         if (facUserId == null) {
             views.setTextViewText(R.id.widget_header, "Not Logged In");
             views.setViewVisibility(R.id.widget_details, View.GONE);

@@ -44,7 +44,9 @@ public class ScheduleActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
+        if (actionbar != null) {
+            actionbar.setDisplayHomeAsUpEnabled(true);
+        }
 
         ButterKnife.bind(this);
 
@@ -61,7 +63,7 @@ public class ScheduleActivity extends AppCompatActivity {
                 LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.addItemDecoration(divider);
-        mScheduleAdapter = new ScheduleAdapter(this, new ArrayList<Schedule>());
+        mScheduleAdapter = new ScheduleAdapter(this, new ArrayList<Schedule>(), currentDay);
         mRecyclerView.setAdapter(mScheduleAdapter);
 
         VolleyUtils.showSchedule(this, facUserId, currentDay, mScheduleAdapter, emptyView);

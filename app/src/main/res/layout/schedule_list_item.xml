@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sch_details"
@@ -7,24 +6,23 @@
     android:layout_height="wrap_content"
     android:background="#fff"
     android:paddingLeft="8dp"
-    android:paddingRight="8dp"
+    android:paddingRight="12dp"
+    android:paddingTop="4dp"
     android:paddingBottom="4dp">
 
     <TextView
-        android:id="@+id/sch_college_tv"
+        android:id="@+id/sch_lect_no_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
         android:background="@drawable/college_circle_bg"
         android:fontFamily="sans-serif-medium"
         android:gravity="center"
-        android:textAllCaps="true"
         android:textColor="@android:color/white"
-        android:textSize="12sp"
-        tools:text="GIT" />
+        android:textSize="16sp"
+        tools:text="1" />
 
 
     <TextView
@@ -32,9 +30,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
-        android:layout_toRightOf="@id/sch_college_tv"
+        android:layout_toRightOf="@id/sch_lect_no_tv"
         android:textColor="@android:color/black"
         tools:text="V Sem" />
 
@@ -43,8 +40,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/sch_semester_tv"
-        android:layout_marginBottom="4dp"
-        android:layout_toRightOf="@id/sch_college_tv"
+        android:layout_toRightOf="@id/sch_lect_no_tv"
         android:textColor="@android:color/black"
         tools:text="CS" />
 
@@ -54,9 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/sch_semester_tv"
         android:layout_marginStart="4dp"
-        android:layout_marginLeft="4dp"
         android:layout_toEndOf="@id/sch_branch_tv"
-        android:layout_toRightOf="@id/sch_branch_tv"
         android:textColor="@android:color/black"
         tools:text="'A'" />
 
@@ -64,47 +58,21 @@
     <View
         android:id="@+id/separator"
         android:layout_width="1dp"
-        android:layout_height="40dp"
+        android:layout_height="30dp"
         android:layout_centerVertical="true"
         android:layout_marginLeft="12dp"
         android:layout_marginRight="12dp"
         android:layout_toEndOf="@id/sch_semester_tv"
-        android:layout_toRightOf="@id/sch_semester_tv"
         android:background="@android:color/darker_gray" />
-
-    <TextView
-        android:id="@+id/sch_lecture_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
-        android:layout_toEndOf="@id/separator"
-        android:layout_toRightOf="@id/separator"
-        android:textColor="@android:color/black"
-        tools:text="5th Lecture" />
 
     <TextView
         android:id="@+id/sch_subject_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/sch_lecture_tv"
-        android:layout_marginBottom="4dp"
         android:layout_toEndOf="@id/separator"
-        android:layout_toRightOf="@id/separator"
+        android:layout_centerVertical="true"
         android:textColor="@android:color/black"
         tools:text="ADS" />
-
-    <View
-        android:id="@+id/separator1"
-        android:layout_width="1dp"
-        android:layout_height="40dp"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="12dp"
-        android:layout_marginRight="12dp"
-        android:layout_toEndOf="@id/sch_lecture_tv"
-        android:layout_toRightOf="@id/sch_lecture_tv"
-        android:background="@android:color/darker_gray" />
 
     <!-- from text (place holder)-->
     <TextView
@@ -112,12 +80,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
-        android:layout_toLeftOf="@id/sch_lect_start_tv"
         android:padding="2dp"
         android:text="@string/from"
         android:textColor="@android:color/black"
+        android:layout_toStartOf="@id/sch_lect_start_tv"
         android:textSize="10sp" />
 
     <!-- lecture start time text -->
@@ -128,8 +94,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_marginLeft="4dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
+        android:textSize="14sp"
         android:textColor="@android:color/black"
         tools:text="08:00" />
 
@@ -156,7 +121,7 @@
         android:layout_alignParentRight="true"
         android:layout_marginLeft="4dp"
         android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
+        android:textSize="14sp"
         android:textColor="@android:color/black"
         tools:text="08:00" />
 

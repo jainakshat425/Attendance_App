@@ -18,9 +18,18 @@
         android:id="@+id/day_picker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp" />
+        android:padding="12dp" />
+
+    <View
+        android:id="@+id/separator2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@android:color/darker_gray"/>
 
     <RelativeLayout
+        android:id="@+id/sch_layout_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center">

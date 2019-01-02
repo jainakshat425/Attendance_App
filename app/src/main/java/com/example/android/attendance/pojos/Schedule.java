@@ -5,12 +5,18 @@ import com.google.gson.annotations.SerializedName;
 
 public class Schedule {
 
-    @SerializedName("coll_name")
+    @SerializedName("coll_id")
     @Expose
-    private String collName;
+    private Integer collId;
     @SerializedName("sem")
     @Expose
     private Integer sem;
+    @SerializedName("class_id")
+    @Expose
+    private Integer classId;
+    @SerializedName("lect_id")
+    @Expose
+    private Integer lectId;
     @SerializedName("b_name")
     @Expose
     private String bName;
@@ -25,17 +31,17 @@ public class Schedule {
     private String subName;
     @SerializedName("lect_start_time")
     @Expose
-    private Integer lectStartTime;
+    private String lectStartTime;
     @SerializedName("lect_end_time")
     @Expose
-    private Integer lectEndTime;
+    private String lectEndTime;
 
-    public String getCollName() {
-        return collName;
+    public Integer getCollId() {
+        return collId;
     }
 
-    public void setCollName(String collName) {
-        this.collName = collName;
+    public void setCollId(Integer collId) {
+        this.collId = collId;
     }
 
     public Integer getSem() {
@@ -78,20 +84,35 @@ public class Schedule {
         this.subName = subName;
     }
 
-    public Integer getLectStartTime() {
+    public String getLectStartTime() {
         return lectStartTime;
     }
 
-    public void setLectStartTime(Integer lectStartTime) {
+    public void setLectStartTime(String lectStartTime) {
         this.lectStartTime = lectStartTime;
     }
 
-    public Integer getLectEndTime() {
+    public String getLectEndTime() {
         return lectEndTime;
     }
 
-    public void setLectEndTime(Integer lectEndTime) {
+    public void setLectEndTime(String lectEndTime) {
         this.lectEndTime = lectEndTime;
     }
 
+    public Integer getClassId() {
+        return classId;
+    }
+
+    public void setClassId(Integer classId) {
+        this.classId = classId;
+    }
+
+    public Integer getLectId() {
+        return lectId;
+    }
+
+    public void setLectId(Integer lectId) {
+        this.lectId = lectId;
+    }
 }

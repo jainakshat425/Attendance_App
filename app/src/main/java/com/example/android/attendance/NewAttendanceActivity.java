@@ -291,7 +291,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
                 if (allInputsProvided()) {
                     VolleyUtils.takeNewAttendance(mContext, date, day, semester, branch,
                             section, subject, lectureEt.getText().toString().trim(),
-                            collegeId, dateDisplay);
+                            collegeId, dateDisplay, -1, -1);
                 } else {
                     RelativeLayout parentLayout = findViewById(R.id.relative_layout);
                     Snackbar.make(parentLayout, "Complete all fields.",

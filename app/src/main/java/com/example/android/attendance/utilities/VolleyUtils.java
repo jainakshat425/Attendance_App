@@ -1,6 +1,5 @@
 package com.example.android.attendance.utilities;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -20,8 +19,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.android.attendance.CheckAttendanceActivity;
 import com.example.android.attendance.CreatePdf;
+import com.example.android.attendance.MainActivity;
 import com.example.android.attendance.NewAttendanceActivity;
 import com.example.android.attendance.R;
+import com.example.android.attendance.ScheduleActivity;
 import com.example.android.attendance.StudentReportActivity;
 import com.example.android.attendance.TakeAttendanceActivity;
 import com.example.android.attendance.adapters.MainListAdapter;
@@ -315,7 +316,7 @@ public class VolleyUtils {
     public static void takeNewAttendance(final Context mContext, final String date, final String day,
                                          final String semester, final String branch, final String section,
                                          final String subject, final String lectNo, final int collegeId,
-                                         final String dateDisplay) {
+                                         final String dateDisplay, final int lectId, final int classId) {
 
         final ProgressDialog progressDialog = new ProgressDialog(mContext);
         progressDialog.setMessage("Loading...");
@@ -331,29 +332,33 @@ public class VolleyUtils {
 
                             if (!jObj.getBoolean("error")) {
 
-                                int classId = jObj.getInt("class_id");
-                                int branchId = jObj.getInt("branch_id");
-                                int lectId = jObj.getInt("lect_id");
+                                Intent intent = new Intent();
+                                intent.setClass(mContext, TakeAttendanceActivity.class);
+                                if (jObj.has("class_id") && classId == -1) {
+                                    int classId = jObj.getInt("class_id");
+                                    intent.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
+                                } else {
+                                    intent.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
+                                }
+                                intent.putExtra(ExtraUtils.EXTRA_DATE, date);
+                                intent.putExtra(ExtraUtils.EXTRA_DISPLAY_DATE, dateDisplay);
+                                intent.putExtra(ExtraUtils.EXTRA_DAY, day);
+                                intent.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
+                                intent.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
+                                intent.putExtra(ExtraUtils.EXTRA_SECTION, section);
+                                intent.putExtra(ExtraUtils.EXTRA_SUBJECT, subject);
+                                intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
 
-                                Intent i = new Intent();
-                                i.setClass(mContext, TakeAttendanceActivity.class);
-                                i.putExtra(ExtraUtils.EXTRA_DATE, date);
-                                i.putExtra(ExtraUtils.EXTRA_DISPLAY_DATE, dateDisplay);
-                                i.putExtra(ExtraUtils.EXTRA_DAY, day);
-                                i.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
-                                i.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
-                                i.putExtra(ExtraUtils.EXTRA_SECTION, section);
-                                i.putExtra(ExtraUtils.EXTRA_SUBJECT, subject);
-                                i.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
-                                i.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
-                                i.putExtra(ExtraUtils.EXTRA_BRANCH_ID, String.valueOf(branchId));
-
-                                ((NewAttendanceActivity) mContext)
-                                        .startActivityForResult(i,
-                                                NewAttendanceActivity.TAKE_ATTENDANCE_REQ_CODE);
+                                mContext.startActivity(intent);
                             } else {
-                                RelativeLayout parentLayout = ((NewAttendanceActivity) mContext)
-                                        .findViewById(R.id.relative_layout);
+                                RelativeLayout parentLayout;
+                                if (lectId == -1) {
+                                    parentLayout = ((NewAttendanceActivity) mContext)
+                                            .findViewById(R.id.relative_layout);
+                                } else {
+                                    parentLayout = ((ScheduleActivity) mContext)
+                                            .findViewById(R.id.sch_layout_container);
+                                }
                                 Snackbar.make(parentLayout, jObj.getString("message"),
                                         Snackbar.LENGTH_LONG).show();
                             }
@@ -374,13 +379,18 @@ public class VolleyUtils {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put(BranchEntry.BRANCH_NAME, branch);
-                params.put(ClassEntry.COLLEGE_ID, String.valueOf(collegeId));
-                params.put(ClassEntry.SEMESTER, semester);
-                params.put(ClassEntry.SECTION, section);
-                params.put(LectureEntry.LECTURE_DAY, day);
-                params.put(LectureEntry.LECTURE_NUMBER, lectNo);
-                params.put(AttendanceRecordEntry.DATE_COL, date);
+                if (lectId == -1) {
+                    params.put(BranchEntry.BRANCH_NAME, branch);
+                    params.put(ClassEntry.COLLEGE_ID, String.valueOf(collegeId));
+                    params.put(ClassEntry.SEMESTER, semester);
+                    params.put(ClassEntry.SECTION, section);
+                    params.put(LectureEntry.LECTURE_DAY, day);
+                    params.put(LectureEntry.LECTURE_NUMBER, lectNo);
+                    params.put(AttendanceRecordEntry.DATE_COL, date);
+                }   else {
+                    params.put(AttendanceRecordEntry.DATE_COL, date);
+                    params.put("lect_id", String.valueOf(lectId));
+                }
                 return params;
             }
         };
@@ -412,10 +422,8 @@ public class VolleyUtils {
                             JSONObject jObj = new JSONObject(response);
 
                             if (!jObj.getBoolean("error")) {
-
-                                ((TakeAttendanceActivity) context).setResult(Activity.RESULT_OK);
                                 ((TakeAttendanceActivity) context).finish();
-
+                                context.startActivity(new Intent(context, MainActivity.class));
                             } else {
                                 Toast.makeText(context, jObj.getString("message"),
                                         Toast.LENGTH_SHORT).show();
@@ -616,8 +624,9 @@ public class VolleyUtils {
                             e.printStackTrace();
                             Toast.makeText(context, "Something went wrong.",
                                     Toast.LENGTH_SHORT).show();
+                            progressDialog.dismiss();
                         } finally {
-                            mAdapter.swapList(schedules);
+                            mAdapter.swapList(schedules, day);
 
                             if(schedules == null || schedules.size() < 1)
                                 emptyView.setVisibility(View.VISIBLE);
@@ -631,7 +640,7 @@ public class VolleyUtils {
             @Override
             public void onErrorResponse(VolleyError error) {
                 progressDialog.dismiss();
-                mAdapter.swapList(null);
+                mAdapter.swapList(null, day);
                 Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
             }
         }) {

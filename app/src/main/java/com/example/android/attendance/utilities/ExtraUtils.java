@@ -29,6 +29,12 @@ public class ExtraUtils {
     public static final SimpleDateFormat dayFormat =
             new SimpleDateFormat("EEEE", Locale.US);
 
+    public static final SimpleDateFormat timeFormat =
+            new SimpleDateFormat("HH:mm:ss", Locale.US);
+
+    public static final SimpleDateFormat timeDisplayFormat =
+            new SimpleDateFormat("hh:mm a", Locale.US);
+
     public static final String EXTRA_COLLEGE_ID = "extra_college_id";
     public static final String EXTRA_CLASS_ID = "extra_class_id";
     public static final String EXTRA_BRANCH_ID = "extra_branch_id";
@@ -111,14 +117,12 @@ public class ExtraUtils {
         return date;
     }
 
-    public static String getCurrentTimeInHour() {
-        SimpleDateFormat timeFormat = new SimpleDateFormat("H", Locale.US);
+    public static String getCurrentTime() {
         String time = timeFormat.format(Calendar.getInstance().getTime());
         return time;
     }
 
-    public static String getCurrentTime() {
-        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.US);
+    public static String getCurrentTimeDisplay() {
         String time = timeFormat.format(Calendar.getInstance().getTime());
         return time;
     }
@@ -134,7 +138,6 @@ public class ExtraUtils {
         context.sendBroadcast(intent);
     }
 
-
     public static TextView getTextView(Context context, int textSize) {
         TextView tv = new TextView(context);
         tv.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT,
@@ -147,7 +150,6 @@ public class ExtraUtils {
         tv.setPadding(4, 4, 4, 4);
         return tv;
     }
-
 
     /**
      * empties the subject spinner

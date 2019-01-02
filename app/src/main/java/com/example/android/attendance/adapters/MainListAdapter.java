@@ -70,7 +70,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
         holder.sectionTv.setText(section);
         holder.subjectTv.setText(subject);
         holder.dateTv.setText(displayDate);
-        holder.dayTv.setText(day.substring(0, 3) + ",");
+        holder.dayTv.setText(String.format("%s,", day.substring(0, 3)));
         holder.lectureTv.setText(ExtraUtils.getLecture(lectureNo));
         holder.studentsPresentTv.setText(stdPresent);
         holder.totalStudentsTv.setText(totalStudents);
