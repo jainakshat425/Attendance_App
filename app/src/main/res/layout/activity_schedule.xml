@@ -14,59 +14,72 @@
         android:background="@color/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark" />
 
-    <ca.antonious.materialdaypicker.MaterialDayPicker
-        android:id="@+id/day_picker"
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="12dp" />
-
-    <View
-        android:id="@+id/separator2"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:background="@android:color/darker_gray"/>
-
-    <RelativeLayout
-        android:id="@+id/sch_layout_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/sch_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_horizontal"
-            android:scrollbars="vertical" />
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        card_view:cardCornerRadius="4dp">
 
         <RelativeLayout
-            android:id="@+id/sch_empty_view"
+            android:id="@+id/sch_layout_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+
+            <ca.antonious.materialdaypicker.MaterialDayPicker
+                android:id="@+id/day_picker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:padding="12dp" />
+
+            <View
+                android:id="@+id/separator2"
+                android:layout_width="match_parent"
+                android:layout_below="@id/day_picker"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/sch_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/separator2"
+                android:layout_gravity="center_horizontal"
+                android:scrollbars="vertical" />
+
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+
+    <RelativeLayout
+        android:id="@+id/sch_empty_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+
+        <ImageView
+            android:id="@+id/empty_sch_list_iv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true">
+            android:layout_centerInParent="true"
+            android:tint="@color/darkRedColor"
+            app:srcCompat="@drawable/ic_empty_schedule" />
 
-            <ImageView
-                android:id="@+id/empty_sch_list_iv"
-                app:srcCompat="@drawable/ic_empty_schedule"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:tint="@color/darkRedColor" />
-
-            <TextView
-                android:id="@+id/list_empty_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/empty_sch_list_iv"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="16dp"
-                android:alpha="0.70"
-                android:fontFamily="sans-serif-medium"
-                android:text="@string/lectures_not_scheduled"
-                android:textColor="@color/darkRedColor" />
-        </RelativeLayout>
+        <TextView
+            android:id="@+id/list_empty_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/empty_sch_list_iv"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:alpha="0.70"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/lectures_not_scheduled"
+            android:textColor="@color/darkRedColor" />
     </RelativeLayout>
 
 </LinearLayout>

@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sch_details"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#fff"
-    android:paddingLeft="8dp"
-    android:paddingRight="12dp"
+    android:paddingStart="8dp"
     android:paddingTop="4dp"
+    android:paddingEnd="12dp"
     android:paddingBottom="4dp">
 
     <TextView
@@ -16,10 +18,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/college_circle_bg"
+        android:background="@drawable/serial_circle_bg"
         android:fontFamily="sans-serif-medium"
         android:gravity="center"
+        android:layout_marginEnd="12dp"
         android:textColor="@android:color/white"
         android:textSize="16sp"
         tools:text="1" />
@@ -31,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginBottom="4dp"
-        android:layout_toRightOf="@id/sch_lect_no_tv"
+        android:layout_toEndOf="@id/sch_lect_no_tv"
         android:textColor="@android:color/black"
         tools:text="V Sem" />
 
@@ -39,8 +41,9 @@
         android:id="@+id/sch_branch_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/sch_semester_tv"
-        android:layout_toRightOf="@id/sch_lect_no_tv"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@id/sch_semester_tv"
         android:textColor="@android:color/black"
         tools:text="CS" />
 
@@ -48,29 +51,18 @@
         android:id="@+id/sch_section_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/sch_semester_tv"
+        android:layout_alignParentTop="true"
         android:layout_marginStart="4dp"
         android:layout_toEndOf="@id/sch_branch_tv"
         android:textColor="@android:color/black"
-        tools:text="'A'" />
-
-
-    <View
-        android:id="@+id/separator"
-        android:layout_width="1dp"
-        android:layout_height="30dp"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="12dp"
-        android:layout_marginRight="12dp"
-        android:layout_toEndOf="@id/sch_semester_tv"
-        android:background="@android:color/darker_gray" />
+        tools:text="A" />
 
     <TextView
         android:id="@+id/sch_subject_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/separator"
-        android:layout_centerVertical="true"
+        android:layout_below="@id/sch_semester_tv"
+        android:layout_toEndOf="@id/sch_lect_no_tv"
         android:textColor="@android:color/black"
         tools:text="ADS" />
 
@@ -80,10 +72,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
+        android:layout_toStartOf="@id/sch_lect_start_tv"
         android:padding="2dp"
         android:text="@string/from"
         android:textColor="@android:color/black"
-        android:layout_toStartOf="@id/sch_lect_start_tv"
         android:textSize="10sp" />
 
     <!-- lecture start time text -->
@@ -93,9 +85,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginLeft="4dp"
-        android:textSize="14sp"
+        android:layout_marginStart="4dp"
         android:textColor="@android:color/black"
+        android:textSize="14sp"
         tools:text="08:00" />
 
     <!-- to text (place holder)-->
@@ -106,7 +98,7 @@
         android:layout_below="@id/from_tv"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
-        android:layout_toLeftOf="@id/sch_lect_end_tv"
+        android:layout_toStartOf="@id/sch_lect_end_tv"
         android:padding="2dp"
         android:text="@string/to"
         android:textColor="@android:color/black"
@@ -118,11 +110,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/from_tv"
-        android:layout_alignParentRight="true"
-        android:layout_marginLeft="4dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="4dp"
-        android:textSize="14sp"
         android:textColor="@android:color/black"
+        android:textSize="14sp"
         tools:text="08:00" />
 
 </RelativeLayout>

@@ -44,7 +44,7 @@ public class ReportAdapter extends
     public ReportViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(mContext)
-                .inflate(R.layout.show_attendance_list_item, parent, false);
+                .inflate(R.layout.report_list_item, parent, false);
 
         return new ReportViewHolder(view);
     }
