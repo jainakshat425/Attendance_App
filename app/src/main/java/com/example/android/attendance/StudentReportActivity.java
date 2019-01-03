@@ -18,7 +18,7 @@ import com.example.android.attendance.adapters.ReportAdapter;
 import com.example.android.attendance.pojos.Report;
 import com.example.android.attendance.pojos.SubReport;
 import com.example.android.attendance.utilities.ExtraUtils;
-import com.example.android.attendance.utilities.VolleyUtils;
+import com.example.android.attendance.volley.VolleyTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ public class StudentReportActivity extends AppCompatActivity {
 
         Bundle classDetails = getIntent().getExtras();
         if (classDetails != null)
-            VolleyUtils.showReport(this, classDetails, adapter, savePdfFab);
+            VolleyTask.showReport(this, classDetails, adapter, savePdfFab);
     }
 
     public void showSubReport(List<SubReport> subReports) {

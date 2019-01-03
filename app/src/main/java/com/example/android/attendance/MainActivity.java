@@ -22,7 +22,7 @@ import android.widget.TextView;
 import com.example.android.attendance.adapters.MainListAdapter;
 import com.example.android.attendance.pojos.AttendanceRecord;
 import com.example.android.attendance.utilities.ExtraUtils;
-import com.example.android.attendance.utilities.VolleyUtils;
+import com.example.android.attendance.volley.VolleyTask;
 
 import java.util.ArrayList;
 
@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity
             String facName = mSharedPref.getFacName();
             String facDept = mSharedPref.getFacDept();
 
-            ExtraUtils.updateWidget(this);
             setupNavigationDrawer(facName, facUserId, facDept);
             newAttendFab.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -85,7 +84,7 @@ public class MainActivity extends AppCompatActivity
             mRecyclerView.setLayoutManager(layoutManager);
             mRecyclerView.addItemDecoration(divider);
             mRecyclerView.setAdapter(mAdapter);
-            VolleyUtils.setupMainActivity(this, facUserId, mAdapter);
+            VolleyTask.setupMainActivity(this, facUserId, mAdapter);
 
             //ReminderUtilities.scheduleAttendanceReminder(this);
 
@@ -157,7 +156,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onResume() {
-        VolleyUtils.setupMainActivity(this, mSharedPref.getFacUserId(), mAdapter);
+        VolleyTask.setupMainActivity(this, mSharedPref.getFacUserId(), mAdapter);
         super.onResume();
     }
 }

@@ -21,7 +21,7 @@
             android:padding="4dp">
 
             <TextView
-                android:id="@+id/tv_serial_no"
+                android:id="@+id/tv_serial_no_rep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -35,7 +35,7 @@
                 tools:text="10" />
 
             <TextView
-                android:id="@+id/tv_name"
+                android:id="@+id/tv_name_rep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -43,12 +43,12 @@
                 android:layout_marginTop="4dp"
                 android:textColor="#000"
                 android:textSize="16sp"
-                app:layout_constraintStart_toEndOf="@+id/tv_serial_no"
+                app:layout_constraintStart_toEndOf="@+id/tv_serial_no_rep"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Akshat Jain" />
 
             <TextView
-                android:id="@+id/tv_roll_no"
+                android:id="@+id/tv_roll_no_rep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -56,12 +56,12 @@
                 android:layout_marginBottom="4dp"
                 android:padding="1dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/tv_serial_no"
-                app:layout_constraintTop_toBottomOf="@+id/tv_name"
+                app:layout_constraintStart_toEndOf="@+id/tv_serial_no_rep"
+                app:layout_constraintTop_toBottomOf="@+id/tv_name_rep"
                 tools:text="16EGJCS017" />
 
             <TextView
-                android:id="@+id/tv_total_present"
+                android:id="@+id/tv_total_present_rep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/black"
@@ -83,7 +83,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/tv_total_classes"
+                android:id="@+id/tv_total_classes_rep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/black"
@@ -93,7 +93,7 @@
 
 
             <TextView
-                android:id="@+id/tv_attendance_percent"
+                android:id="@+id/tv_attendance_percent_rep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"

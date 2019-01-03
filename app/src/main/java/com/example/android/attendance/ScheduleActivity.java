@@ -1,7 +1,5 @@
 package com.example.android.attendance;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -10,15 +8,12 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.example.android.attendance.adapters.ScheduleAdapter;
-import com.example.android.attendance.data.DatabaseHelper;
-import com.example.android.attendance.data.DbHelperMethods;
 import com.example.android.attendance.pojos.Schedule;
 import com.example.android.attendance.utilities.ExtraUtils;
-import com.example.android.attendance.utilities.VolleyUtils;
+import com.example.android.attendance.volley.VolleyTask;
 
 import java.util.ArrayList;
 
@@ -66,14 +61,14 @@ public class ScheduleActivity extends AppCompatActivity {
         mScheduleAdapter = new ScheduleAdapter(this, new ArrayList<Schedule>(), currentDay);
         mRecyclerView.setAdapter(mScheduleAdapter);
 
-        VolleyUtils.showSchedule(this, facUserId, currentDay, mScheduleAdapter, emptyView);
+        VolleyTask.showSchedule(this, facUserId, currentDay, mScheduleAdapter, emptyView, null);
 
         materialDayPicker.setDayPressedListener(new MaterialDayPicker.DayPressedListener() {
             @Override
             public void onDayPressed(MaterialDayPicker.Weekday weekday, boolean isSelected) {
                 if (isSelected)
-                     VolleyUtils.showSchedule(ScheduleActivity.this, facUserId,
-                             weekday.toString(), mScheduleAdapter, emptyView);
+                     VolleyTask.showSchedule(ScheduleActivity.this, facUserId,
+                             weekday.toString(), mScheduleAdapter, emptyView, null);
             }
         });
     }

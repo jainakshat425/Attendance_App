@@ -19,17 +19,17 @@ import java.util.List;
  */
 public class TakeAttendAdapter extends RecyclerView.Adapter<TakeAttendAdapter.TakeAttendViewHolder> {
 
-    private static List<Attendance> attendanceList;
+    private static List<Attendance> mAttendanceList;
     private Context mContext;
 
-    public TakeAttendAdapter(Context mContext, List<Attendance> attendanceList) {
+    public TakeAttendAdapter(Context mContext, List<Attendance> mAttendanceList) {
         this.mContext = mContext;
-        attendanceList = attendanceList;
+        this.mAttendanceList = mAttendanceList;
 
     }
 
-    public static Attendance[] getAttendanceList() {
-        return attendanceList.toArray(new Attendance[0]);
+    public static Attendance[] getmAttendanceList() {
+        return mAttendanceList.toArray(new Attendance[0]);
     }
 
     @NonNull
@@ -43,7 +43,7 @@ public class TakeAttendAdapter extends RecyclerView.Adapter<TakeAttendAdapter.Ta
     @Override
     public void onBindViewHolder(@NonNull TakeAttendViewHolder holder, int position) {
 
-        Attendance attendance = attendanceList.get(position);
+        Attendance attendance = mAttendanceList.get(position);
 
         String name = attendance.getStdName();
         String rollNo = attendance.getStdRollNo();
@@ -67,11 +67,11 @@ public class TakeAttendAdapter extends RecyclerView.Adapter<TakeAttendAdapter.Ta
             @Override
             public void onClick(View v) {
                 int position = Integer.parseInt(String.valueOf(v.getTag()));
-                int attendState = attendanceList.get(position).getAttendanceState();
+                int attendState = mAttendanceList.get(position).getAttendanceState();
                 if (attendState == 1) {
-                    attendanceList.get(position).setAttendanceState(0);
+                    mAttendanceList.get(position).setAttendanceState(0);
                 } else {
-                    attendanceList.get(position).setAttendanceState(1);
+                    mAttendanceList.get(position).setAttendanceState(1);
                 }
 
             }
@@ -80,14 +80,14 @@ public class TakeAttendAdapter extends RecyclerView.Adapter<TakeAttendAdapter.Ta
 
     @Override
     public int getItemCount() {
-        if (attendanceList == null)
+        if (mAttendanceList == null)
             return 0;
         else
-            return attendanceList.size();
+            return mAttendanceList.size();
     }
 
     public void swapList(List<Attendance> records) {
-        attendanceList = records;
+        mAttendanceList = records;
         this.notifyDataSetChanged();
     }
 
@@ -102,9 +102,9 @@ public class TakeAttendAdapter extends RecyclerView.Adapter<TakeAttendAdapter.Ta
         public TakeAttendViewHolder(View view) {
             super(view);
 
-            nameTv = view.findViewById(R.id.tv_name);
-            rollNoTv = view.findViewById(R.id.tv_roll_no);
-            serialTv = view.findViewById(R.id.tv_serial_no);
+            nameTv = view.findViewById(R.id.tv_name_rep);
+            rollNoTv = view.findViewById(R.id.tv_roll_no_rep);
+            serialTv = view.findViewById(R.id.tv_serial_no_rep);
             presentCheckbox = view.findViewById(R.id.present_checkbox);
         }
     }

@@ -1,4 +1,4 @@
-package com.example.android.attendance.utilities;
+package com.example.android.attendance.volley;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -39,7 +39,8 @@ import com.example.android.attendance.contracts.FacultyContract.FacultyEntry;
 
 import com.example.android.attendance.contracts.LectureContract.LectureEntry;
 import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
-import com.example.android.attendance.network.RequestHandler;
+import com.example.android.attendance.utilities.ExtraUtils;
+import com.example.android.attendance.utilities.GsonUtils;
 import com.example.android.attendance.pojos.Attendance;
 import com.example.android.attendance.pojos.AttendanceRecord;
 import com.example.android.attendance.pojos.Report;
@@ -58,7 +59,7 @@ import java.util.Map;
 /**
  * Created by Akshat Jain on 29-Dec-18.
  */
-public class VolleyUtils {
+public class VolleyTask {
 
 
     public static void setupMainActivity(final Context context, final String facUserId,
@@ -405,7 +406,7 @@ public class VolleyUtils {
         progressDialog.show();
 
         Gson gson = new Gson();
-        Attendance[] attendances = TakeAttendAdapter.getAttendanceList();
+        Attendance[] attendances = TakeAttendAdapter.getmAttendanceList();
         final String attJsonObj = gson.toJson(attendances);
 
         String url;
@@ -459,7 +460,7 @@ public class VolleyUtils {
         progressDialog.setMessage("Loading...");
         progressDialog.show();
 
-        final int recId = TakeAttendAdapter.getAttendanceList()[1].getAttendanceRecordId();
+        final int recId = TakeAttendAdapter.getmAttendanceList()[1].getAttendanceRecordId();
         StringRequest request = new StringRequest(Request.Method.POST,
                 ExtraUtils.DELETE_RECORD_URL,
                 new Response.Listener<String>() {
@@ -600,25 +601,30 @@ public class VolleyUtils {
     }
 
     public static void showSchedule(final Context context, final String facUserId, final String day,
-                                         final ScheduleAdapter mAdapter, final RelativeLayout emptyView) {
+                                    final ScheduleAdapter mAdapter, final RelativeLayout emptyView,
+                                    final VolleyCallback volleyCallback) {
 
         final ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setMessage("Loading...");
         progressDialog.show();
-        StringRequest request = new StringRequest(Request.Method.POST,
+        final StringRequest request = new StringRequest(Request.Method.POST,
                 ExtraUtils.GET_FAC_SCH_URL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         List<Schedule> schedules = null;
                         try {
-                            JSONObject jObj = new JSONObject(response);
-
-                            if (!jObj.getBoolean("error")) {
-                                schedules = GsonUtils.extractScheduleFromJSON(jObj);
+                            if (mAdapter == null) {
+                              volleyCallback.onSuccessResponse(response);
                             } else {
-                                Toast.makeText(context, jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
+                                JSONObject jObj = new JSONObject(response);
+
+                                if (!jObj.getBoolean("error")) {
+                                    schedules = GsonUtils.extractScheduleFromJSON(jObj);
+                                } else {
+                                    Toast.makeText(context, jObj.getString("message"),
+                                            Toast.LENGTH_SHORT).show();
+                                }
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

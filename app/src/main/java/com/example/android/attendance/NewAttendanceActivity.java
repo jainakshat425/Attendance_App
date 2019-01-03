@@ -18,11 +18,9 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 
 import com.example.android.attendance.utilities.ExtraUtils;
-import com.example.android.attendance.utilities.VolleyUtils;
+import com.example.android.attendance.volley.VolleyTask;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -100,8 +98,8 @@ public class NewAttendanceActivity extends AppCompatActivity {
         collegeId = sharedPrefManager.getCollId();
 
         //setup all spinners
-        VolleyUtils.setupSemesterSpinner(mContext, semesterSpinner, progressDialog);
-        VolleyUtils.setupBranchSpinner(mContext, branchSpinner, progressDialog);
+        VolleyTask.setupSemesterSpinner(mContext, semesterSpinner, progressDialog);
+        VolleyTask.setupBranchSpinner(mContext, branchSpinner, progressDialog);
         ExtraUtils.emptySectionSpinner(mContext, sectionSpinner);
         ExtraUtils.emptySubjectSpinner(mContext, subjectSpinner);
 
@@ -112,9 +110,9 @@ public class NewAttendanceActivity extends AppCompatActivity {
                 subject = null;
                 if (position != 0) {
                     semester = parent.getItemAtPosition(position).toString();
-                    VolleyUtils.setupSubjectSpinner(mContext, subjectSpinner, progressDialog,
+                    VolleyTask.setupSubjectSpinner(mContext, subjectSpinner, progressDialog,
                             branch, semester);
-                    VolleyUtils.setupSectionSpinner(mContext, sectionSpinner, progressDialog,
+                    VolleyTask.setupSectionSpinner(mContext, sectionSpinner, progressDialog,
                             branch, semester);
                 }
             }
@@ -130,9 +128,9 @@ public class NewAttendanceActivity extends AppCompatActivity {
                 subject = null;
                 if (position != 0) {
                     branch = parent.getItemAtPosition(position).toString();
-                    VolleyUtils.setupSubjectSpinner(mContext, subjectSpinner, progressDialog,
+                    VolleyTask.setupSubjectSpinner(mContext, subjectSpinner, progressDialog,
                             branch, semester);
-                    VolleyUtils.setupSectionSpinner(mContext, sectionSpinner, progressDialog,
+                    VolleyTask.setupSectionSpinner(mContext, sectionSpinner, progressDialog,
                             branch, semester);
                 }
             }
@@ -289,7 +287,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (allInputsProvided()) {
-                    VolleyUtils.takeNewAttendance(mContext, date, day, semester, branch,
+                    VolleyTask.takeNewAttendance(mContext, date, day, semester, branch,
                             section, subject, lectureEt.getText().toString().trim(),
                             collegeId, dateDisplay, -1, -1);
                 } else {

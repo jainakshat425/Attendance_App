@@ -1,7 +1,6 @@
 package com.example.android.attendance.adapters;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,7 +12,7 @@ import android.widget.Toast;
 import com.example.android.attendance.R;
 import com.example.android.attendance.pojos.Schedule;
 import com.example.android.attendance.utilities.ExtraUtils;
-import com.example.android.attendance.utilities.VolleyUtils;
+import com.example.android.attendance.volley.VolleyTask;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -113,7 +112,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
                 String dateDisplay = ExtraUtils.getCurrentDateDisplay();
 
 
-                VolleyUtils.takeNewAttendance(mContext, date, mDay, semester, branch,
+                VolleyTask.takeNewAttendance(mContext, date, mDay, semester, branch,
                         section, subName, lectNo,
                         collegeId, dateDisplay, lectId, classId);
             } else {

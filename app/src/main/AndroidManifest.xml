@@ -43,30 +43,6 @@
         <activity android:name=".ScheduleActivity"
             android:parentActivityName=".MainActivity"/>
 
-        <!-- This is required for immediate syncs -->
-        <service
-            android:name=".sync.AttendanceReminderIntentService"
-            android:exported="false" />
-
-        <!-- This is the Service declaration used in conjunction with FirebaseJobDispatcher -->
-        <!--<service
-            android:name=".sync.AttendanceReminderFirebaseJobService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
-            </intent-filter>
-        </service>-->
-
-        <receiver android:name=".AttendanceWidgetProvider">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/attendance_widget_provider_info" />
-        </receiver>
-
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

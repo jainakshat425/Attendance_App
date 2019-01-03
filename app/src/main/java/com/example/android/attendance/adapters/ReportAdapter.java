@@ -22,7 +22,6 @@ import com.example.android.attendance.pojos.Report;
 import com.example.android.attendance.utilities.ExtraUtils;
 
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -115,12 +114,12 @@ public class ReportAdapter extends
         public ReportViewHolder(View view) {
             super(view);
 
-            serialNoTv = view.findViewById(R.id.tv_serial_no);
-            nameTv = view.findViewById(R.id.tv_name);
-            rollNoTv = view.findViewById(R.id.tv_roll_no);
-            totalPresentTv = view.findViewById(R.id.tv_total_present);
-            totalClassesTv = view.findViewById(R.id.tv_total_classes);
-            percentTv = view.findViewById(R.id.tv_attendance_percent);
+            serialNoTv = view.findViewById(R.id.tv_serial_no_rep);
+            nameTv = view.findViewById(R.id.tv_name_rep);
+            rollNoTv = view.findViewById(R.id.tv_roll_no_rep);
+            totalPresentTv = view.findViewById(R.id.tv_total_present_rep);
+            totalClassesTv = view.findViewById(R.id.tv_total_classes_rep);
+            percentTv = view.findViewById(R.id.tv_attendance_percent_rep);
             subWiseAttendTable = view.findViewById(R.id.sub_wise_attend_table);
 
             row = new TableRow(mContext);

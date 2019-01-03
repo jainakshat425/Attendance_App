@@ -14,7 +14,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.android.attendance.contracts.FacultyContract.FacultyEntry;
-import com.example.android.attendance.network.RequestHandler;
+import com.example.android.attendance.volley.RequestHandler;
 import com.example.android.attendance.utilities.ExtraUtils;
 
 import org.json.JSONException;

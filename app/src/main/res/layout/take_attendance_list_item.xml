@@ -9,7 +9,7 @@
     android:paddingTop="8dp">
 
     <TextView
-        android:id="@+id/tv_serial_no"
+        android:id="@+id/tv_serial_no_rep"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -23,13 +23,13 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/tv_serial_no"
+        android:layout_toRightOf="@id/tv_serial_no_rep"
         android:orientation="vertical"
         android:layout_centerVertical="true"
         android:layout_marginLeft="12dp">
 
         <TextView
-            android:id="@+id/tv_name"
+            android:id="@+id/tv_name_rep"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
@@ -38,7 +38,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/tv_roll_no"
+            android:id="@+id/tv_roll_no_rep"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="1dp"
