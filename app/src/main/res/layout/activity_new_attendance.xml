@@ -158,6 +158,6 @@
         android:layout_alignParentBottom="true"
         android:layout_margin="@dimen/fab_margin"
         android:background="@color/colorPrimary"
-        android:src="@drawable/baseline_done_white_24" />
+        app:srcCompat="@drawable/ic_baseline_done_24px" />
 
 </RelativeLayout>

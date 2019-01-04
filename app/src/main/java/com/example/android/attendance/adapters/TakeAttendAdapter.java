@@ -22,9 +22,9 @@ public class TakeAttendAdapter extends RecyclerView.Adapter<TakeAttendAdapter.Ta
     private static List<Attendance> mAttendanceList;
     private Context mContext;
 
-    public TakeAttendAdapter(Context mContext, List<Attendance> mAttendanceList) {
+    public TakeAttendAdapter(Context mContext, List<Attendance> attendanceList) {
         this.mContext = mContext;
-        this.mAttendanceList = mAttendanceList;
+        mAttendanceList = attendanceList;
 
     }
 
@@ -49,11 +49,9 @@ public class TakeAttendAdapter extends RecyclerView.Adapter<TakeAttendAdapter.Ta
         String rollNo = attendance.getStdRollNo();
         int attendState = attendance.getAttendanceState();
 
-        int serialNo = position;
-
         holder.nameTv.setText(name);
         holder.rollNoTv.setText(rollNo);
-        holder.serialTv.setText(String.valueOf(serialNo + 1));
+        holder.serialTv.setText(String.valueOf(position + 1));
         if (attendState == 1) {
             holder.presentCheckbox.setChecked(true);
         } else {
@@ -107,6 +105,20 @@ public class TakeAttendAdapter extends RecyclerView.Adapter<TakeAttendAdapter.Ta
             serialTv = view.findViewById(R.id.tv_serial_no_rep);
             presentCheckbox = view.findViewById(R.id.present_checkbox);
         }
+    }
+
+    public void checkAll() {
+        for (Attendance a : mAttendanceList) {
+            a.setAttendanceState(1);
+        }
+        this.notifyDataSetChanged();
+    }
+
+    public void unCheckAll() {
+        for (Attendance a : mAttendanceList) {
+            a.setAttendanceState(0);
+        }
+        this.notifyDataSetChanged();
     }
 
 

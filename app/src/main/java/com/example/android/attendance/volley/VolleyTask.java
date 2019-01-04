@@ -3,8 +3,6 @@ package com.example.android.attendance.volley;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -18,7 +16,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.android.attendance.CheckAttendanceActivity;
-import com.example.android.attendance.CreatePdf;
 import com.example.android.attendance.MainActivity;
 import com.example.android.attendance.NewAttendanceActivity;
 import com.example.android.attendance.R;
@@ -27,7 +24,6 @@ import com.example.android.attendance.StudentReportActivity;
 import com.example.android.attendance.TakeAttendanceActivity;
 import com.example.android.attendance.adapters.MainListAdapter;
 import com.example.android.attendance.adapters.ScheduleAdapter;
-import com.example.android.attendance.adapters.ReportAdapter;
 import com.example.android.attendance.adapters.SpinnerArrayAdapter;
 
 import com.example.android.attendance.adapters.TakeAttendAdapter;
@@ -56,6 +52,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 /**
  * Created by Akshat Jain on 29-Dec-18.
  */
@@ -388,7 +385,7 @@ public class VolleyTask {
                     params.put(LectureEntry.LECTURE_DAY, day);
                     params.put(LectureEntry.LECTURE_NUMBER, lectNo);
                     params.put(AttendanceRecordEntry.DATE_COL, date);
-                }   else {
+                } else {
                     params.put(AttendanceRecordEntry.DATE_COL, date);
                     params.put("lect_id", String.valueOf(lectId));
                 }
@@ -503,7 +500,7 @@ public class VolleyTask {
 
 
     public static void setupForUpdateAttendance(final Context context, final String attendRecId,
-                                                final TakeAttendAdapter mAdapter) {
+                                                final VolleyCallback callback) {
         final ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setMessage("Loading...");
         progressDialog.show();
@@ -518,9 +515,7 @@ public class VolleyTask {
 
                             if (!jObj.getBoolean("error")) {
 
-                                List<Attendance> records = GsonUtils
-                                        .extractAttendanceFromJSON(jObj);
-                                mAdapter.swapList(records);
+                               callback.onSuccessResponse(jObj);
 
                             } else {
                                 Toast.makeText(context,
@@ -551,7 +546,7 @@ public class VolleyTask {
 
     public static void setupForNewAttendance(final Context context, final String lectureNo,
                                              final String classId, final String date,
-                                             final String day, final TakeAttendAdapter mAdapter) {
+                                             final String day, final VolleyCallback callback) {
         final ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setMessage("Loading...");
         progressDialog.show();
@@ -566,8 +561,7 @@ public class VolleyTask {
 
                             if (!jObj.getBoolean("error")) {
 
-                                List<Attendance> records = GsonUtils.extractAttendanceFromJSON(jObj);
-                                mAdapter.swapList(records);
+                                callback.onSuccessResponse(jObj);
 
                             } else {
                                 Toast.makeText(context, jObj.getString("message"),
@@ -601,8 +595,7 @@ public class VolleyTask {
     }
 
     public static void showSchedule(final Context context, final String facUserId, final String day,
-                                    final ScheduleAdapter mAdapter, final RelativeLayout emptyView,
-                                    final VolleyCallback volleyCallback) {
+                                    final ScheduleAdapter mAdapter, final RelativeLayout emptyView) {
 
         final ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setMessage("Loading...");
@@ -614,18 +607,15 @@ public class VolleyTask {
                     public void onResponse(String response) {
                         List<Schedule> schedules = null;
                         try {
-                            if (mAdapter == null) {
-                              volleyCallback.onSuccessResponse(response);
-                            } else {
-                                JSONObject jObj = new JSONObject(response);
+                            JSONObject jObj = new JSONObject(response);
 
-                                if (!jObj.getBoolean("error")) {
-                                    schedules = GsonUtils.extractScheduleFromJSON(jObj);
-                                } else {
-                                    Toast.makeText(context, jObj.getString("message"),
-                                            Toast.LENGTH_SHORT).show();
-                                }
+                            if (!jObj.getBoolean("error")) {
+                                schedules = GsonUtils.extractScheduleFromJSON(jObj);
+                            } else {
+                                Toast.makeText(context, jObj.getString("message"),
+                                        Toast.LENGTH_SHORT).show();
                             }
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Toast.makeText(context, "Something went wrong.",
@@ -634,7 +624,7 @@ public class VolleyTask {
                         } finally {
                             mAdapter.swapList(schedules, day);
 
-                            if(schedules == null || schedules.size() < 1)
+                            if (schedules == null || schedules.size() < 1)
                                 emptyView.setVisibility(View.VISIBLE);
                             else
                                 emptyView.setVisibility(View.GONE);
@@ -730,40 +720,23 @@ public class VolleyTask {
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 
-    public static void showReport(final Context context, final Bundle classDetails,
-                                  final ReportAdapter mAdapter, final FloatingActionButton saveFab) {
+    public static void showReport(final Context context, final int branchId, final int classId,
+                                  final int collId, final boolean isDayWise, final String fromDate,
+                                  final String toDate, final VolleyCallback callback) {
 
         final ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setMessage("Loading...");
         progressDialog.show();
-
-        StringRequest request = new StringRequest(Request.Method.POST,
-                ExtraUtils.GET_STD_REPORT_URL,
+        StringRequest request = new StringRequest(Request.Method.POST, ExtraUtils.GET_STD_REPORT_URL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         try {
                             final JSONObject jObj = new JSONObject(response);
-
                             if (!jObj.getBoolean("error")) {
-                                final List<Report> reports = GsonUtils.extractReportsFromJson(jObj);
-                                final List<SubReport> subReports = GsonUtils.extractSubReportsFromJson(jObj);
-                                final int attendTaken = jObj.getInt("attend_taken");
-                                final String collName = jObj.getString("coll_full_name");
 
-                                ((StudentReportActivity)context).showSubReport(subReports);
-                                mAdapter.swapList(reports, attendTaken);
+                                callback.onSuccessResponse(jObj);
 
-                                //setup savePdf button after getting report of all the students
-                                saveFab.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-
-                                        CreatePdf createPdf = new CreatePdf(context, reports, subReports,
-                                                attendTaken, collName, classDetails);
-                                        createPdf.execute();
-                                    }
-                                });
                             } else {
                                 Toast.makeText(context, jObj.getString("message"),
                                         Toast.LENGTH_SHORT).show();
@@ -775,7 +748,6 @@ public class VolleyTask {
                         } finally {
                             progressDialog.dismiss();
                         }
-
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -786,19 +758,12 @@ public class VolleyTask {
         }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                int branchId = classDetails.getInt(ExtraUtils.EXTRA_BRANCH_ID);
-                int classId = classDetails.getInt(ExtraUtils.EXTRA_CLASS_ID);
-                int collId = classDetails.getInt(ExtraUtils.EXTRA_COLLEGE_ID);
-                boolean isDayWise = classDetails.getBoolean(ExtraUtils.EXTRA_IS_DATE_WISE);
 
                 Map<String, String> params = new HashMap<>();
                 params.put("class_id", String.valueOf(classId));
                 params.put("branch_id", String.valueOf(branchId));
                 params.put("college_id", String.valueOf(collId));
                 if (isDayWise) {
-                    String fromDate = classDetails.getString(ExtraUtils.EXTRA_FROM_DATE);
-                    String toDate = classDetails.getString(ExtraUtils.EXTRA_TO_DATE);
-
                     params.put("from_date", fromDate);
                     params.put("to_date", toDate);
                 }

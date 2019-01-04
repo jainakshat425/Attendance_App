@@ -61,14 +61,14 @@ public class ScheduleActivity extends AppCompatActivity {
         mScheduleAdapter = new ScheduleAdapter(this, new ArrayList<Schedule>(), currentDay);
         mRecyclerView.setAdapter(mScheduleAdapter);
 
-        VolleyTask.showSchedule(this, facUserId, currentDay, mScheduleAdapter, emptyView, null);
+        VolleyTask.showSchedule(this, facUserId, currentDay, mScheduleAdapter, emptyView);
 
         materialDayPicker.setDayPressedListener(new MaterialDayPicker.DayPressedListener() {
             @Override
             public void onDayPressed(MaterialDayPicker.Weekday weekday, boolean isSelected) {
                 if (isSelected)
                      VolleyTask.showSchedule(ScheduleActivity.this, facUserId,
-                             weekday.toString(), mScheduleAdapter, emptyView, null);
+                             weekday.toString(), mScheduleAdapter, emptyView);
             }
         });
     }

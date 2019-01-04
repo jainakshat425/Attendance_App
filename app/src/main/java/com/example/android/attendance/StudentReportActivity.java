@@ -4,22 +4,27 @@ import android.graphics.Color;
 import android.os.Bundle;
 
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.android.attendance.adapters.ReportAdapter;
 import com.example.android.attendance.pojos.Report;
 import com.example.android.attendance.pojos.SubReport;
 import com.example.android.attendance.utilities.ExtraUtils;
+import com.example.android.attendance.utilities.GsonUtils;
+import com.example.android.attendance.volley.VolleyCallback;
 import com.example.android.attendance.volley.VolleyTask;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +36,9 @@ public class StudentReportActivity extends AppCompatActivity {
 
     @BindView(R.id.rv_show_attendance)
     RecyclerView mRecyclerView;
-    @BindView(R.id.save_pdf_fab)
-    FloatingActionButton savePdfFab;
+
+    private ReportAdapter mAdapter;
+    private CreatePdf mCreatePdf;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,16 +53,47 @@ public class StudentReportActivity extends AppCompatActivity {
         }
         ButterKnife.bind(this);
 
-        ReportAdapter adapter = new ReportAdapter(this, new ArrayList<Report>(), 0);
+        mAdapter = new ReportAdapter(this, new ArrayList<Report>(), 0);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this,
                 LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.setAdapter(mAdapter);
 
-        Bundle classDetails = getIntent().getExtras();
-        if (classDetails != null)
-            VolleyTask.showReport(this, classDetails, adapter, savePdfFab);
+        final Bundle classDetails = getIntent().getExtras();
+        if (classDetails != null) {
+
+            int branchId = classDetails.getInt(ExtraUtils.EXTRA_BRANCH_ID);
+            int classId = classDetails.getInt(ExtraUtils.EXTRA_CLASS_ID);
+            int collId = classDetails.getInt(ExtraUtils.EXTRA_COLLEGE_ID);
+            boolean isDayWise = classDetails.getBoolean(ExtraUtils.EXTRA_IS_DATE_WISE);
+            String fromDate = null;
+            String toDate = null;
+            if (isDayWise) {
+                fromDate = classDetails.getString(ExtraUtils.EXTRA_FROM_DATE);
+                toDate = classDetails.getString(ExtraUtils.EXTRA_TO_DATE);
+            }
+
+            VolleyTask.showReport(this,  branchId, classId, collId,
+                    isDayWise, fromDate, toDate, new VolleyCallback() {
+                @Override
+                public void onSuccessResponse(JSONObject jObj) {
+                    List<Report> reports = GsonUtils.extractReportsFromJson(jObj);
+                    List<SubReport> subReports = GsonUtils.extractSubReportsFromJson(jObj);
+                    showSubReport(subReports);
+                    try {
+                        int attendTaken = jObj.getInt("attend_taken");
+                        String collName = jObj.getString("coll_full_name");
+
+                        mAdapter.swapList(reports, attendTaken);
+                        mCreatePdf = new CreatePdf(StudentReportActivity.this, reports,
+                                subReports, attendTaken, collName, classDetails);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
     }
 
     public void showSubReport(List<SubReport> subReports) {
@@ -87,5 +124,26 @@ public class StudentReportActivity extends AppCompatActivity {
             totalSubLectTable.addView(rowHeader);
             totalSubLectTable.addView(row);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu_report, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case R.id.item_create_pdf:
+                if (mCreatePdf != null)
+                    mCreatePdf.execute();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -12,7 +12,7 @@
         android:id="@+id/tv_serial_no_rep"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:background="@drawable/serial_circle_bg"
         android:gravity="center"
@@ -23,17 +23,17 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/tv_serial_no_rep"
+        android:layout_toEndOf="@id/tv_serial_no_rep"
         android:orientation="vertical"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="12dp">
+        android:layout_marginStart="12dp">
 
         <TextView
             android:id="@+id/tv_name_rep"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
-            android:text="Akshat Jain"
+            tools:text="Akshat Jain"
             android:textColor="#000"
             android:textSize="16sp" />
 
@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="1dp"
-            android:text="16EGJCS017" />
+            tools:text="16EGJCS017" />
     </LinearLayout>
 
     <CheckBox
@@ -50,14 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginRight="16dp"
-        android:layout_toLeftOf="@id/plus_note_image" />
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="24dp" />
 
-    <ImageView
-        android:id="@+id/plus_note_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:src="@drawable/round_add_black_36" />
 </RelativeLayout>

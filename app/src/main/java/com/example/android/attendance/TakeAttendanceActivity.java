@@ -17,9 +17,14 @@ import android.widget.TextView;
 import com.example.android.attendance.adapters.TakeAttendAdapter;
 import com.example.android.attendance.pojos.Attendance;
 import com.example.android.attendance.utilities.ExtraUtils;
+import com.example.android.attendance.utilities.GsonUtils;
+import com.example.android.attendance.volley.VolleyCallback;
 import com.example.android.attendance.volley.VolleyTask;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,6 +51,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
 
     @BindView(R.id.students_list_view)
     RecyclerView mRecyclerView;
+    private TakeAttendAdapter mAdapter;
 
     private boolean isUpdateMode = false;
 
@@ -88,7 +94,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             semesterTv.setText(ExtraUtils.getSemester(semester));
             lectureTv.setText(ExtraUtils.getLecture(lectNo));
 
-            TakeAttendAdapter mAdapter = new TakeAttendAdapter(this, new ArrayList<Attendance>());
+            mAdapter = new TakeAttendAdapter(this, new ArrayList<Attendance>());
             LinearLayoutManager layoutManager = new LinearLayoutManager(this);
             layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
             DividerItemDecoration divider = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
@@ -99,11 +105,25 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             if (attendRecId != null) {
                 setTitle(getString(R.string.update_attendance_title));
                 isUpdateMode = true;
-                VolleyTask.setupForUpdateAttendance(this, attendRecId, mAdapter);
+                VolleyTask.setupForUpdateAttendance(this, attendRecId, new VolleyCallback() {
+                    @Override
+                    public void onSuccessResponse(JSONObject jObj) {
+                        List<Attendance> records = GsonUtils
+                                .extractAttendanceFromJSON(jObj);
+                        mAdapter.swapList(records);
+                    }
+                });
             } else {
                 setTitle(R.string.take_attendance_title);
                 isUpdateMode = false;
-                VolleyTask.setupForNewAttendance(this, lectNo, classId, date, day, mAdapter);
+                VolleyTask.setupForNewAttendance(this, lectNo, classId, date, day,
+                        new VolleyCallback() {
+                            @Override
+                            public void onSuccessResponse(JSONObject jObj) {
+                                List<Attendance> records = GsonUtils.extractAttendanceFromJSON(jObj);
+                                mAdapter.swapList(records);
+                            }
+                        });
             }
         }
     }
@@ -113,6 +133,12 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.save_attendance:
                 VolleyTask.saveAttendance(this, isUpdateMode);
+                break;
+            case R.id.check_all:
+                mAdapter.checkAll();
+                break;
+            case R.id.uncheck_all:
+                mAdapter.unCheckAll();
                 break;
             case android.R.id.home:
                 if (isUpdateMode) finish();
@@ -130,7 +156,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        getMenuInflater().inflate(R.menu.menu_take_attendance_activity, menu);
+        getMenuInflater().inflate(R.menu.menu_take_attendance, menu);
 
         return super.onCreateOptionsMenu(menu);
     }

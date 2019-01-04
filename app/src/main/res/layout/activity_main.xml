@@ -76,18 +76,6 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/click_button_below_to_add_new_attendance" />
         </RelativeLayout>
-
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_main_activity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_margin="@dimen/fab_margin"
-            android:background="@color/colorPrimary"
-            android:layout_alignParentEnd="true"
-            android:src="@drawable/baseline_add_white_48" />
         
     </RelativeLayout>
     <!-- Container for contents of drawer - use NavigationView to make configuration easier -->
