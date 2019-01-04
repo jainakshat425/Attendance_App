@@ -14,8 +14,7 @@
         android:background="@color/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark" />
 
-    <LinearLayout style="@style/SpinnerLayoutContainer"
-        >
+    <LinearLayout style="@style/SpinnerLayoutContainer">
 
         <TextView
             style="@style/SpinnerTextStyle"
@@ -47,6 +46,72 @@
             android:id="@+id/section_spin"
             style="@style/SpinnerStyle" />
     </LinearLayout>
+
+    <LinearLayout style="@style/SpinnerLayoutContainer">
+
+        <TextView
+            style="@style/SpinnerTextStyle"
+            android:text="Date Wise" />
+
+        <CheckBox
+            android:id="@+id/show_date_cb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/date_layout_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <!-- Date  -->
+        <LinearLayout
+            android:id="@+id/from_date_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Label -->
+            <TextView
+                style="@style/CategoryStyle"
+                android:text="From" />
+
+            <!-- input field -->
+            <EditText
+                android:id="@+id/from_edit_date"
+                style="@style/EditorFieldStyle"
+                android:clickable="true"
+                android:focusable="false"
+                android:hint="dd-mm-yyyy"
+                android:inputType="date" />
+        </LinearLayout>
+
+        <!-- Date  -->
+        <LinearLayout
+            android:id="@+id/to_date_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/toolbar"
+            android:orientation="horizontal">
+
+            <!-- Label -->
+            <TextView
+                style="@style/CategoryStyle"
+                android:text="to" />
+
+            <!-- input field -->
+            <EditText
+                android:id="@+id/to_edit_date"
+                style="@style/EditorFieldStyle"
+                android:clickable="true"
+                android:focusable="false"
+                android:hint="dd-mm-yyyy"
+                android:inputType="date" />
+        </LinearLayout>
+    </LinearLayout>
+
 
     <Button
         android:id="@+id/show_button"

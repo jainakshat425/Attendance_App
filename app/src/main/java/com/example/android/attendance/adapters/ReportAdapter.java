@@ -64,7 +64,10 @@ public class ReportAdapter extends
 
         holder.totalClassesTv.setText(String.valueOf(mAttendTaken));
 
-        float attendancePercent = (Float.valueOf(totalPresent) / (float) mAttendTaken) * 100;
+        float attendancePercent = 0;
+        if (mAttendTaken > 0) {
+            attendancePercent = (Float.valueOf(totalPresent) / (float) mAttendTaken) * 100;
+        }
         holder.percentTv.setText(String.format(Locale.US,"%.1f%%", attendancePercent));
 
         holder.serialNoTv.setText(String.valueOf(++position));

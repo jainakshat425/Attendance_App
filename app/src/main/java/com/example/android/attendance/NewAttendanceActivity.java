@@ -71,8 +71,6 @@ public class NewAttendanceActivity extends AppCompatActivity {
     private Button minusButton;
     ProgressDialog progressDialog;
 
-    public static final int TAKE_ATTENDANCE_REQ_CODE = 3;
-
     SharedPrefManager sharedPrefManager;
     int collegeId;
 

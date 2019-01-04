@@ -662,7 +662,8 @@ public class VolleyTask {
     }
 
     public static void checkValidClass(final Context mContext, final int collegeId, final String semester,
-                                       final String branch, final String section) {
+                                       final String branch, final String section, final boolean isDateWise,
+                                       final String fromDate, final String toDate) {
         final ProgressDialog progressDialog = new ProgressDialog(mContext);
         progressDialog.setMessage("Loading...");
         progressDialog.show();
@@ -688,6 +689,11 @@ public class VolleyTask {
                                 i.putExtra(ExtraUtils.EXTRA_COLLEGE_ID, collegeId);
                                 i.putExtra(ExtraUtils.EXTRA_CLASS_ID, classId);
                                 i.putExtra(ExtraUtils.EXTRA_BRANCH_ID, branchId);
+                                i.putExtra(ExtraUtils.EXTRA_IS_DATE_WISE, isDateWise);
+                                if (isDateWise) {
+                                    i.putExtra(ExtraUtils.EXTRA_FROM_DATE, fromDate);
+                                    i.putExtra(ExtraUtils.EXTRA_TO_DATE, toDate);
+                                }
 
                                 mContext.startActivity(i);
                             } else {
@@ -783,11 +789,19 @@ public class VolleyTask {
                 int branchId = classDetails.getInt(ExtraUtils.EXTRA_BRANCH_ID);
                 int classId = classDetails.getInt(ExtraUtils.EXTRA_CLASS_ID);
                 int collId = classDetails.getInt(ExtraUtils.EXTRA_COLLEGE_ID);
+                boolean isDayWise = classDetails.getBoolean(ExtraUtils.EXTRA_IS_DATE_WISE);
 
                 Map<String, String> params = new HashMap<>();
                 params.put("class_id", String.valueOf(classId));
                 params.put("branch_id", String.valueOf(branchId));
                 params.put("college_id", String.valueOf(collId));
+                if (isDayWise) {
+                    String fromDate = classDetails.getString(ExtraUtils.EXTRA_FROM_DATE);
+                    String toDate = classDetails.getString(ExtraUtils.EXTRA_TO_DATE);
+
+                    params.put("from_date", fromDate);
+                    params.put("to_date", toDate);
+                }
                 return params;
             }
         };

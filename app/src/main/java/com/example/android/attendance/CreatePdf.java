@@ -100,6 +100,7 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
             String semester = mClassDetails.getString(ExtraUtils.EXTRA_SEMESTER);
             String branch = mClassDetails.getString(ExtraUtils.EXTRA_BRANCH);
             String section = mClassDetails.getString(ExtraUtils.EXTRA_SECTION);
+            boolean isDateWise = mClassDetails.getBoolean(ExtraUtils.EXTRA_IS_DATE_WISE);
 
             //Create a directory for your PDF
             String pdfName = semester + branch + section + "_" +
@@ -154,6 +155,15 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
                 String phrase = ExtraUtils.getSemester(semester) + "  " + branch + "  " + section;
                 pCell.setPhrase(new Phrase(phrase));
                 parentTable.addCell(pCell);
+
+                if (isDateWise) {
+                    String fromDate = mClassDetails.getString(ExtraUtils.EXTRA_FROM_DATE);
+                    String toDate = mClassDetails.getString(ExtraUtils.EXTRA_TO_DATE);
+
+                    String dateString = "From "+fromDate +" To " +toDate;
+                    pCell.setPhrase(new Phrase(dateString));
+                    parentTable.addCell(pCell);
+                }
 
                 pCell.setPhrase(new Phrase(" "));
                 parentTable.addCell(pCell);
@@ -227,14 +237,18 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
 
                 //row entries for each student
                 for (int i = 0; i < mReports.size(); i++) {
+                    cell.setBackgroundColor(colorWhite);
 
                     Report currentStdReport = mReports.get(i);
 
                     String stdName = currentStdReport.getStdName();
                     String stdRollNo = currentStdReport.getStdRollNo();
                     String stdTotalPresent = currentStdReport.getTotalPresent();
-                    float totalPercentage =
-                            (Float.parseFloat(stdTotalPresent) / (float) mAttendTaken) * 100;
+                    float totalPercentage = 0;
+
+                    if (mAttendTaken > 0) {
+                        totalPercentage = (Float.parseFloat(stdTotalPresent) / (float) mAttendTaken) * 100;
+                    }
 
                     String[] subWisePresents =
                             currentStdReport.getSubWiseAttend().toArray(new String[0]);
@@ -252,16 +266,16 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
                     cell.setPhrase(new Phrase(percentage));
                     table.addCell(cell);
 
-                    //set bgColor back to white after setting bgColor of % cell
-                    cell.setBackgroundColor(colorWhite);
-
                     int k = 0;
                     int subTotalLecture;
 
                     for (String noOfPresent : subWisePresents) {
 
                         subTotalLecture = mSubReports.get(k).getSubTotalLect();
-                        float subWisePercent = (Float.valueOf(noOfPresent) / (float) subTotalLecture) * 100;
+                        float subWisePercent = 0;
+                        if (subTotalLecture > 0) {
+                            subWisePercent = (Float.valueOf(noOfPresent) / (float) subTotalLecture) * 100;
+                        }
 
                         if (subWisePercent < 75) cell.setBackgroundColor(colorLtGrey);
                         else cell.setBackgroundColor(colorWhite);
@@ -307,7 +321,7 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
         builder.setView(dialogView);
 
         // Set up the buttons
-        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Save & Open", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
@@ -318,8 +332,10 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
                     builder.show();
                     input.setError("Enter valid Filename.");
                 } else {
-                    File newFile = new File(context.getExternalFilesDir("pdf"),
-                            newName + ".pdf");
+                    if (!newName.endsWith(".pdf")) {
+                        newName.concat(".pdf");
+                    }
+                    File newFile = new File(context.getExternalFilesDir("pdf"), newName);
 
                     boolean renamed = pdfFile.renameTo(newFile);
                     dialog.cancel();
@@ -327,11 +343,13 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
                         Toast.makeText(context, "saved at " + newFile.getAbsolutePath(),
                                 Toast.LENGTH_LONG)
                                 .show();
+                        openPdf(context, newFile);
                         showShareDialog(context, newFile);
                     } else {
                         Toast.makeText(context, "saved at " + pdfFile.getAbsolutePath(),
                                 Toast.LENGTH_LONG)
                                 .show();
+                        openPdf(context, pdfFile);
                         showShareDialog(context, pdfFile);
                     }
                 }
@@ -376,6 +394,22 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
             }
         });
         builder.show();
+    }
+
+    public void openPdf(final Context context, File pdfFile) {
+
+        // Get URI and MIME type of file
+        Uri uri = FileProvider.getUriForFile(context,
+                BuildConfig.APPLICATION_ID + ".fileprovider",
+                pdfFile);
+        String mime = context.getContentResolver().getType(uri);
+
+        // Open file with user selected app
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, mime);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        context.startActivity(intent);
     }
 
 }
