@@ -3,17 +3,17 @@ package com.example.android.attendance;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+
+import com.google.android.material.navigation.NavigationView;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,9 +23,14 @@ import android.widget.TextView;
 import com.example.android.attendance.adapters.MainListAdapter;
 import com.example.android.attendance.pojos.AttendanceRecord;
 import com.example.android.attendance.utilities.ExtraUtils;
+import com.example.android.attendance.utilities.GsonUtils;
+import com.example.android.attendance.volley.VolleyCallback;
 import com.example.android.attendance.volley.VolleyTask;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -75,7 +80,14 @@ public class MainActivity extends AppCompatActivity
             mRecyclerView.setLayoutManager(layoutManager);
             mRecyclerView.addItemDecoration(divider);
             mRecyclerView.setAdapter(mAdapter);
-            VolleyTask.setupMainActivity(this, facUserId, mAdapter);
+            VolleyTask.setupMainActivity(this, facUserId, new VolleyCallback() {
+                @Override
+                public void onSuccessResponse(JSONObject jObj) {
+                    List<AttendanceRecord> records =
+                            GsonUtils.extractRecordsFromJSON(jObj);
+                    mAdapter.swapList(records);
+                }
+            });
 
             //ReminderUtilities.scheduleAttendanceReminder(this);
 
@@ -159,7 +171,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onResume() {
-        VolleyTask.setupMainActivity(this, mSharedPref.getFacUserId(), mAdapter);
+        VolleyTask.setupMainActivity(this, mSharedPref.getFacUserId(), new VolleyCallback() {
+            @Override
+            public void onSuccessResponse(JSONObject jObj) {
+                List<AttendanceRecord> records =
+                        GsonUtils.extractRecordsFromJSON(jObj);
+                mAdapter.swapList(records);
+            }
+        });
         super.onResume();
     }
 }

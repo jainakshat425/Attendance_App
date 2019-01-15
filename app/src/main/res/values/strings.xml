@@ -3,7 +3,6 @@
     <string name="Login">Login</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
-    <string name="enter_following_details">Enter following details:</string>
     <string name="need_help">Need Help?</string>
     <string name="toast_login_successful">Login Successful</string>
     <string name="pick_date">Pick Date</string>

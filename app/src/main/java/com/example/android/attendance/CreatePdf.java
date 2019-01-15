@@ -10,15 +10,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 
-import android.support.v4.content.FileProvider;
-import android.support.v7.app.AlertDialog;
+import androidx.core.content.FileProvider;
+import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.android.attendance.BuildConfig;
-import com.example.android.attendance.R;
 import com.example.android.attendance.pojos.Report;
 import com.example.android.attendance.pojos.SubReport;
 import com.example.android.attendance.utilities.ExtraUtils;

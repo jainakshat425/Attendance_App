@@ -8,7 +8,7 @@ public class Schedule {
     @SerializedName("coll_id")
     @Expose
     private Integer collId;
-    @SerializedName("sem")
+    @SerializedName("semester")
     @Expose
     private Integer sem;
     @SerializedName("class_id")

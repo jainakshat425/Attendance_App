@@ -4,11 +4,11 @@ import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -96,8 +96,8 @@ public class NewAttendanceActivity extends AppCompatActivity {
         collegeId = sharedPrefManager.getCollId();
 
         //setup all spinners
-        VolleyTask.setupSemesterSpinner(mContext, semesterSpinner, progressDialog);
-        VolleyTask.setupBranchSpinner(mContext, branchSpinner, progressDialog);
+        VolleyTask.setupSemesterSpinner(mContext, collegeId, semesterSpinner, progressDialog);
+        VolleyTask.setupBranchSpinner(mContext, collegeId, branchSpinner, progressDialog);
         ExtraUtils.emptySectionSpinner(mContext, sectionSpinner);
         ExtraUtils.emptySubjectSpinner(mContext, subjectSpinner);
 
@@ -109,9 +109,9 @@ public class NewAttendanceActivity extends AppCompatActivity {
                 if (position != 0) {
                     semester = parent.getItemAtPosition(position).toString();
                     VolleyTask.setupSubjectSpinner(mContext, subjectSpinner, progressDialog,
-                            branch, semester);
+                            branch, semester, collegeId);
                     VolleyTask.setupSectionSpinner(mContext, sectionSpinner, progressDialog,
-                            branch, semester);
+                            branch, semester, collegeId);
                 }
             }
 
@@ -127,9 +127,9 @@ public class NewAttendanceActivity extends AppCompatActivity {
                 if (position != 0) {
                     branch = parent.getItemAtPosition(position).toString();
                     VolleyTask.setupSubjectSpinner(mContext, subjectSpinner, progressDialog,
-                            branch, semester);
+                            branch, semester, collegeId);
                     VolleyTask.setupSectionSpinner(mContext, sectionSpinner, progressDialog,
-                            branch, semester);
+                            branch, semester, collegeId);
                 }
             }
 

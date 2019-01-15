@@ -4,10 +4,10 @@ package com.example.android.attendance;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
@@ -24,6 +24,7 @@ import java.util.Calendar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 
 public class CheckAttendanceActivity extends AppCompatActivity {
@@ -66,6 +67,18 @@ public class CheckAttendanceActivity extends AppCompatActivity {
     @BindView(R.id.date_layout_container)
     LinearLayout dateLayoutContainer;
 
+    @OnClick(R.id.show_button)
+    void showAttendanceReport() {
+        if (allInputsProvided()) {
+            VolleyTask.checkValidClass(CheckAttendanceActivity.this, collegeId,
+                    semester, branch, section, isDateWise, fromDate, toDate);
+        } else {
+            LinearLayout parentLayout = findViewById(R.id.check_attendance_linear_layout);
+            Snackbar.make(parentLayout, "Complete all fields!",
+                    Snackbar.LENGTH_LONG).show();
+        }
+    }
+
     ProgressDialog progressDialog;
 
     SharedPrefManager sharedPrefManager;
@@ -93,8 +106,8 @@ public class CheckAttendanceActivity extends AppCompatActivity {
 
         //setup all spinners
         //setup all spinners
-        VolleyTask.setupSemesterSpinner(this, semesterSpinner, progressDialog);
-        VolleyTask.setupBranchSpinner(this, branchSpinner, progressDialog);
+        VolleyTask.setupSemesterSpinner(this, collegeId, semesterSpinner, progressDialog);
+        VolleyTask.setupBranchSpinner(this, collegeId, branchSpinner, progressDialog);
         ExtraUtils.emptySectionSpinner(this, sectionSpinner);
 
 
@@ -106,7 +119,7 @@ public class CheckAttendanceActivity extends AppCompatActivity {
                     semester = parent.getItemAtPosition(position).toString();
                     VolleyTask.setupSectionSpinner(CheckAttendanceActivity.this,
                             sectionSpinner, progressDialog,
-                            branch, semester);
+                            branch, semester, collegeId);
                 }
             }
 
@@ -122,7 +135,7 @@ public class CheckAttendanceActivity extends AppCompatActivity {
                     branch = parent.getItemAtPosition(position).toString();
                     VolleyTask.setupSectionSpinner(CheckAttendanceActivity.this,
                             sectionSpinner, progressDialog,
-                            branch, semester);
+                            branch, semester, collegeId);
                 }
             }
 
@@ -138,6 +151,7 @@ public class CheckAttendanceActivity extends AppCompatActivity {
                     section = parent.getItemAtPosition(position).toString();
                 }
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
@@ -158,20 +172,6 @@ public class CheckAttendanceActivity extends AppCompatActivity {
                 } else {
                     dateLayoutContainer.setVisibility(View.GONE);
                     isDateWise = false;
-                }
-            }
-        });
-
-        (findViewById(R.id.show_button)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (allInputsProvided()) {
-                    VolleyTask.checkValidClass(CheckAttendanceActivity.this, collegeId,
-                            semester, branch, section, isDateWise, fromDate, toDate);
-                } else {
-                    LinearLayout parentLayout = findViewById(R.id.check_attendance_linear_layout);
-                    Snackbar.make(parentLayout, "Complete all fields!",
-                            Snackbar.LENGTH_LONG).show();
                 }
             }
         });
@@ -197,18 +197,18 @@ public class CheckAttendanceActivity extends AppCompatActivity {
 
         final DatePickerDialog.OnDateSetListener dateSetListener =
                 new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear,
-                                  int dayOfMonth) {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                          int dayOfMonth) {
 
-                calender.set(Calendar.YEAR, year);
-                calender.set(Calendar.MONTH, monthOfYear);
-                calender.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        calender.set(Calendar.YEAR, year);
+                        calender.set(Calendar.MONTH, monthOfYear);
+                        calender.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                updateDateEt(dateEditText, calender);
-            }
+                        updateDateEt(dateEditText, calender);
+                    }
 
-        };
+                };
 
         dateEditText.setOnClickListener(new View.OnClickListener() {
 

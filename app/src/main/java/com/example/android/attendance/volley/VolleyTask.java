@@ -3,7 +3,7 @@ package com.example.android.attendance.volley;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.support.design.widget.Snackbar;
+import com.google.android.material.snackbar.Snackbar;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -22,7 +22,6 @@ import com.example.android.attendance.R;
 import com.example.android.attendance.ScheduleActivity;
 import com.example.android.attendance.StudentReportActivity;
 import com.example.android.attendance.TakeAttendanceActivity;
-import com.example.android.attendance.adapters.MainListAdapter;
 import com.example.android.attendance.adapters.ScheduleAdapter;
 import com.example.android.attendance.adapters.SpinnerArrayAdapter;
 
@@ -38,10 +37,7 @@ import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
 import com.example.android.attendance.utilities.ExtraUtils;
 import com.example.android.attendance.utilities.GsonUtils;
 import com.example.android.attendance.pojos.Attendance;
-import com.example.android.attendance.pojos.AttendanceRecord;
-import com.example.android.attendance.pojos.Report;
 import com.example.android.attendance.pojos.Schedule;
-import com.example.android.attendance.pojos.SubReport;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -58,9 +54,37 @@ import java.util.Map;
  */
 public class VolleyTask {
 
+    public static void login(final Context context, final String username, final String password,
+                             final VolleyCallback volleyCallback) {
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.FAC_LOGIN_URL, response -> {
+                    try {
+                        JSONObject jObj = new JSONObject(response);
+                        if (!jObj.getBoolean("error")) {
+                            volleyCallback.onSuccessResponse(jObj);
+                        } else {
+                            Toast.makeText(context, jObj.getString("message"),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }, error -> Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show()) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+
+                params.put(FacultyEntry.F_USERNAME_COL, username);
+                params.put(FacultyEntry.F_PASSWORD_COL, password);
+
+                return params;
+            }
+        };
+        RequestHandler.getInstance(context).addToRequestQueue(request);
+    }
 
     public static void setupMainActivity(final Context context, final String facUserId,
-                                         final MainListAdapter mAdapter) {
+                                         final VolleyCallback callback) {
 
         final ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setMessage("Loading...");
@@ -75,9 +99,8 @@ public class VolleyTask {
                             JSONObject jObj = new JSONObject(response);
 
                             if (!jObj.getBoolean("error")) {
-                                List<AttendanceRecord> records =
-                                        GsonUtils.extractRecordsFromJSON(jObj);
-                                mAdapter.swapList(records);
+
+                                callback.onSuccessResponse(jObj);
                             } else {
                                 Toast.makeText(context, jObj.getString("message"),
                                         Toast.LENGTH_SHORT).show();
@@ -106,7 +129,8 @@ public class VolleyTask {
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
-    public static void setupSemesterSpinner(final Context mContext, final Spinner semesterSpinner,
+    public static void setupSemesterSpinner(final Context mContext, final int collId,
+                                            final Spinner semesterSpinner,
                                             final ProgressDialog progressDialog) {
         final List<String> semArr = new ArrayList<>();
         semArr.add("Semester");
@@ -145,11 +169,20 @@ public class VolleyTask {
                         Toast.LENGTH_LONG).show();
                 progressDialog.dismiss();
             }
-        });
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                params.put(ClassEntry.COLLEGE_ID, String.valueOf(collId));
+
+                return params;
+            }
+        };
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 
-    public static void setupBranchSpinner(final Context mContext, final Spinner branchSpinner,
+    public static void setupBranchSpinner(final Context mContext, final int collId,
+                                          final Spinner branchSpinner,
                                           final ProgressDialog progressDialog) {
         final List<String> branchArr = new ArrayList<>();
         branchArr.add("Branch");
@@ -190,13 +223,21 @@ public class VolleyTask {
                         Toast.LENGTH_LONG).show();
                 progressDialog.dismiss();
             }
-        });
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                params.put(ClassEntry.COLLEGE_ID, String.valueOf(collId));
+
+                return params;
+            }
+        };
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 
     public static void setupSectionSpinner(final Context mContext, final Spinner sectionSpinner,
                                            final ProgressDialog progressDialog, final String branchSelected,
-                                           final String semesterSelected) {
+                                           final String semesterSelected, final int collId) {
         if (semesterSelected != null && branchSelected != null) {
             final List<String> secArr = new ArrayList<>();
             secArr.add("Section");
@@ -244,6 +285,7 @@ public class VolleyTask {
                     Map<String, String> params = new HashMap<>();
                     params.put("branch_name", branchSelected);
                     params.put("semester", semesterSelected);
+                    params.put("college_id", String.valueOf(collId));
                     return params;
                 }
             };
@@ -254,7 +296,7 @@ public class VolleyTask {
 
     public static void setupSubjectSpinner(final Context mContext, final Spinner subjectSpinner,
                                            final ProgressDialog progressDialog, final String branchSelected,
-                                           final String semesterSelected) {
+                                           final String semesterSelected, final int collId) {
         if (semesterSelected != null && branchSelected != null) {
             final List<String> subArray = new ArrayList<>();
             subArray.add("Subject");
@@ -303,6 +345,7 @@ public class VolleyTask {
                     Map<String, String> params = new HashMap<>();
                     params.put(BranchEntry.BRANCH_NAME, branchSelected);
                     params.put(SubjectEntry.SUB_SEMESTER_COL, semesterSelected);
+                    params.put(ClassEntry.COLLEGE_ID, String.valueOf(collId));
                     return params;
                 }
             };

@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- array containing colleges for spinner -->
-    <string-array name="colleges_array">
-        <item>College</item>
-        <item>GIT</item>
-        <item>GCT</item>
-    </string-array>
-
     <!-- array containing 'semester' for spinner -->
     <string-array name="semester_array">
         <item>Semester</item>
@@ -19,27 +12,6 @@
         <item>6</item>
         <item>7</item>
         <item>8</item>
-    </string-array>
-
-    <!-- array containing name of branches for spinner -->
-    <string-array name="branch_array">
-        <item>Branch</item>
-        <item>CS</item>
-        <item>IT</item>
-        <item>ME</item>
-        <item>EC</item>
-        <item>CE</item>
-    </string-array>
-
-    <!-- array containing sections for spinner -->
-    <string-array name="section_array">
-        <item>Section</item>
-        <item>A</item>
-        <item>B</item>
-        <item>C</item>
-        <item>D</item>
-        <item>E</item>
-        <item>F</item>
     </string-array>
 
 </resources>

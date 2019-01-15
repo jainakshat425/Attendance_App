@@ -34,7 +34,7 @@ public class SharedPrefManager {
     }
 
     public boolean saveLoginUserDetails(int facId, String facName, String facUsername,
-                                        String facDept, int fCollId) {
+                                        String facDept, int fCollId, String mobNo) {
 
         SharedPreferences.Editor sharedPref = mCtx.getSharedPreferences(MY_SHARED_PREF,
                 Context.MODE_PRIVATE).edit();
@@ -42,8 +42,9 @@ public class SharedPrefManager {
         sharedPref.putInt(FacultyEntry._ID, facId);
         sharedPref.putString(FacultyEntry.F_USERNAME_COL, facUsername);
         sharedPref.putString(FacultyEntry.F_NAME_COL, facName);
-        sharedPref.putString(FacultyEntry.F_DEPARTMENT_COL, facDept);
+        sharedPref.putString("dept_name", facDept);
         sharedPref.putInt(FacultyEntry.F_COLLEGE_ID, fCollId);
+        sharedPref.putString(FacultyEntry.F_MOB_NO, mobNo);
 
         sharedPref.apply();
         return true;
@@ -81,6 +82,13 @@ public class SharedPrefManager {
         SharedPreferences sharedPref = mCtx
                 .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
 
-        return sharedPref.getString(FacultyEntry.F_DEPARTMENT_COL, null);
+        return sharedPref.getString("dept_name", null);
+    }
+
+    public String getFacMobNo() {
+        SharedPreferences sharedPref = mCtx
+                .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
+
+        return sharedPref.getString(FacultyEntry.F_MOB_NO, null);
     }
 }

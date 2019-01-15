@@ -38,7 +38,7 @@ public class AttendanceRecord {
     @SerializedName("college_id")
     @Expose
     private Integer collegeId;
-    @SerializedName("sem")
+    @SerializedName("semester")
     @Expose
     private Integer sem;
     @SerializedName("branch_id")
