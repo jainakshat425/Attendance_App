@@ -2,30 +2,13 @@ package com.example.android.attendance.volley;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
-import com.google.android.material.snackbar.Snackbar;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.Spinner;
+
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.example.android.attendance.CheckAttendanceActivity;
-import com.example.android.attendance.MainActivity;
-import com.example.android.attendance.NewAttendanceActivity;
-import com.example.android.attendance.R;
-import com.example.android.attendance.ScheduleActivity;
-import com.example.android.attendance.StudentReportActivity;
-import com.example.android.attendance.TakeAttendanceActivity;
-import com.example.android.attendance.adapters.ScheduleAdapter;
-import com.example.android.attendance.adapters.SpinnerArrayAdapter;
 
-import com.example.android.attendance.adapters.TakeAttendAdapter;
 import com.example.android.attendance.contracts.AttendanceContract.AttendanceEntry;
 import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
 import com.example.android.attendance.contracts.BranchContract.BranchEntry;
@@ -35,18 +18,11 @@ import com.example.android.attendance.contracts.FacultyContract.FacultyEntry;
 import com.example.android.attendance.contracts.LectureContract.LectureEntry;
 import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
 import com.example.android.attendance.utilities.ExtraUtils;
-import com.example.android.attendance.utilities.GsonUtils;
-import com.example.android.attendance.pojos.Attendance;
-import com.example.android.attendance.pojos.Schedule;
-import com.google.gson.Gson;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,20 +32,27 @@ public class VolleyTask {
 
     public static void login(final Context context, final String username, final String password,
                              final VolleyCallback volleyCallback) {
+        ProgressDialog pDialog = new ProgressDialog(context);
+        pDialog.setMessage("Logging in...");
+        pDialog.show();
         StringRequest request = new StringRequest(Request.Method.POST,
                 ExtraUtils.FAC_LOGIN_URL, response -> {
-                    try {
-                        JSONObject jObj = new JSONObject(response);
-                        if (!jObj.getBoolean("error")) {
-                            volleyCallback.onSuccessResponse(jObj);
-                        } else {
-                            Toast.makeText(context, jObj.getString("message"),
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show()) {
+            pDialog.dismiss();
+            try {
+                JSONObject jObj = new JSONObject(response);
+                if (!jObj.getBoolean("error")) {
+                    volleyCallback.onSuccessResponse(jObj);
+                } else {
+                    Toast.makeText(context, jObj.getString("message"),
+                            Toast.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
+        }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
@@ -83,44 +66,35 @@ public class VolleyTask {
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
-    public static void setupMainActivity(final Context context, final String facUserId,
+    public static void getAttendanceList(final Context context, final String facUserId,
                                          final VolleyCallback callback) {
-
-        final ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
+        ProgressDialog pDialog = new ProgressDialog(context);
+        pDialog.setMessage("Setting up...");
+        pDialog.show();
         StringRequest request = new StringRequest(Request.Method.POST,
-                ExtraUtils.GET_ATT_REC_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
+                ExtraUtils.GET_ATT_REC_URL, response -> {
+            pDialog.dismiss();
+            try {
+                JSONObject jObj = new JSONObject(response);
 
-                        try {
-                            JSONObject jObj = new JSONObject(response);
+                if (!jObj.getBoolean("error")) {
+                    callback.onSuccessResponse(jObj);
+                } else {
+                    Toast.makeText(context, jObj.getString("message"),
+                            Toast.LENGTH_SHORT).show();
+                }
 
-                            if (!jObj.getBoolean("error")) {
-
-                                callback.onSuccessResponse(jObj);
-                            } else {
-                                Toast.makeText(context, jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            Toast.makeText(context, "Something went wrong.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                        progressDialog.dismiss();
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                progressDialog.dismiss();
-                Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Toast.makeText(context, "Something went wrong.",
+                        Toast.LENGTH_SHORT).show();
             }
+        }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
         }) {
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
+            protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
                 params.put(FacultyEntry.F_USERNAME_COL, facUserId);
                 return params;
@@ -129,293 +103,142 @@ public class VolleyTask {
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
-    public static void setupSemesterSpinner(final Context mContext, final int collId,
-                                            final Spinner semesterSpinner,
-                                            final ProgressDialog progressDialog) {
-        final List<String> semArr = new ArrayList<>();
-        semArr.add("Semester");
+    public static void getBranchNames(final Context mContext, final int collId,
+                                      VolleyCallback callback) {
+        ProgressDialog pDialog = new ProgressDialog(mContext);
+        pDialog.setMessage("Setting up...");
+        pDialog.show();
         StringRequest request = new StringRequest(Request.Method.POST,
-                ExtraUtils.GET_SEMS_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        try {
-                            JSONObject jObj = new JSONObject(response);
-
-                            if (!jObj.getBoolean("error")) {
-
-                                JSONArray jsonArray = jObj.getJSONArray("semesters");
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    semArr.add(jsonArray.getString(i));
-                                }
-                                SpinnerArrayAdapter semesterAdapter = new SpinnerArrayAdapter(mContext,
-                                        android.R.layout.simple_spinner_dropdown_item,
-                                        semArr.toArray(new String[0]));
-                                semesterSpinner.setAdapter(semesterAdapter);
-                            } else {
-                                Toast.makeText(mContext,
-                                        jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(mContext, error.getMessage(),
-                        Toast.LENGTH_LONG).show();
-                progressDialog.dismiss();
+                ExtraUtils.GET_BRANCHES_URL, response -> {
+            pDialog.dismiss();
+            try {
+                JSONObject jObj = new JSONObject(response);
+                if (!jObj.getBoolean("error")) {
+                    callback.onSuccessResponse(jObj);
+                } else {
+                    Toast.makeText(mContext,
+                            jObj.getString("message"),
+                            Toast.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        }){
+        }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(mContext, error.getMessage(), Toast.LENGTH_LONG).show();
+        }) {
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
                 params.put(ClassEntry.COLLEGE_ID, String.valueOf(collId));
-
                 return params;
             }
         };
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 
-    public static void setupBranchSpinner(final Context mContext, final int collId,
-                                          final Spinner branchSpinner,
-                                          final ProgressDialog progressDialog) {
-        final List<String> branchArr = new ArrayList<>();
-        branchArr.add("Branch");
+    public static void getSections(final Context mContext, final String branchSelected,
+                                   final String semesterSelected, final int collId,
+                                   VolleyCallback callback) {
+        ProgressDialog pDialog = new ProgressDialog(mContext);
+        pDialog.setMessage("Please wait...");
+        pDialog.show();
         StringRequest request = new StringRequest(Request.Method.POST,
-                ExtraUtils.GET_BRANCHES_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
+                ExtraUtils.GET_SECS_URL,
+                response -> {
+                    pDialog.dismiss();
+                    try {
+                        JSONObject jObj = new JSONObject(response);
 
-                        try {
-                            JSONObject jObj = new JSONObject(response);
-
-                            if (!jObj.getBoolean("error")) {
-
-                                JSONArray jsonArray = jObj.getJSONArray("branches");
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    branchArr.add(jsonArray.getString(i));
-                                }
-                                SpinnerArrayAdapter branchAdapter = new SpinnerArrayAdapter(mContext,
-                                        android.R.layout.simple_spinner_dropdown_item,
-                                        branchArr.toArray(new String[0]));
-                                branchSpinner.setAdapter(branchAdapter);
-                            } else {
-                                Toast.makeText(mContext,
-                                        jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        } finally {
-                            if (progressDialog != null) progressDialog.dismiss();
+                        if (!jObj.getBoolean("error")) {
+                            callback.onSuccessResponse(jObj);
+                        } else {
+                            Toast.makeText(mContext, jObj.getString("message"),
+                                    Toast.LENGTH_SHORT).show();
                         }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, new Response.ErrorListener() {
+                }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(mContext, error.getMessage(), Toast.LENGTH_LONG).show();
+        }) {
             @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(mContext, error.getMessage(),
-                        Toast.LENGTH_LONG).show();
-                progressDialog.dismiss();
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("branch_name", branchSelected);
+                params.put("semester", semesterSelected);
+                params.put("college_id", String.valueOf(collId));
+                return params;
             }
+        };
+        RequestHandler.getInstance(mContext).addToRequestQueue(request);
+    }
+
+    public static void getSubjects(final Context mContext, final String branchSelected,
+                                   final String semesterSelected, final int collId,
+                                   VolleyCallback callback) {
+
+        ProgressDialog pDialog = new ProgressDialog(mContext);
+        pDialog.setMessage("Please wait...");
+        pDialog.show();
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.GET_SUB_NAME_URL, response -> {
+            pDialog.dismiss();
+            try {
+                JSONObject jObj = new JSONObject(response);
+                if (!jObj.getBoolean("error")) {
+                    callback.onSuccessResponse(jObj);
+                } else {
+                    Toast.makeText(mContext, jObj.getString("message"),
+                            Toast.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(mContext, error.getMessage(), Toast.LENGTH_LONG).show();
         }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
+                Map<String, String> params = new HashMap<>();
+                params.put(BranchEntry.BRANCH_NAME, branchSelected);
+                params.put(SubjectEntry.SUB_SEMESTER_COL, semesterSelected);
                 params.put(ClassEntry.COLLEGE_ID, String.valueOf(collId));
-
                 return params;
             }
         };
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
-    }
-
-    public static void setupSectionSpinner(final Context mContext, final Spinner sectionSpinner,
-                                           final ProgressDialog progressDialog, final String branchSelected,
-                                           final String semesterSelected, final int collId) {
-        if (semesterSelected != null && branchSelected != null) {
-            final List<String> secArr = new ArrayList<>();
-            secArr.add("Section");
-            progressDialog.setMessage("Loading...");
-            progressDialog.show();
-            StringRequest request = new StringRequest(Request.Method.POST,
-                    ExtraUtils.GET_SECS_URL,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-
-                            try {
-                                JSONObject jObj = new JSONObject(response);
-
-                                if (!jObj.getBoolean("error")) {
-
-                                    JSONArray jsonArray = jObj.getJSONArray("sections");
-                                    for (int i = 0; i < jsonArray.length(); i++) {
-                                        secArr.add(jsonArray.getString(i));
-                                    }
-                                    SpinnerArrayAdapter sectionAdapter = new SpinnerArrayAdapter(mContext,
-                                            android.R.layout.simple_spinner_dropdown_item,
-                                            secArr.toArray(new String[0]));
-                                    sectionSpinner.setAdapter(sectionAdapter);
-                                } else {
-                                    Toast.makeText(mContext, jObj.getString("message"),
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            } finally {
-                                progressDialog.dismiss();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(mContext, error.getMessage(),
-                            Toast.LENGTH_LONG).show();
-                    progressDialog.dismiss();
-                }
-            }) {
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> params = new HashMap<>();
-                    params.put("branch_name", branchSelected);
-                    params.put("semester", semesterSelected);
-                    params.put("college_id", String.valueOf(collId));
-                    return params;
-                }
-            };
-            RequestHandler.getInstance(mContext).addToRequestQueue(request);
-        } else
-            ExtraUtils.emptySectionSpinner(mContext, sectionSpinner);
-    }
-
-    public static void setupSubjectSpinner(final Context mContext, final Spinner subjectSpinner,
-                                           final ProgressDialog progressDialog, final String branchSelected,
-                                           final String semesterSelected, final int collId) {
-        if (semesterSelected != null && branchSelected != null) {
-            final List<String> subArray = new ArrayList<>();
-            subArray.add("Subject");
-            progressDialog.setMessage("Loading...");
-            progressDialog.show();
-            StringRequest request = new StringRequest(Request.Method.POST,
-                    ExtraUtils.GET_SUB_NAME_URL,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-
-                            try {
-                                JSONObject jObj = new JSONObject(response);
-
-                                if (!jObj.getBoolean("error")) {
-
-                                    JSONArray subJSONArray = jObj.getJSONArray("subjects");
-                                    for (int i = 0; i < subJSONArray.length(); i++) {
-                                        JSONObject subObj = subJSONArray.getJSONObject(i);
-                                        subArray.add(subObj.getString("sub_name"));
-                                    }
-                                    SpinnerArrayAdapter subjectAdapter = new SpinnerArrayAdapter(mContext,
-                                            android.R.layout.simple_spinner_dropdown_item,
-                                            subArray.toArray(new String[0]));
-                                    subjectSpinner.setAdapter(subjectAdapter);
-
-                                } else {
-                                    Toast.makeText(mContext,
-                                            jObj.getString("message"),
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(mContext, error.getMessage(),
-                            Toast.LENGTH_LONG).show();
-                    progressDialog.dismiss();
-                }
-            }) {
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> params = new HashMap<>();
-                    params.put(BranchEntry.BRANCH_NAME, branchSelected);
-                    params.put(SubjectEntry.SUB_SEMESTER_COL, semesterSelected);
-                    params.put(ClassEntry.COLLEGE_ID, String.valueOf(collId));
-                    return params;
-                }
-            };
-            RequestHandler.getInstance(mContext).addToRequestQueue(request);
-        } else
-            ExtraUtils.emptySubjectSpinner(mContext, subjectSpinner);
     }
 
     public static void takeNewAttendance(final Context mContext, final String date, final String day,
                                          final String semester, final String branch, final String section,
-                                         final String subject, final String lectNo, final int collegeId,
-                                         final String dateDisplay, final int lectId, final int classId) {
-
-        final ProgressDialog progressDialog = new ProgressDialog(mContext);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
+                                         final String lectNo, final int collegeId, final int lectId,
+                                         VolleyCallback callback) {
+        ProgressDialog pDialog = new ProgressDialog(mContext);
+        pDialog.setMessage("Please wait...");
+        pDialog.show();
         StringRequest request = new StringRequest(Request.Method.POST,
-                ExtraUtils.CHECK_ATTEND_ALREADY_EXIST,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
+                ExtraUtils.CHECK_ATTEND_ALREADY_EXIST, response -> {
+            pDialog.dismiss();
+            try {
+                JSONObject jObj = new JSONObject(response);
+                if (!jObj.getBoolean("error")) {
 
-                        try {
-                            JSONObject jObj = new JSONObject(response);
+                    callback.onSuccessResponse(jObj);
 
-                            if (!jObj.getBoolean("error")) {
-
-                                Intent intent = new Intent();
-                                intent.setClass(mContext, TakeAttendanceActivity.class);
-                                if (jObj.has("class_id") && classId == -1) {
-                                    int classId = jObj.getInt("class_id");
-                                    intent.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
-                                } else {
-                                    intent.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
-                                }
-                                intent.putExtra(ExtraUtils.EXTRA_DATE, date);
-                                intent.putExtra(ExtraUtils.EXTRA_DISPLAY_DATE, dateDisplay);
-                                intent.putExtra(ExtraUtils.EXTRA_DAY, day);
-                                intent.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
-                                intent.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
-                                intent.putExtra(ExtraUtils.EXTRA_SECTION, section);
-                                intent.putExtra(ExtraUtils.EXTRA_SUBJECT, subject);
-                                intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
-
-                                mContext.startActivity(intent);
-                            } else {
-                                RelativeLayout parentLayout;
-                                if (lectId == -1) {
-                                    parentLayout = ((NewAttendanceActivity) mContext)
-                                            .findViewById(R.id.relative_layout);
-                                } else {
-                                    parentLayout = ((ScheduleActivity) mContext)
-                                            .findViewById(R.id.sch_layout_container);
-                                }
-                                Snackbar.make(parentLayout, jObj.getString("message"),
-                                        Snackbar.LENGTH_LONG).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            Toast.makeText(mContext, "Something went wrong.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                        progressDialog.dismiss();
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                progressDialog.dismiss();
-                Toast.makeText(mContext, error.getMessage(), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(mContext, jObj.getString("message"), Toast.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Toast.makeText(mContext, "Something went wrong.",
+                        Toast.LENGTH_SHORT).show();
             }
+        }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(mContext, error.getMessage(), Toast.LENGTH_LONG).show();
         }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
@@ -435,52 +258,40 @@ public class VolleyTask {
                 return params;
             }
         };
-
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 
 
-    public static void saveAttendance(final Context context, final boolean isUpdateMode) {
-        final ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
+    public static void saveAttendance(final Context context, final boolean isUpdateMode,
+                                      String attJsonObj, VolleyCallback callback) {
+        ProgressDialog pDialog = new ProgressDialog(context);
 
-        Gson gson = new Gson();
-        Attendance[] attendances = TakeAttendAdapter.getmAttendanceList();
-        final String attJsonObj = gson.toJson(attendances);
+        if (isUpdateMode) pDialog.setMessage("Updating...");
+        else pDialog.setMessage("Saving...");
+
+        pDialog.show();
 
         String url;
-        if (isUpdateMode)
-            url = ExtraUtils.UPDATE_ATTEND_URL;
-        else
-            url = ExtraUtils.SAVE_NEW_ATTEND_URL;
+        if (isUpdateMode) url = ExtraUtils.UPDATE_ATTEND_URL;
+        else url = ExtraUtils.SAVE_NEW_ATTEND_URL;
+
         StringRequest request = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        try {
-                            JSONObject jObj = new JSONObject(response);
-
-                            if (!jObj.getBoolean("error")) {
-                                ((TakeAttendanceActivity) context).finish();
-                                context.startActivity(new Intent(context, MainActivity.class));
-                            } else {
-                                Toast.makeText(context, jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                response -> {
+                    pDialog.dismiss();
+                    try {
+                        JSONObject jObj = new JSONObject(response);
+                        if (!jObj.getBoolean("error")) {
+                            callback.onSuccessResponse(jObj);
+                        } else {
+                            Toast.makeText(context, jObj.getString("message"),
+                                    Toast.LENGTH_SHORT).show();
                         }
-                        progressDialog.dismiss();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                progressDialog.dismiss();
-                Toast.makeText(context,
-                        error.getMessage(), Toast.LENGTH_LONG).show();
-            }
+                }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
         }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
@@ -495,46 +306,34 @@ public class VolleyTask {
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
-    public static void undoAttendanceAndFinish(final Context context) {
-        final ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
-
-        final int recId = TakeAttendAdapter.getmAttendanceList()[1].getAttendanceRecordId();
+    public static void undoAttendance(final Context context, int recordId, VolleyCallback callback) {
+        ProgressDialog pDialog = new ProgressDialog(context);
+        pDialog.setMessage("Please wait...");
+        pDialog.show();
         StringRequest request = new StringRequest(Request.Method.POST,
                 ExtraUtils.DELETE_RECORD_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
+                response -> {
+                    pDialog.dismiss();
+                    try {
+                        JSONObject jObj = new JSONObject(response);
 
-                        try {
-                            JSONObject jObj = new JSONObject(response);
-
-                            if (!jObj.getBoolean("error")) {
-                                Toast.makeText(context, "Attendance not saved.",
-                                        Toast.LENGTH_SHORT).show();
-                                ((TakeAttendanceActivity) context).finish();
-                            } else {
-                                Toast.makeText(context, jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                        if (!jObj.getBoolean("error")) {
+                            callback.onSuccessResponse(jObj);
+                        } else {
+                            Toast.makeText(context, jObj.getString("message"),
+                                    Toast.LENGTH_SHORT).show();
                         }
-                        progressDialog.dismiss();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                progressDialog.dismiss();
-                Toast.makeText(context,
-                        error.getMessage(), Toast.LENGTH_LONG).show();
-            }
+                }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
         }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put(AttendanceRecordEntry.ID, String.valueOf(recId));
+                params.put(AttendanceRecordEntry.ID, String.valueOf(recordId));
                 return params;
             }
         };
@@ -544,38 +343,31 @@ public class VolleyTask {
 
     public static void setupForUpdateAttendance(final Context context, final String attendRecId,
                                                 final VolleyCallback callback) {
-        final ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
+        ProgressDialog pDialog = new ProgressDialog(context);
+        pDialog.setMessage("Setting up...");
+        pDialog.show();
         StringRequest request = new StringRequest(Request.Method.POST,
                 ExtraUtils.SETUP_UPDATE_ATTEND_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
+                response -> {
+                    pDialog.dismiss();
+                    try {
+                        JSONObject jObj = new JSONObject(response);
 
-                        try {
-                            JSONObject jObj = new JSONObject(response);
+                        if (!jObj.getBoolean("error")) {
 
-                            if (!jObj.getBoolean("error")) {
+                            callback.onSuccessResponse(jObj);
 
-                               callback.onSuccessResponse(jObj);
-
-                            } else {
-                                Toast.makeText(context,
-                                        jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                        } else {
+                            Toast.makeText(context,
+                                    jObj.getString("message"),
+                                    Toast.LENGTH_SHORT).show();
                         }
-                        progressDialog.dismiss();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                progressDialog.dismiss();
-                Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
-            }
+                }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
         }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
@@ -590,40 +382,35 @@ public class VolleyTask {
     public static void setupForNewAttendance(final Context context, final String lectureNo,
                                              final String classId, final String date,
                                              final String day, final VolleyCallback callback) {
-        final ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
+
+        ProgressDialog pDialog = new ProgressDialog(context);
+        pDialog.setMessage("Setting up...");
+        pDialog.show();
+
         StringRequest request = new StringRequest(Request.Method.POST,
                 ExtraUtils.SETUP_NEW_ATTEND_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
+                response -> {
+            pDialog.dismiss();
+                    try {
+                        JSONObject jObj = new JSONObject(response);
 
-                        try {
-                            JSONObject jObj = new JSONObject(response);
+                        if (!jObj.getBoolean("error")) {
 
-                            if (!jObj.getBoolean("error")) {
+                            callback.onSuccessResponse(jObj);
 
-                                callback.onSuccessResponse(jObj);
-
-                            } else {
-                                Toast.makeText(context, jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                        } else {
+                            Toast.makeText(context, jObj.getString("message"),
+                                    Toast.LENGTH_SHORT).show();
                         }
-                        progressDialog.dismiss();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                progressDialog.dismiss();
-                Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
-            }
+                }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
         }) {
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
+            protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
 
                 params.put(LectureEntry.CLASS_ID, classId);
@@ -638,50 +425,31 @@ public class VolleyTask {
     }
 
     public static void showSchedule(final Context context, final String facUserId, final String day,
-                                    final ScheduleAdapter mAdapter, final RelativeLayout emptyView) {
-
-        final ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
+                                    VolleyCallback callback) {
+        ProgressDialog pDialog = new ProgressDialog(context);
+        pDialog.setMessage("Loading...");
+        pDialog.show();
         final StringRequest request = new StringRequest(Request.Method.POST,
-                ExtraUtils.GET_FAC_SCH_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        List<Schedule> schedules = null;
-                        try {
-                            JSONObject jObj = new JSONObject(response);
+                ExtraUtils.GET_FAC_SCH_URL, response -> {
+            pDialog.dismiss();
+            try {
+                JSONObject jObj = new JSONObject(response);
 
-                            if (!jObj.getBoolean("error")) {
-                                schedules = GsonUtils.extractScheduleFromJSON(jObj);
-                            } else {
-                                Toast.makeText(context, jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            Toast.makeText(context, "Something went wrong.",
-                                    Toast.LENGTH_SHORT).show();
-                            progressDialog.dismiss();
-                        } finally {
-                            mAdapter.swapList(schedules, day);
-
-                            if (schedules == null || schedules.size() < 1)
-                                emptyView.setVisibility(View.VISIBLE);
-                            else
-                                emptyView.setVisibility(View.GONE);
-                            progressDialog.dismiss();
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                progressDialog.dismiss();
-                mAdapter.swapList(null, day);
-                Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
+                if (!jObj.getBoolean("error")) {
+                    callback.onSuccessResponse(jObj);
+                } else {
+                    Toast.makeText(context, jObj.getString("message"),
+                            Toast.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Toast.makeText(context, "Something went wrong.",
+                        Toast.LENGTH_SHORT).show();
             }
+
+        }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
         }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
@@ -695,62 +463,34 @@ public class VolleyTask {
     }
 
     public static void checkValidClass(final Context mContext, final int collegeId, final String semester,
-                                       final String branch, final String section, final boolean isDateWise,
-                                       final String fromDate, final String toDate) {
-        final ProgressDialog progressDialog = new ProgressDialog(mContext);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
+                                       final String branch, final String section, VolleyCallback callback) {
+        ProgressDialog pDialog = new ProgressDialog(mContext);
+        pDialog.setMessage("Please wait...");
+        pDialog.show();
         StringRequest request = new StringRequest(Request.Method.POST,
                 ExtraUtils.CHECK_VALID_CLASS_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
+                response -> {
+                    pDialog.dismiss();
+                    try {
+                        JSONObject jObj = new JSONObject(response);
 
-                        try {
-                            JSONObject jObj = new JSONObject(response);
-
-                            if (!jObj.getBoolean("error")) {
-
-                                int classId = jObj.getInt("class_id");
-                                int branchId = jObj.getInt("branch_id");
-
-                                Intent i = new Intent();
-                                i.setClass(mContext, StudentReportActivity.class);
-                                i.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
-                                i.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
-                                i.putExtra(ExtraUtils.EXTRA_SECTION, section);
-                                i.putExtra(ExtraUtils.EXTRA_COLLEGE_ID, collegeId);
-                                i.putExtra(ExtraUtils.EXTRA_CLASS_ID, classId);
-                                i.putExtra(ExtraUtils.EXTRA_BRANCH_ID, branchId);
-                                i.putExtra(ExtraUtils.EXTRA_IS_DATE_WISE, isDateWise);
-                                if (isDateWise) {
-                                    i.putExtra(ExtraUtils.EXTRA_FROM_DATE, fromDate);
-                                    i.putExtra(ExtraUtils.EXTRA_TO_DATE, toDate);
-                                }
-
-                                mContext.startActivity(i);
-                            } else {
-                                LinearLayout parentLayout = ((CheckAttendanceActivity) mContext)
-                                        .findViewById(R.id.check_attendance_linear_layout);
-                                Snackbar.make(parentLayout, jObj.getString("message"),
-                                        Snackbar.LENGTH_LONG).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            Toast.makeText(mContext, "Something went wrong.",
-                                    Toast.LENGTH_SHORT).show();
+                        if (!jObj.getBoolean("error")) {
+                            callback.onSuccessResponse(jObj);
+                        } else {
+                            Toast.makeText(mContext, jObj.getString("message"),
+                                    Toast.LENGTH_LONG).show();
                         }
-                        progressDialog.dismiss();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(mContext, "Something went wrong.",
+                                Toast.LENGTH_SHORT).show();
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                progressDialog.dismiss();
-                Toast.makeText(mContext, error.getMessage(), Toast.LENGTH_LONG).show();
-            }
+                }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(mContext, error.getMessage(), Toast.LENGTH_LONG).show();
         }) {
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
+            protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
                 params.put(BranchEntry.BRANCH_NAME, branch);
                 params.put(ClassEntry.COLLEGE_ID, String.valueOf(collegeId));
@@ -766,38 +506,31 @@ public class VolleyTask {
     public static void showReport(final Context context, final int branchId, final int classId,
                                   final int collId, final boolean isDayWise, final String fromDate,
                                   final String toDate, final VolleyCallback callback) {
+        ProgressDialog pDialog = new ProgressDialog(context);
+        pDialog.setMessage("Setting up...");
+        pDialog.show();
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.GET_STD_REPORT_URL,
+                response -> {
+                    pDialog.dismiss();
+                    try {
+                        final JSONObject jObj = new JSONObject(response);
+                        if (!jObj.getBoolean("error")) {
 
-        final ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
-        StringRequest request = new StringRequest(Request.Method.POST, ExtraUtils.GET_STD_REPORT_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            final JSONObject jObj = new JSONObject(response);
-                            if (!jObj.getBoolean("error")) {
+                            callback.onSuccessResponse(jObj);
 
-                                callback.onSuccessResponse(jObj);
-
-                            } else {
-                                Toast.makeText(context, jObj.getString("message"),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            Toast.makeText(context, "Something went wrong.",
+                        } else {
+                            Toast.makeText(context, jObj.getString("message"),
                                     Toast.LENGTH_SHORT).show();
-                        } finally {
-                            progressDialog.dismiss();
                         }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(context, "Something went wrong.",
+                                Toast.LENGTH_SHORT).show();
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                progressDialog.dismiss();
-                Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
-            }
+                }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
         }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {

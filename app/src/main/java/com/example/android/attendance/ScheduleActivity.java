@@ -1,5 +1,7 @@
 package com.example.android.attendance;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
@@ -8,14 +10,18 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.example.android.attendance.adapters.ScheduleAdapter;
 import com.example.android.attendance.pojos.Schedule;
 import com.example.android.attendance.utilities.ExtraUtils;
+import com.example.android.attendance.utilities.GsonUtils;
 import com.example.android.attendance.volley.VolleyTask;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -24,12 +30,15 @@ import ca.antonious.materialdaypicker.SingleSelectionMode;
 
 public class ScheduleActivity extends AppCompatActivity {
 
+    List<Schedule> mSchedules;
+    String facUserId;
+
     @BindView(R.id.sch_recycler_view)
     RecyclerView mRecyclerView;
     @BindView(R.id.sch_empty_view)
     RelativeLayout emptyView;
 
-    private ScheduleAdapter mScheduleAdapter;
+    private ScheduleAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +54,7 @@ public class ScheduleActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        final String facUserId = getIntent().getStringExtra(ExtraUtils.EXTRA_FAC_USER_ID);
+        facUserId = SharedPrefManager.getInstance(this).getFacUserId();
         String currentDay = ExtraUtils.getCurrentDay();
 
         final MaterialDayPicker materialDayPicker = findViewById(R.id.day_picker);
@@ -58,18 +67,27 @@ public class ScheduleActivity extends AppCompatActivity {
                 LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.addItemDecoration(divider);
-        mScheduleAdapter = new ScheduleAdapter(this, new ArrayList<Schedule>(), currentDay);
-        mRecyclerView.setAdapter(mScheduleAdapter);
 
-        VolleyTask.showSchedule(this, facUserId, currentDay, mScheduleAdapter, emptyView);
+        mSchedules = new ArrayList<>();
+        mAdapter = new ScheduleAdapter(this, mSchedules, currentDay);
+        mRecyclerView.setAdapter(mAdapter);
 
-        materialDayPicker.setDayPressedListener(new MaterialDayPicker.DayPressedListener() {
-            @Override
-            public void onDayPressed(MaterialDayPicker.Weekday weekday, boolean isSelected) {
-                if (isSelected)
-                     VolleyTask.showSchedule(ScheduleActivity.this, facUserId,
-                             weekday.toString(), mScheduleAdapter, emptyView);
-            }
+        refreshList(facUserId, currentDay);
+
+        materialDayPicker.setDayPressedListener((weekday, isSelected) -> {
+            if (isSelected)  refreshList(facUserId, weekday.toString());
+        });
+    }
+
+    private void refreshList(String facUserId, String currentDay) {
+        VolleyTask.showSchedule(this, facUserId, currentDay, jObj -> {
+            mSchedules = GsonUtils.extractScheduleFromJSON(jObj);
+            mAdapter.swapList(mSchedules, currentDay);
+
+            if (mAdapter.getItemCount() < 1)
+                emptyView.setVisibility(View.VISIBLE);
+            else
+                emptyView.setVisibility(View.GONE);
         });
     }
 }

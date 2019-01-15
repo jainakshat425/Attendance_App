@@ -3,16 +3,20 @@ package com.example.android.attendance;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+
+import com.example.android.attendance.adapters.SpinnerArrayAdapter;
 import com.google.android.material.snackbar.Snackbar;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -20,7 +24,12 @@ import android.widget.Spinner;
 import com.example.android.attendance.utilities.ExtraUtils;
 import com.example.android.attendance.volley.VolleyTask;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,6 +38,7 @@ import butterknife.OnClick;
 
 public class CheckAttendanceActivity extends AppCompatActivity {
 
+    private Context mContext;
     /**
      * semester
      */
@@ -71,15 +81,40 @@ public class CheckAttendanceActivity extends AppCompatActivity {
     void showAttendanceReport() {
         if (allInputsProvided()) {
             VolleyTask.checkValidClass(CheckAttendanceActivity.this, collegeId,
-                    semester, branch, section, isDateWise, fromDate, toDate);
+                    semester, branch, section, jObj -> {
+
+                        Intent i = new Intent();
+                        i.setClass(mContext, StudentReportActivity.class);
+
+                        i.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
+                        i.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
+                        i.putExtra(ExtraUtils.EXTRA_SECTION, section);
+                        i.putExtra(ExtraUtils.EXTRA_COLLEGE_ID, collegeId);
+
+                        i.putExtra(ExtraUtils.EXTRA_IS_DATE_WISE, isDateWise);
+                        if (isDateWise) {
+                            i.putExtra(ExtraUtils.EXTRA_FROM_DATE, fromDate);
+                            i.putExtra(ExtraUtils.EXTRA_TO_DATE, toDate);
+                        }
+
+                        try {
+                            int classId = jObj.getInt("class_id");
+                            int branchId = jObj.getInt("branch_id");
+
+                            i.putExtra(ExtraUtils.EXTRA_CLASS_ID, classId);
+                            i.putExtra(ExtraUtils.EXTRA_BRANCH_ID, branchId);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        startActivity(i);
+                    });
         } else {
             LinearLayout parentLayout = findViewById(R.id.check_attendance_linear_layout);
             Snackbar.make(parentLayout, "Complete all fields!",
                     Snackbar.LENGTH_LONG).show();
         }
     }
-
-    ProgressDialog progressDialog;
 
     SharedPrefManager sharedPrefManager;
     int collegeId;
@@ -88,6 +123,9 @@ public class CheckAttendanceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_attendance);
+        ButterKnife.bind(this);
+
+        mContext = this;
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -96,20 +134,32 @@ public class CheckAttendanceActivity extends AppCompatActivity {
             actionbar.setDisplayHomeAsUpEnabled(true);
         }
 
-        ButterKnife.bind(this);
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Setting up...");
-        progressDialog.show();
-
         sharedPrefManager = SharedPrefManager.getInstance(this);
         collegeId = sharedPrefManager.getCollId();
 
-        //setup all spinners
-        //setup all spinners
-        VolleyTask.setupSemesterSpinner(this, collegeId, semesterSpinner, progressDialog);
-        VolleyTask.setupBranchSpinner(this, collegeId, branchSpinner, progressDialog);
-        ExtraUtils.emptySectionSpinner(this, sectionSpinner);
 
+        setupSemesterSpinner();
+
+        final List<String> branchArr = new ArrayList<>();
+        branchArr.add("Branch");
+        VolleyTask.getBranchNames(mContext, collegeId, jObj -> {
+            JSONArray jsonArray;
+            try {
+                jsonArray = jObj.getJSONArray("branches");
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    branchArr.add(jsonArray.getString(i));
+                }
+                SpinnerArrayAdapter branchAdapter = new SpinnerArrayAdapter(mContext,
+                        android.R.layout.simple_spinner_dropdown_item,
+                        branchArr.toArray(new String[0]));
+                branchSpinner.setAdapter(branchAdapter);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        });
+
+        ExtraUtils.emptySectionSpinner(this, sectionSpinner);
 
         //set click listeners on spinners
         semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -117,15 +167,12 @@ public class CheckAttendanceActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position != 0) {
                     semester = parent.getItemAtPosition(position).toString();
-                    VolleyTask.setupSectionSpinner(CheckAttendanceActivity.this,
-                            sectionSpinner, progressDialog,
-                            branch, semester, collegeId);
+                    refreshSectionSpinner();
                 }
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
         branchSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -133,15 +180,12 @@ public class CheckAttendanceActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position != 0) {
                     branch = parent.getItemAtPosition(position).toString();
-                    VolleyTask.setupSectionSpinner(CheckAttendanceActivity.this,
-                            sectionSpinner, progressDialog,
-                            branch, semester, collegeId);
+                    refreshSectionSpinner();
                 }
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
         sectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -154,7 +198,6 @@ public class CheckAttendanceActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
 
@@ -163,24 +206,17 @@ public class CheckAttendanceActivity extends AppCompatActivity {
         setupDatePickerDialog(toDateEt);
         setDefaultToDate();
 
-        showDateCb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    dateLayoutContainer.setVisibility(View.VISIBLE);
-                    isDateWise = true;
-                } else {
-                    dateLayoutContainer.setVisibility(View.GONE);
-                    isDateWise = false;
-                }
+        showDateCb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                dateLayoutContainer.setVisibility(View.VISIBLE);
+                isDateWise = true;
+            } else {
+                dateLayoutContainer.setVisibility(View.GONE);
+                isDateWise = false;
             }
         });
     }
 
-
-    /**
-     * check all inputs are valid or not
-     */
     private boolean allInputsProvided() {
         if (semester == null || branch == null || section == null) {
             return false;
@@ -190,40 +226,29 @@ public class CheckAttendanceActivity extends AppCompatActivity {
         return true;
     }
 
-
     private void setupDatePickerDialog(final EditText dateEditText) {
 
         final Calendar calender = Calendar.getInstance();
 
         final DatePickerDialog.OnDateSetListener dateSetListener =
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int monthOfYear,
-                                          int dayOfMonth) {
+                (view, year, monthOfYear, dayOfMonth) -> {
 
-                        calender.set(Calendar.YEAR, year);
-                        calender.set(Calendar.MONTH, monthOfYear);
-                        calender.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    calender.set(Calendar.YEAR, year);
+                    calender.set(Calendar.MONTH, monthOfYear);
+                    calender.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                        updateDateEt(dateEditText, calender);
-                    }
-
+                    updateDateEt(dateEditText, calender);
                 };
 
-        dateEditText.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-
-                DatePickerDialog dpDialog = new DatePickerDialog(
-                        CheckAttendanceActivity.this,
-                        dateSetListener,
-                        calender.get(Calendar.YEAR),
-                        calender.get(Calendar.MONTH),
-                        calender.get(Calendar.DAY_OF_MONTH));
-                dpDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
-                dpDialog.show();
-            }
+        dateEditText.setOnClickListener(v -> {
+            DatePickerDialog dpDialog = new DatePickerDialog(
+                    CheckAttendanceActivity.this,
+                    dateSetListener,
+                    calender.get(Calendar.YEAR),
+                    calender.get(Calendar.MONTH),
+                    calender.get(Calendar.DAY_OF_MONTH));
+            dpDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
+            dpDialog.show();
         });
     }
 
@@ -246,5 +271,40 @@ public class CheckAttendanceActivity extends AppCompatActivity {
         toDateDisplay = ExtraUtils.dateDisplayFormat.format(Calendar.getInstance().getTime());
         toDateEt.setText(toDateDisplay);
     }
+
+    private void refreshSectionSpinner() {
+        if (semester != null && branch != null) {
+            final List<String> secArr = new ArrayList<>();
+            secArr.add("Section");
+            VolleyTask.getSections(mContext,
+                    branch, semester, collegeId, jObj -> {
+                        JSONArray jsonArray;
+                        try {
+                            jsonArray = jObj.getJSONArray("sections");
+
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                secArr.add(jsonArray.getString(i));
+                            }
+                            SpinnerArrayAdapter sectionAdapter = new SpinnerArrayAdapter(mContext,
+                                    android.R.layout.simple_spinner_dropdown_item,
+                                    secArr.toArray(new String[0]));
+                            sectionSpinner.setAdapter(sectionAdapter);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+        } else
+            ExtraUtils.emptySectionSpinner(mContext, sectionSpinner);
+    }
+
+    private void setupSemesterSpinner() {
+        String[] semArr = getResources().getStringArray(R.array.semester_array);
+        SpinnerArrayAdapter semesterAdapter = new SpinnerArrayAdapter(CheckAttendanceActivity.this,
+                android.R.layout.simple_spinner_dropdown_item,
+                semArr);
+        semesterSpinner.setAdapter(semesterAdapter);
+
+    }
+
 
 }

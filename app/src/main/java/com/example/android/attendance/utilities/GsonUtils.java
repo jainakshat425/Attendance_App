@@ -23,10 +23,13 @@ public class GsonUtils {
         try {
             String recordsArray = jObj.getString("attendanceRecord");
 
-            Gson gson = new Gson();
-            AttendanceRecord[] targetArray = gson.fromJson(recordsArray, AttendanceRecord[].class);
+            if (recordsArray != null && !recordsArray.equals("null")) {
+                Gson gson = new Gson();
+                AttendanceRecord[] targetArray = gson.fromJson(recordsArray, AttendanceRecord[].class);
 
-            return Arrays.asList(targetArray);
+                return Arrays.asList(targetArray);
+            }
+            return null;
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -37,10 +40,12 @@ public class GsonUtils {
         try {
             String recordsArray = jObj.getString("attendance");
 
-            Gson gson = new Gson();
-            Attendance[] targetArray = gson.fromJson(recordsArray, Attendance[].class);
+            if (recordsArray != null && !recordsArray.equals("null")) {
+                Gson gson = new Gson();
+                Attendance[] targetArray = gson.fromJson(recordsArray, Attendance[].class);
 
-            return Arrays.asList(targetArray);
+                return Arrays.asList(targetArray);
+            } else return null;
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -51,41 +56,47 @@ public class GsonUtils {
         try {
             String recordsArray = jObj.getString("schedule");
 
-            Gson gson = new Gson();
-            Schedule[] targetArray = gson.fromJson(recordsArray, Schedule[].class);
+            if (recordsArray != null && !recordsArray.equals("null")) {
+                Gson gson = new Gson();
+                Schedule[] targetArray = gson.fromJson(recordsArray, Schedule[].class);
 
-            return Arrays.asList(targetArray);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
+                return Arrays.asList(targetArray);
+            } else return null;
+            } catch(JSONException e){
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        public static List<Report> extractReportsFromJson (JSONObject jObj){
+            try {
+                String reportArr = jObj.getString("report");
+
+                if (reportArr != null && !reportArr.equals("null")) {
+                    Gson gson = new Gson();
+                    Report[] targetArray = gson.fromJson(reportArr, Report[].class);
+
+                    return Arrays.asList(targetArray);
+                } else return null;
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        public static List<SubReport> extractSubReportsFromJson (JSONObject jObj){
+            try {
+                String subReportArr = jObj.getString("sub_report");
+
+                if (subReportArr != null && !subReportArr.equals("null")) {
+                    Gson gson = new Gson();
+                    SubReport[] targetArray = gson.fromJson(subReportArr, SubReport[].class);
+
+                    return Arrays.asList(targetArray);
+                } else return null;
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
-
-    public static List<Report> extractReportsFromJson(JSONObject jObj) {
-        try {
-            String reportArr = jObj.getString("report");
-
-            Gson gson = new Gson();
-            Report[] targetArray = gson.fromJson(reportArr, Report[].class);
-
-            return Arrays.asList(targetArray);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static List<SubReport> extractSubReportsFromJson(JSONObject jObj) {
-        try {
-            String subReportArr = jObj.getString("sub_report");
-
-            Gson gson = new Gson();
-            SubReport[] targetArray = gson.fromJson(subReportArr, SubReport[].class);
-
-            return Arrays.asList(targetArray);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-}

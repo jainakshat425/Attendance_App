@@ -2,7 +2,6 @@ package com.example.android.attendance;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -114,21 +113,6 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
             }
 
             document.open();
-
-            /** For making image compatible for pdf **/
-            /*   Image bgImage;
-            //set drawable in cell
-            Drawable myImage = context.getResources().getDrawable(R.drawable.trinity);
-            Bitmap bitmap = ((BitmapDrawable) myImage).getBitmap();
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            byte[] bitmapdata = stream.toByteArray();*/
-
-            /** for adding heading and image to the pdf **/
-            /*  bgImage = Image.getInstance(bitmapdata);
-            bgImage.setAbsolutePosition(330f, 642f);
-            cell.addElement(bgImage);
-            pt.addCell(cell);    */
 
             try {
 
@@ -319,48 +303,42 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
         builder.setView(dialogView);
 
         // Set up the buttons
-        builder.setPositiveButton("Save & Open", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        builder.setPositiveButton("Save & Open", (dialog, which) -> {
 
-                String newName = input.getText().toString().trim();
+            String newName = input.getText().toString().trim();
 
-                if (newName.equals("") || newName.startsWith(" ")) {
+            if (newName.equals("") || newName.startsWith(" ")) {
 
-                    builder.show();
-                    input.setError("Enter valid Filename.");
+                builder.show();
+                input.setError("Enter valid Filename.");
+            } else {
+                if (!newName.endsWith(".pdf")) {
+                    newName.concat(".pdf");
+                }
+                File newFile = new File(context.getExternalFilesDir("pdf"), newName);
+
+                boolean renamed = pdfFile.renameTo(newFile);
+                dialog.cancel();
+                if (renamed) {
+                    Toast.makeText(context, "saved at " + newFile.getAbsolutePath(),
+                            Toast.LENGTH_LONG)
+                            .show();
+                    openPdf(context, newFile);
+                    showShareDialog(context, newFile);
                 } else {
-                    if (!newName.endsWith(".pdf")) {
-                        newName.concat(".pdf");
-                    }
-                    File newFile = new File(context.getExternalFilesDir("pdf"), newName);
-
-                    boolean renamed = pdfFile.renameTo(newFile);
-                    dialog.cancel();
-                    if (renamed) {
-                        Toast.makeText(context, "saved at " + newFile.getAbsolutePath(),
-                                Toast.LENGTH_LONG)
-                                .show();
-                        openPdf(context, newFile);
-                        showShareDialog(context, newFile);
-                    } else {
-                        Toast.makeText(context, "saved at " + pdfFile.getAbsolutePath(),
-                                Toast.LENGTH_LONG)
-                                .show();
-                        openPdf(context, pdfFile);
-                        showShareDialog(context, pdfFile);
-                    }
+                    Toast.makeText(context, "saved at " + pdfFile.getAbsolutePath(),
+                            Toast.LENGTH_LONG)
+                            .show();
+                    openPdf(context, pdfFile);
+                    showShareDialog(context, pdfFile);
                 }
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(context, "saved at " + pdfFile.getAbsolutePath(),
-                        Toast.LENGTH_LONG)
-                        .show();
-                showShareDialog(context, pdfFile);
-            }
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            Toast.makeText(context, "saved at " + pdfFile.getAbsolutePath(),
+                    Toast.LENGTH_LONG)
+                    .show();
+            showShareDialog(context, pdfFile);
         });
         builder.show();
     }
@@ -370,31 +348,23 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
         builder.setTitle("Share file?");
 
         // Set up the buttons
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Uri uri = FileProvider.getUriForFile(context,
-                        BuildConfig.APPLICATION_ID + ".fileprovider",
-                        pdfFile);
+        builder.setPositiveButton("Yes", (dialog, which) -> {
+            Uri uri = FileProvider.getUriForFile(context,
+                    BuildConfig.APPLICATION_ID + ".fileprovider",
+                    pdfFile);
 
-                Intent share = new Intent();
-                share.setAction(Intent.ACTION_SEND);
-                share.setType("application/pdf");
-                share.putExtra(Intent.EXTRA_STREAM, uri);
-                share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                context.startActivity(share);
-            }
+            Intent share = new Intent();
+            share.setAction(Intent.ACTION_SEND);
+            share.setType("application/pdf");
+            share.putExtra(Intent.EXTRA_STREAM, uri);
+            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            context.startActivity(share);
         });
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setNegativeButton("No", (dialog, which) -> dialog.dismiss());
         builder.show();
     }
 
-    public void openPdf(final Context context, File pdfFile) {
+    private void openPdf(final Context context, File pdfFile) {
 
         // Get URI and MIME type of file
         Uri uri = FileProvider.getUriForFile(context,

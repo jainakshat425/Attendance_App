@@ -3,16 +3,19 @@ package com.example.android.attendance;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import com.example.android.attendance.adapters.SpinnerArrayAdapter;
 import com.google.android.material.snackbar.Snackbar;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -20,10 +23,17 @@ import android.widget.Spinner;
 import com.example.android.attendance.utilities.ExtraUtils;
 import com.example.android.attendance.volley.VolleyTask;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class NewAttendanceActivity extends AppCompatActivity {
 
@@ -65,11 +75,50 @@ public class NewAttendanceActivity extends AppCompatActivity {
     private String dateDisplay = null;
     private String day = null;
 
+    @OnClick(R.id.fab_new_attendance)
+    void newAttendance() {
+        if (allInputsProvided()) {
+            final ProgressDialog progressDialog = new ProgressDialog(mContext);
+            progressDialog.setMessage("Loading...");
+            progressDialog.show();
+
+            String lectNo = lectureEt.getText().toString().trim();
+
+            VolleyTask.takeNewAttendance(mContext, date, day, semester, branch,
+                    section, lectNo, collegeId, -1,
+                    jObj -> {
+                        Intent intent = new Intent();
+                        intent.setClass(mContext, TakeAttendanceActivity.class);
+                        if (jObj.has("class_id")) {
+                            try {
+                                int classId = jObj.getInt("class_id");
+                                intent.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        intent.putExtra(ExtraUtils.EXTRA_DATE, date);
+                        intent.putExtra(ExtraUtils.EXTRA_DISPLAY_DATE, dateDisplay);
+                        intent.putExtra(ExtraUtils.EXTRA_DAY, day);
+                        intent.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
+                        intent.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
+                        intent.putExtra(ExtraUtils.EXTRA_SECTION, section);
+                        intent.putExtra(ExtraUtils.EXTRA_SUBJECT, subject);
+                        intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
+
+                        mContext.startActivity(intent);
+                    });
+        } else {
+            RelativeLayout parentLayout = findViewById(R.id.relative_layout);
+            Snackbar.make(parentLayout, "Complete all fields.",
+                    Snackbar.LENGTH_LONG).show();
+        }
+    }
+
     //declare buttons and edit text field for lecture selection
     private EditText lectureEt;
     private Button plusButton;
     private Button minusButton;
-    ProgressDialog progressDialog;
 
     SharedPrefManager sharedPrefManager;
     int collegeId;
@@ -88,16 +137,31 @@ public class NewAttendanceActivity extends AppCompatActivity {
 
         mContext = this;
         ButterKnife.bind(this);
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Setting up...");
-        progressDialog.show();
 
         sharedPrefManager = SharedPrefManager.getInstance(mContext);
         collegeId = sharedPrefManager.getCollId();
 
-        //setup all spinners
-        VolleyTask.setupSemesterSpinner(mContext, collegeId, semesterSpinner, progressDialog);
-        VolleyTask.setupBranchSpinner(mContext, collegeId, branchSpinner, progressDialog);
+        setupSemesterSpinner();
+
+        final List<String> branchArr = new ArrayList<>();
+        branchArr.add("Branch");
+        VolleyTask.getBranchNames(mContext, collegeId, jObj -> {
+            JSONArray jsonArray;
+            try {
+                jsonArray = jObj.getJSONArray("branches");
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    branchArr.add(jsonArray.getString(i));
+                }
+                SpinnerArrayAdapter branchAdapter = new SpinnerArrayAdapter(mContext,
+                        android.R.layout.simple_spinner_dropdown_item,
+                        branchArr.toArray(new String[0]));
+                branchSpinner.setAdapter(branchAdapter);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        });
+
         ExtraUtils.emptySectionSpinner(mContext, sectionSpinner);
         ExtraUtils.emptySubjectSpinner(mContext, subjectSpinner);
 
@@ -108,10 +172,8 @@ public class NewAttendanceActivity extends AppCompatActivity {
                 subject = null;
                 if (position != 0) {
                     semester = parent.getItemAtPosition(position).toString();
-                    VolleyTask.setupSubjectSpinner(mContext, subjectSpinner, progressDialog,
-                            branch, semester, collegeId);
-                    VolleyTask.setupSectionSpinner(mContext, sectionSpinner, progressDialog,
-                            branch, semester, collegeId);
+                    refreshSubjectSpinner();
+                    refreshSectionSpinner();
                 }
             }
 
@@ -126,10 +188,8 @@ public class NewAttendanceActivity extends AppCompatActivity {
                 subject = null;
                 if (position != 0) {
                     branch = parent.getItemAtPosition(position).toString();
-                    VolleyTask.setupSubjectSpinner(mContext, subjectSpinner, progressDialog,
-                            branch, semester, collegeId);
-                    VolleyTask.setupSectionSpinner(mContext, sectionSpinner, progressDialog,
-                            branch, semester, collegeId);
+                    refreshSubjectSpinner();
+                    refreshSectionSpinner();
                 }
             }
 
@@ -165,11 +225,6 @@ public class NewAttendanceActivity extends AppCompatActivity {
             }
         });
 
-        //setup fab button for TakeAttendanceActivity
-        setupFabButton();
-
-
-
         //setup date picker dialog
         setupDatePickerDialog();
         setDefaultDate();
@@ -197,33 +252,27 @@ public class NewAttendanceActivity extends AppCompatActivity {
         lectureEt.setText("1");
         minusButton.setEnabled(false);
 
-        plusButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        plusButton.setOnClickListener(v -> {
 
-                int currentLectureValue = Integer.parseInt(lectureEt.getText().toString());
-                if (currentLectureValue < 8) {
-                    lectureEt.setText(String.valueOf(++currentLectureValue));
-                    plusButton.setEnabled(true);
-                } else {
-                    plusButton.setEnabled(false);
-                }
-                minusButton.setEnabled(true);
+            int currentLectureValue = Integer.parseInt(lectureEt.getText().toString());
+            if (currentLectureValue < 8) {
+                lectureEt.setText(String.valueOf(++currentLectureValue));
+                plusButton.setEnabled(true);
+            } else {
+                plusButton.setEnabled(false);
             }
+            minusButton.setEnabled(true);
         });
 
-        minusButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int currentLectureValue = Integer.parseInt(lectureEt.getText().toString());
-                if (currentLectureValue > 1) {
-                    lectureEt.setText(String.valueOf(--currentLectureValue));
-                    minusButton.setEnabled(true);
-                } else {
-                    minusButton.setEnabled(false);
-                }
-                plusButton.setEnabled(true);
+        minusButton.setOnClickListener(v -> {
+            int currentLectureValue = Integer.parseInt(lectureEt.getText().toString());
+            if (currentLectureValue > 1) {
+                lectureEt.setText(String.valueOf(--currentLectureValue));
+                minusButton.setEnabled(true);
+            } else {
+                minusButton.setEnabled(false);
             }
+            plusButton.setEnabled(true);
         });
     }
 
@@ -234,32 +283,22 @@ public class NewAttendanceActivity extends AppCompatActivity {
 
         myCalendar = Calendar.getInstance();
 
-        final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+        final DatePickerDialog.OnDateSetListener date = (view, year, monthOfYear, dayOfMonth) -> {
 
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear,
-                                  int dayOfMonth) {
+            myCalendar.set(Calendar.YEAR, year);
+            myCalendar.set(Calendar.MONTH, monthOfYear);
+            myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                myCalendar.set(Calendar.YEAR, year);
-                myCalendar.set(Calendar.MONTH, monthOfYear);
-                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-                updateDateEt();
-            }
-
+            updateDateEt();
         };
 
-        dateEditText.setOnClickListener(new View.OnClickListener() {
+        dateEditText.setOnClickListener(v -> {
 
-            @Override
-            public void onClick(View v) {
-
-                DatePickerDialog dpDialog = new DatePickerDialog(mContext, date, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH));
-                dpDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
-                dpDialog.show();
-            }
+            DatePickerDialog dpDialog = new DatePickerDialog(mContext, date, myCalendar
+                    .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                    myCalendar.get(Calendar.DAY_OF_MONTH));
+            dpDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
+            dpDialog.show();
         });
     }
 
@@ -276,30 +315,6 @@ public class NewAttendanceActivity extends AppCompatActivity {
     }
 
     /**
-     * setup fab button which LINKs to TakeAttendanceActivity
-     */
-    private void setupFabButton() {
-        //initialise floatingActionButton and link it to takeAttendance
-        final FloatingActionButton takeAttendanceFab = findViewById(R.id.fab_new_attendance);
-        takeAttendanceFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (allInputsProvided()) {
-                    VolleyTask.takeNewAttendance(mContext, date, day, semester, branch,
-                            section, subject, lectureEt.getText().toString().trim(),
-                            collegeId, dateDisplay, -1, -1);
-                } else {
-                    RelativeLayout parentLayout = findViewById(R.id.relative_layout);
-                    Snackbar.make(parentLayout, "Complete all fields.",
-                            Snackbar.LENGTH_LONG).show();
-                }
-            }
-
-        });
-    }
-
-
-    /**
      * check all inputs are valid or not
      */
     private boolean allInputsProvided() {
@@ -310,5 +325,65 @@ public class NewAttendanceActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    private void setupSemesterSpinner() {
+        String[] semArr = getResources().getStringArray(R.array.semester_array);
+        SpinnerArrayAdapter semesterAdapter = new SpinnerArrayAdapter(NewAttendanceActivity.this,
+                android.R.layout.simple_spinner_dropdown_item,
+                semArr);
+        semesterSpinner.setAdapter(semesterAdapter);
+
+    }
+
+    private void refreshSectionSpinner() {
+        if (semester != null && branch != null) {
+            final List<String> secArr = new ArrayList<>();
+            secArr.add("Section");
+            VolleyTask.getSections(mContext,
+                    branch, semester, collegeId, jObj -> {
+                        JSONArray jsonArray;
+                        try {
+                            jsonArray = jObj.getJSONArray("sections");
+
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                secArr.add(jsonArray.getString(i));
+                            }
+                            SpinnerArrayAdapter sectionAdapter = new SpinnerArrayAdapter(mContext,
+                                    android.R.layout.simple_spinner_dropdown_item,
+                                    secArr.toArray(new String[0]));
+                            sectionSpinner.setAdapter(sectionAdapter);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+        } else
+            ExtraUtils.emptySectionSpinner(mContext, sectionSpinner);
+    }
+
+    private void refreshSubjectSpinner() {
+        final List<String> subArray = new ArrayList<>();
+        subArray.add("Subject");
+        if (semester != null && branch != null) {
+
+            VolleyTask.getSubjects(mContext, branch, semester, collegeId, jObj -> {
+                JSONArray subJSONArray;
+                try {
+                    subJSONArray = jObj.getJSONArray("subjects");
+
+                    for (int i = 0; i < subJSONArray.length(); i++) {
+                        JSONObject subObj = subJSONArray.getJSONObject(i);
+                        subArray.add(subObj.getString("sub_name"));
+                    }
+                    SpinnerArrayAdapter subjectAdapter = new SpinnerArrayAdapter(mContext,
+                            android.R.layout.simple_spinner_dropdown_item,
+                            subArray.toArray(new String[0]));
+                    subjectSpinner.setAdapter(subjectAdapter);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            });
+        } else
+            ExtraUtils.emptySubjectSpinner(mContext, subjectSpinner);
     }
 }

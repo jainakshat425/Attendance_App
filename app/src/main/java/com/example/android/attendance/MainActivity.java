@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity
             mRecyclerView.setLayoutManager(layoutManager);
             mRecyclerView.addItemDecoration(divider);
             mRecyclerView.setAdapter(mAdapter);
-            VolleyTask.setupMainActivity(this, facUserId, new VolleyCallback() {
+            VolleyTask.getAttendanceList(this, facUserId, new VolleyCallback() {
                 @Override
                 public void onSuccessResponse(JSONObject jObj) {
                     List<AttendanceRecord> records =
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onResume() {
-        VolleyTask.setupMainActivity(this, mSharedPref.getFacUserId(), new VolleyCallback() {
+        VolleyTask.getAttendanceList(this, mSharedPref.getFacUserId(), new VolleyCallback() {
             @Override
             public void onSuccessResponse(JSONObject jObj) {
                 List<AttendanceRecord> records =

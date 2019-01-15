@@ -3,6 +3,8 @@ package com.example.android.attendance.adapters;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +12,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.attendance.R;
+import com.example.android.attendance.TakeAttendanceActivity;
 import com.example.android.attendance.pojos.Schedule;
 import com.example.android.attendance.utilities.ExtraUtils;
+import com.example.android.attendance.volley.VolleyCallback;
 import com.example.android.attendance.volley.VolleyTask;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -113,8 +120,23 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
 
 
                 VolleyTask.takeNewAttendance(mContext, date, mDay, semester, branch,
-                        section, subName, lectNo,
-                        collegeId, dateDisplay, lectId, classId);
+                        section, lectNo, collegeId, lectId,
+                        jObj -> {
+                            Intent intent = new Intent();
+                            intent.setClass(mContext, TakeAttendanceActivity.class);
+
+                            intent.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
+                            intent.putExtra(ExtraUtils.EXTRA_DATE, date);
+                            intent.putExtra(ExtraUtils.EXTRA_DISPLAY_DATE, dateDisplay);
+                            intent.putExtra(ExtraUtils.EXTRA_DAY, mDay);
+                            intent.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
+                            intent.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
+                            intent.putExtra(ExtraUtils.EXTRA_SECTION, section);
+                            intent.putExtra(ExtraUtils.EXTRA_SUBJECT, subName);
+                            intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
+
+                            mContext.startActivity(intent);
+                        });
             } else {
                 Toast.makeText(mContext, "Attendance can only be taken for current day!",
                         Toast.LENGTH_SHORT).show();

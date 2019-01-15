@@ -1,8 +1,10 @@
 package com.example.android.attendance;
 
 import android.app.Activity;
-import android.content.DialogInterface;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,18 +12,18 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.attendance.adapters.TakeAttendAdapter;
 import com.example.android.attendance.pojos.Attendance;
 import com.example.android.attendance.utilities.ExtraUtils;
 import com.example.android.attendance.utilities.GsonUtils;
-import com.example.android.attendance.volley.VolleyCallback;
 import com.example.android.attendance.volley.VolleyTask;
-
-import org.json.JSONObject;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +65,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
+        assert actionbar != null;
         actionbar.setDisplayHomeAsUpEnabled(true);
 
         ButterKnife.bind(this);
@@ -94,9 +97,9 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             semesterTv.setText(ExtraUtils.getSemester(semester));
             lectureTv.setText(ExtraUtils.getLecture(lectNo));
 
-            mAdapter = new TakeAttendAdapter(this, new ArrayList<Attendance>());
+            mAdapter = new TakeAttendAdapter(this, new ArrayList<>());
             LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            layoutManager.setOrientation(RecyclerView.VERTICAL);
             DividerItemDecoration divider = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
             mRecyclerView.setLayoutManager(layoutManager);
             mRecyclerView.addItemDecoration(divider);
@@ -105,24 +108,18 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             if (attendRecId != null) {
                 setTitle(getString(R.string.update_attendance_title));
                 isUpdateMode = true;
-                VolleyTask.setupForUpdateAttendance(this, attendRecId, new VolleyCallback() {
-                    @Override
-                    public void onSuccessResponse(JSONObject jObj) {
-                        List<Attendance> records = GsonUtils
-                                .extractAttendanceFromJSON(jObj);
-                        mAdapter.swapList(records);
-                    }
+                VolleyTask.setupForUpdateAttendance(this, attendRecId, jObj -> {
+                    List<Attendance> records = GsonUtils
+                            .extractAttendanceFromJSON(jObj);
+                    mAdapter.swapList(records);
                 });
             } else {
                 setTitle(R.string.take_attendance_title);
                 isUpdateMode = false;
                 VolleyTask.setupForNewAttendance(this, lectNo, classId, date, day,
-                        new VolleyCallback() {
-                            @Override
-                            public void onSuccessResponse(JSONObject jObj) {
-                                List<Attendance> records = GsonUtils.extractAttendanceFromJSON(jObj);
-                                mAdapter.swapList(records);
-                            }
+                        jObj -> {
+                            List<Attendance> records = GsonUtils.extractAttendanceFromJSON(jObj);
+                            mAdapter.swapList(records);
                         });
             }
         }
@@ -132,7 +129,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.save_attendance:
-                VolleyTask.saveAttendance(this, isUpdateMode);
+                saveAttendance();
                 break;
             case R.id.check_all:
                 mAdapter.checkAll();
@@ -142,10 +139,35 @@ public class TakeAttendanceActivity extends AppCompatActivity {
                 break;
             case android.R.id.home:
                 if (isUpdateMode) finish();
-                else VolleyTask.undoAttendanceAndFinish(this);
+                else {
+                   undoChangesAndFinish();
+                }
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void undoChangesAndFinish() {
+        int recordId = TakeAttendAdapter.getmAttendanceList()[1].getAttendanceRecordId();
+        VolleyTask.undoAttendance(this, recordId, jObj -> {
+            Toast.makeText(this, "Attendance not saved.",
+                    Toast.LENGTH_SHORT).show();
+            finish();
+        });
+    }
+
+    private void saveAttendance() {
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
+
+        Gson gson = new Gson();
+        Attendance[] attendances = TakeAttendAdapter.getmAttendanceList();
+        final String attJsonObj = gson.toJson(attendances);
+        VolleyTask.saveAttendance(this, isUpdateMode, attJsonObj, jObj -> {
+            finish();
+            startActivity(new Intent(TakeAttendanceActivity.this, MainActivity.class));
+        });
     }
 
     @Override
@@ -166,19 +188,15 @@ public class TakeAttendanceActivity extends AppCompatActivity {
                 .setTitle("Attendance will be lost!")
                 .setMessage("Do you want to exit?")
                 .setPositiveButton("No",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        }).setNegativeButton("Yes",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                setResult(Activity.RESULT_CANCELED);
-                                if (isUpdateMode) finish();
-                                else VolleyTask.undoAttendanceAndFinish(TakeAttendanceActivity.this);
-                            }
+                        (dialog1, which) -> dialog1.cancel()).setNegativeButton("Yes",
+                        (dialog12, which) -> {
+
+                            setResult(Activity.RESULT_CANCELED);
+
+                            if (isUpdateMode) finish();
+
+                            else undoChangesAndFinish();
+
                         }).create();
         dialog.show();
     }
