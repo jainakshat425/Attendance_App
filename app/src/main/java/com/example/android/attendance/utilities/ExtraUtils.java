@@ -54,7 +54,7 @@ public class ExtraUtils {
     public static final String EXTRA_SUBJECT = "extra_subject";
     public static final String EXTRA_LECTURE_NO = "extra_lecture";
 
-    public static final String EXTRA_FAC_USER_ID = "extra_fac_user_id";
+    public static final String EXTRA_FAC_EMAIL = "extra_fac_email";
     public static final String EXTRA_FAC_NAME = "extra_fac_name";
     public static final String EXTRA_FAC_DEPT = "extra_fac_dept";
 

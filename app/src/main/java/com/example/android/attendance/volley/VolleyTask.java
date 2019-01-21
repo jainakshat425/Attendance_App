@@ -57,7 +57,7 @@ public class VolleyTask {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
 
-                params.put(FacultyEntry.F_USERNAME_COL, username);
+                params.put(FacultyEntry.F_EMAIL_COL, username);
                 params.put(FacultyEntry.F_PASSWORD_COL, password);
 
                 return params;
@@ -96,7 +96,7 @@ public class VolleyTask {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put(FacultyEntry.F_USERNAME_COL, facUserId);
+                params.put(FacultyEntry.F_EMAIL_COL, facUserId);
                 return params;
             }
         };

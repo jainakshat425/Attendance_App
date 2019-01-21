@@ -76,14 +76,14 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
         holder.totalStudentsTv.setText(totalStudents);
 
         String attendRecId = String.valueOf(record.getId());
-        String facUserId = record.getFacUserId();
+        String facUserId = record.getFacEmail();
         String classId = String.valueOf(record.getClassId());
         String collegeId = String.valueOf(record.getCollegeId());
 
 
         Bundle intentBundle = new Bundle();
         intentBundle.putString(ExtraUtils.EXTRA_ATTEND_REC_ID, attendRecId);
-        intentBundle.putString(ExtraUtils.EXTRA_FAC_USER_ID, facUserId);
+        intentBundle.putString(ExtraUtils.EXTRA_FAC_EMAIL, facUserId);
         intentBundle.putString(ExtraUtils.EXTRA_DATE, dateString);
         intentBundle.putString(ExtraUtils.EXTRA_DISPLAY_DATE, displayDate);
         intentBundle.putString(ExtraUtils.EXTRA_SEMESTER, semester);

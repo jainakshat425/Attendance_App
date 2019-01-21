@@ -20,9 +20,9 @@ public class AttendanceRecord {
     @SerializedName("total_students")
     @Expose
     private Integer totalStudents;
-    @SerializedName("fac_user_id")
+    @SerializedName("fac_email")
     @Expose
-    private String facUserId;
+    private String facEmail;
     @SerializedName("class_id")
     @Expose
     private Integer classId;
@@ -97,12 +97,12 @@ public class AttendanceRecord {
         this.totalStudents = totalStudents;
     }
 
-    public String getFacUserId() {
-        return facUserId;
+    public String getFacEmail() {
+        return facEmail;
     }
 
-    public void setFacUserId(String facUserId) {
-        this.facUserId = facUserId;
+    public void setFacEmail(String facEmail) {
+        this.facEmail = facEmail;
     }
 
     public Integer getClassId() {

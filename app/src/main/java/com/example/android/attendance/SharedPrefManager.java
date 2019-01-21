@@ -27,7 +27,7 @@ public class SharedPrefManager {
         SharedPreferences sharedPref = mCtx
                 .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
 
-        if (sharedPref.getString(FacultyEntry.F_USERNAME_COL, null) != null)
+        if (sharedPref.getString(FacultyEntry.F_EMAIL_COL, null) != null)
             return true;
         else
             return false;
@@ -40,7 +40,7 @@ public class SharedPrefManager {
                 Context.MODE_PRIVATE).edit();
 
         sharedPref.putInt(FacultyEntry._ID, facId);
-        sharedPref.putString(FacultyEntry.F_USERNAME_COL, facUsername);
+        sharedPref.putString(FacultyEntry.F_EMAIL_COL, facUsername);
         sharedPref.putString(FacultyEntry.F_NAME_COL, facName);
         sharedPref.putString("dept_name", facDept);
         sharedPref.putInt(FacultyEntry.F_COLLEGE_ID, fCollId);
@@ -68,7 +68,7 @@ public class SharedPrefManager {
         SharedPreferences sharedPref = mCtx
                 .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
 
-        return sharedPref.getString(FacultyEntry.F_USERNAME_COL, null);
+        return sharedPref.getString(FacultyEntry.F_EMAIL_COL, null);
     }
 
     public String getFacName() {

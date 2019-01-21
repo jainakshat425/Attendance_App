@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_schedule:
                 String facUserId = mSharedPref.getFacUserId();
                 Intent scheduleIntent = new Intent(this, ScheduleActivity.class);
-                scheduleIntent.putExtra(ExtraUtils.EXTRA_FAC_USER_ID, facUserId);
+                scheduleIntent.putExtra(ExtraUtils.EXTRA_FAC_EMAIL, facUserId);
                 startActivity(scheduleIntent);
                 break;
         }
