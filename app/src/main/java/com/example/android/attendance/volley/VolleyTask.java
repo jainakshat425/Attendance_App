@@ -9,13 +9,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 
-import com.example.android.attendance.contracts.AttendanceContract.AttendanceEntry;
-import com.example.android.attendance.contracts.AttendanceRecordContract.AttendanceRecordEntry;
-import com.example.android.attendance.contracts.BranchContract.BranchEntry;
-import com.example.android.attendance.contracts.ClassContract.ClassEntry;
-import com.example.android.attendance.contracts.FacultyContract.FacultyEntry;
-
-import com.example.android.attendance.contracts.LectureContract.LectureEntry;
+import com.example.android.attendance.SharedPrefManager;
 import com.example.android.attendance.utilities.ExtraUtils;
 
 import org.json.JSONException;
@@ -56,8 +50,8 @@ public class VolleyTask {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
 
-                params.put(FacultyEntry.F_EMAIL_COL, username);
-                params.put(FacultyEntry.F_PASSWORD_COL, password);
+                params.put(SharedPrefManager.FAC_EMAIL, username);
+                params.put(SharedPrefManager.FAC_PASSWORD, password);
 
                 return params;
             }
@@ -93,7 +87,7 @@ public class VolleyTask {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put(FacultyEntry.F_EMAIL_COL, facEmail);
+                params.put(SharedPrefManager.FAC_EMAIL, facEmail);
                 return params;
             }
         };
@@ -127,7 +121,7 @@ public class VolleyTask {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put(ClassEntry.COLLEGE_ID, String.valueOf(collId));
+                params.put("college_id", String.valueOf(collId));
                 return params;
             }
         };
@@ -243,17 +237,17 @@ public class VolleyTask {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
                 if (lectId == -1) {
-                    params.put(BranchEntry.BRANCH_NAME, branch);
-                    params.put(ClassEntry.COLLEGE_ID, String.valueOf(collegeId));
-                    params.put(ClassEntry.SEMESTER, semester);
-                    params.put(ClassEntry.SECTION, section);
-                    params.put(LectureEntry.LECTURE_DAY, day);
-                    params.put(LectureEntry.LECTURE_NUMBER, lectNo);
-                    params.put(AttendanceRecordEntry.DATE_COL, date);
+                    params.put("b_name", branch);
+                    params.put("college_id", String.valueOf(collegeId));
+                    params.put("semester", semester);
+                    params.put("section", section);
+                    params.put("day", day);
+                    params.put("lect_no", lectNo);
                 } else {
-                    params.put(AttendanceRecordEntry.DATE_COL, date);
                     params.put("lect_id", String.valueOf(lectId));
                 }
+                params.put("date", date);
+
                 return params;
             }
         };
@@ -332,7 +326,7 @@ public class VolleyTask {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put(AttendanceRecordEntry.ID, String.valueOf(recordId));
+                params.put("_id", String.valueOf(recordId));
                 return params;
             }
         };
@@ -371,7 +365,7 @@ public class VolleyTask {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put(AttendanceEntry.ATTENDANCE_RECORD_ID, attendRecId);
+                params.put("attendance_record_id", attendRecId);
                 return params;
             }
         };
@@ -412,10 +406,10 @@ public class VolleyTask {
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
 
-                params.put(LectureEntry.CLASS_ID, classId);
-                params.put(LectureEntry.LECTURE_NUMBER, lectureNo);
-                params.put(LectureEntry.LECTURE_DAY, day);
-                params.put(AttendanceRecordEntry.DATE_COL, date);
+                params.put("class_id", classId);
+                params.put("lect_no", lectureNo);
+                params.put("day", day);
+                params.put("date", date);
 
                 return params;
             }
@@ -453,8 +447,8 @@ public class VolleyTask {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put(LectureEntry.FAC_USER_ID, facEmail);
-                params.put(LectureEntry.LECTURE_DAY, day);
+                params.put("fac_email", facEmail);
+                params.put("day", day);
                 return params;
             }
         };
@@ -491,10 +485,10 @@ public class VolleyTask {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put(BranchEntry.BRANCH_NAME, branch);
-                params.put(ClassEntry.COLLEGE_ID, String.valueOf(collegeId));
-                params.put(ClassEntry.SEMESTER, semester);
-                params.put(ClassEntry.SECTION, section);
+                params.put("b_name", branch);
+                params.put("college_id", String.valueOf(collegeId));
+                params.put("semester", semester);
+                params.put("section", section);
                 return params;
             }
         };

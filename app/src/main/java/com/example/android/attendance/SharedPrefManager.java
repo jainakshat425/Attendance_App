@@ -3,9 +3,17 @@ package com.example.android.attendance;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.android.attendance.contracts.FacultyContract.FacultyEntry;
-
 public class SharedPrefManager {
+
+
+    public static final String FAC_ID = "_id";
+    public static final String FAC_NAME = "fac_name";
+    public static final String FAC_EMAIL = "fac_email";
+    public static final String FAC_PASSWORD = "fac_password";
+    public static final String FAC_DEPT = "dept_name";
+    public static final String FAC_COLL_ID = "college_id";
+    public static final String FAC_MOB_NO = "mob_no";
+
     private static SharedPrefManager mInstance;
     private static Context mCtx;
 
@@ -27,7 +35,7 @@ public class SharedPrefManager {
         SharedPreferences sharedPref = mCtx
                 .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
 
-        if (sharedPref.getString(FacultyEntry.F_EMAIL_COL, null) != null)
+        if (sharedPref.getString(FAC_EMAIL, null) != null)
             return true;
         else
             return false;
@@ -39,12 +47,12 @@ public class SharedPrefManager {
         SharedPreferences.Editor sharedPref = mCtx.getSharedPreferences(MY_SHARED_PREF,
                 Context.MODE_PRIVATE).edit();
 
-        sharedPref.putInt(FacultyEntry._ID, facId);
-        sharedPref.putString(FacultyEntry.F_EMAIL_COL, facUsername);
-        sharedPref.putString(FacultyEntry.F_NAME_COL, facName);
+        sharedPref.putInt(FAC_ID, facId);
+        sharedPref.putString(FAC_EMAIL, facUsername);
+        sharedPref.putString(FAC_NAME, facName);
         sharedPref.putString("dept_name", facDept);
-        sharedPref.putInt(FacultyEntry.F_COLLEGE_ID, fCollId);
-        sharedPref.putString(FacultyEntry.F_MOB_NO, mobNo);
+        sharedPref.putInt(FAC_COLL_ID, fCollId);
+        sharedPref.putString(FAC_MOB_NO, mobNo);
 
         sharedPref.apply();
         return true;
@@ -54,28 +62,28 @@ public class SharedPrefManager {
         SharedPreferences sharedPref = mCtx
                 .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
 
-        return sharedPref.getInt(FacultyEntry._ID, -1);
+        return sharedPref.getInt(FAC_ID, -1);
     }
 
     public int getCollId() {
         SharedPreferences sharedPref = mCtx
                 .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
 
-        return sharedPref.getInt(FacultyEntry.F_COLLEGE_ID, -1);
+        return sharedPref.getInt(FAC_COLL_ID, -1);
     }
 
     public String getFacEmail() {
         SharedPreferences sharedPref = mCtx
                 .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
 
-        return sharedPref.getString(FacultyEntry.F_EMAIL_COL, null);
+        return sharedPref.getString(FAC_EMAIL, null);
     }
 
     public String getFacName() {
         SharedPreferences sharedPref = mCtx
                 .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
 
-        return sharedPref.getString(FacultyEntry.F_NAME_COL, null);
+        return sharedPref.getString(FAC_NAME, null);
     }
 
     public String getFacDept() {
@@ -89,7 +97,7 @@ public class SharedPrefManager {
         SharedPreferences sharedPref = mCtx
                 .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
 
-        return sharedPref.getString(FacultyEntry.F_MOB_NO, null);
+        return sharedPref.getString(FAC_MOB_NO, null);
     }
 
     public void clearCredentials() {

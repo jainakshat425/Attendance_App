@@ -11,7 +11,6 @@ import android.text.TextUtils;
 import android.util.Patterns;
 import android.widget.Toast;
 
-import com.example.android.attendance.contracts.FacultyContract.FacultyEntry;
 import com.example.android.attendance.volley.VolleyTask;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -41,11 +40,11 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
 
                     int facId = jObj.getInt("fac_id");
-                    String facName = jObj.getString(FacultyEntry.F_NAME_COL);
-                    String facUsername = jObj.getString(FacultyEntry.F_EMAIL_COL);
-                    String facDept = jObj.getString("dept_name");
-                    int fCollId = jObj.getInt(FacultyEntry.F_COLLEGE_ID);
-                    String mobNo = jObj.getString(FacultyEntry.F_MOB_NO);
+                    String facName = jObj.getString(SharedPrefManager.FAC_NAME);
+                    String facUsername = jObj.getString(SharedPrefManager.FAC_EMAIL);
+                    String facDept = jObj.getString(SharedPrefManager.FAC_DEPT);
+                    int fCollId = jObj.getInt(SharedPrefManager.FAC_COLL_ID);
+                    String mobNo = jObj.getString(SharedPrefManager.FAC_MOB_NO);
 
                     boolean saved = SharedPrefManager.getInstance(LoginActivity.this)
                             .saveLoginUserDetails(facId, facName, facUsername,

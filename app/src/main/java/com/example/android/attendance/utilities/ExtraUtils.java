@@ -126,8 +126,7 @@ public class ExtraUtils {
     }
 
     public static String getCurrentTimeDisplay() {
-        String time = timeFormat.format(Calendar.getInstance().getTime());
-        return time;
+        return timeFormat.format(Calendar.getInstance().getTime());
     }
 
     public static TextView getTextView(Context context, int textSize) {
@@ -141,26 +140,6 @@ public class ExtraUtils {
         }
         tv.setPadding(4, 4, 4, 4);
         return tv;
-    }
-
-    /**
-     * empties the subject spinner
-     */
-    public static void emptySubjectSpinner(Context context, Spinner subSpinner) {
-        String[] subject = {"Subject"};
-        SpinnerArrayAdapter subjectAdapter = new SpinnerArrayAdapter(context,
-                android.R.layout.simple_spinner_dropdown_item, subject);
-        subSpinner.setAdapter(subjectAdapter);
-    }
-
-    /**
-     * empties the section spinner
-     */
-    public static void emptySectionSpinner(Context context, Spinner secSpinner) {
-        String[] section = {"Section"};
-        SpinnerArrayAdapter sectionAdapter = new SpinnerArrayAdapter(context,
-                android.R.layout.simple_spinner_dropdown_item, section);
-        secSpinner.setAdapter(sectionAdapter);
     }
 
 }
