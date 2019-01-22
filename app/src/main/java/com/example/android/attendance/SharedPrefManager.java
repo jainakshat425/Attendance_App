@@ -91,4 +91,8 @@ public class SharedPrefManager {
 
         return sharedPref.getString(FacultyEntry.F_MOB_NO, null);
     }
+
+    public void clearCredentials() {
+        mCtx.getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE).edit().clear().apply();
+    }
 }

@@ -8,9 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.attendance.R;
+import com.example.android.attendance.TakeAttendanceActivity;
 import com.example.android.attendance.pojos.Attendance;
+import com.example.android.attendance.volley.VolleyTask;
 
 import java.util.List;
 
@@ -120,6 +123,4 @@ public class TakeAttendAdapter extends RecyclerView.Adapter<TakeAttendAdapter.Ta
         }
         this.notifyDataSetChanged();
     }
-
-
 }

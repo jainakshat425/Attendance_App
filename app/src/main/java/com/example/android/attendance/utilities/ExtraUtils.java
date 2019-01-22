@@ -59,8 +59,11 @@ public class ExtraUtils {
     public static final String EXTRA_FAC_DEPT = "extra_fac_dept";
 
 
+
     private static final String DB_URL = "http://10.0.11.249/attendancephp/v1/";
     public static final String FAC_LOGIN_URL = DB_URL + "facLogin.php";
+    public static final String CHANGE_FACULTY_PASS_URL = DB_URL + "changeFacultyPassword.php";
+
     public static final String GET_ATT_REC_URL = DB_URL + "getAttendanceRecords.php";
     public static final String CHECK_ATTEND_ALREADY_EXIST = DB_URL + "checkAttendAlreadyExist.php";
     public static final String SETUP_NEW_ATTEND_URL = DB_URL + "setupNewAttendance.php";

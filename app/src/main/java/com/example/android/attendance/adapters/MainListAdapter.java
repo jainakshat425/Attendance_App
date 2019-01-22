@@ -83,18 +83,11 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
 
         Bundle intentBundle = new Bundle();
         intentBundle.putString(ExtraUtils.EXTRA_ATTEND_REC_ID, attendRecId);
-        intentBundle.putString(ExtraUtils.EXTRA_FAC_EMAIL, facUserId);
         intentBundle.putString(ExtraUtils.EXTRA_DATE, dateString);
         intentBundle.putString(ExtraUtils.EXTRA_DISPLAY_DATE, displayDate);
-        intentBundle.putString(ExtraUtils.EXTRA_SEMESTER, semester);
-        intentBundle.putString(ExtraUtils.EXTRA_BRANCH, branch);
-        intentBundle.putString(ExtraUtils.EXTRA_SECTION, section);
-        intentBundle.putString(ExtraUtils.EXTRA_SUBJECT, subject);
-        intentBundle.putString(ExtraUtils.EXTRA_COLLEGE, college);
         intentBundle.putString(ExtraUtils.EXTRA_LECTURE_NO, lectureNo);
         intentBundle.putString(ExtraUtils.EXTRA_DAY, day);
         intentBundle.putString(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
-        intentBundle.putString(ExtraUtils.EXTRA_COLLEGE_ID, String.valueOf(collegeId));
 
         holder.itemView.setTag(intentBundle);
     }

@@ -16,7 +16,6 @@ import com.example.android.attendance.contracts.ClassContract.ClassEntry;
 import com.example.android.attendance.contracts.FacultyContract.FacultyEntry;
 
 import com.example.android.attendance.contracts.LectureContract.LectureEntry;
-import com.example.android.attendance.contracts.SubjectContract.SubjectEntry;
 import com.example.android.attendance.utilities.ExtraUtils;
 
 import org.json.JSONException;
@@ -543,6 +542,44 @@ public class VolleyTask {
                     params.put("from_date", fromDate);
                     params.put("to_date", toDate);
                 }
+                return params;
+            }
+        };
+        RequestHandler.getInstance(context).addToRequestQueue(request);
+    }
+
+    public static void changeFacultyPassword(Context context, int facId, String currentPass,
+                                             String newPass, VolleyCallback callback) {
+        ProgressDialog pDialog = new ProgressDialog(context);
+        pDialog.setMessage("Verifying & Updating...");
+        pDialog.show();
+        StringRequest request = new StringRequest(Request.Method.POST,
+                ExtraUtils.CHANGE_FACULTY_PASS_URL,
+                response -> {
+                    pDialog.dismiss();
+                    try {
+                        JSONObject jObj = new JSONObject(response);
+                        Toast.makeText(context, jObj.getString("message"),
+                                Toast.LENGTH_SHORT).show();
+                        if (!jObj.getBoolean("error")) {
+                            callback.onSuccessResponse(jObj);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }, error -> {
+            pDialog.dismiss();
+            Toast.makeText(context, error.getMessage(),
+                    Toast.LENGTH_LONG).show();
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+
+                params.put("fac_id", String.valueOf(facId));
+                params.put("current_password", currentPass);
+                params.put("new_password", newPass);
                 return params;
             }
         };

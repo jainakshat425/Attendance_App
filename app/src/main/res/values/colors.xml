@@ -14,4 +14,7 @@
     <color name="daySelected">#004d40</color>
     <color name="dayDeselected">@android:color/darker_gray</color>
 
+    <color name="darkGrayColor">#424242</color>
+    <color name="darkerGrayColor">#1b1b1b</color>
+
 </resources>

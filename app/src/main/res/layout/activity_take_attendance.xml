@@ -20,12 +20,10 @@
         android:id="@+id/details_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="8dp"
-        card_view:cardCornerRadius="4dp">
+        android:layout_margin="4dp"
+        card_view:cardCornerRadius="5dp">
 
-        <RelativeLayout
-
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -35,78 +33,31 @@
             android:paddingTop="8dp">
 
             <TextView
-                android:id="@+id/college_text_view"
-                android:layout_width="wrap_content"
+                android:id="@+id/date_text_view"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginBottom="4dp"
-                android:textAllCaps="true"
-                tools:text="GIT" />
-
-            <TextView
-                android:id="@+id/semester_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginBottom="4dp"
-                tools:text="V Sem" />
-
-            <TextView
-                android:id="@+id/branch_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@id/college_text_view"
-                android:layout_marginBottom="4dp"
-                tools:text="CS" />
-
-            <TextView
-                android:id="@+id/section_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/college_text_view"
-                android:layout_marginLeft="4dp"
-                android:layout_toRightOf="@id/branch_text_view"
-                tools:text="'A'" />
-
-
-            <TextView
-                android:id="@+id/subject_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_below="@id/semester_text_view"
-                android:layout_marginBottom="4dp"
-                tools:text="ADS" />
-
-            <TextView
-                android:id="@+id/lecture_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_below="@id/subject_text_view"
-                android:layout_marginBottom="4dp"
-                tools:text="5th Lecture" />
+                tools:text="07-08-2018" />
 
             <TextView
                 android:id="@+id/day_text_view"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/branch_text_view"
-                android:paddingRight="4dp"
-                tools:text="Thursday," />
+                tools:text="Thursday" />
 
             <TextView
-                android:id="@+id/date_text_view"
-                android:layout_width="wrap_content"
+                android:id="@+id/lecture_text_view"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/day_text_view"
-                android:layout_below="@id/branch_text_view"
-                tools:text="07-08-2018" />
+                android:layout_marginBottom="4dp"
+                tools:text="5th Lecture" />
 
-        </RelativeLayout>
+        </LinearLayout>
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"

@@ -101,9 +101,6 @@ public class NewAttendanceActivity extends AppCompatActivity {
                         intent.putExtra(ExtraUtils.EXTRA_DATE, date);
                         intent.putExtra(ExtraUtils.EXTRA_DISPLAY_DATE, dateDisplay);
                         intent.putExtra(ExtraUtils.EXTRA_DAY, day);
-                        intent.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
-                        intent.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
-                        intent.putExtra(ExtraUtils.EXTRA_SECTION, section);
                         intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
 
                         startActivity(intent);

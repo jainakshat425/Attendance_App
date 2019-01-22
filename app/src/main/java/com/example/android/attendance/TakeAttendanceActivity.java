@@ -34,16 +34,6 @@ import butterknife.ButterKnife;
 
 public class TakeAttendanceActivity extends AppCompatActivity {
 
-    @BindView(R.id.college_text_view)
-    TextView collegeTv;
-    @BindView(R.id.semester_text_view)
-    TextView semesterTv;
-    @BindView(R.id.branch_text_view)
-    TextView branchTv;
-    @BindView(R.id.section_text_view)
-    TextView sectionTv;
-    @BindView(R.id.subject_text_view)
-    TextView subjectTv;
     @BindView(R.id.date_text_view)
     TextView dateTv;
     @BindView(R.id.lecture_text_view)
@@ -76,25 +66,12 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             String date = bundle.getString(ExtraUtils.EXTRA_DATE);
             String dateDisplay = bundle.getString(ExtraUtils.EXTRA_DISPLAY_DATE);
             String day = bundle.getString(ExtraUtils.EXTRA_DAY);
-            String semester = bundle.getString(ExtraUtils.EXTRA_SEMESTER);
-            String branch = bundle.getString(ExtraUtils.EXTRA_BRANCH);
-            String section = bundle.getString(ExtraUtils.EXTRA_SECTION);
-            String subject = bundle.getString(ExtraUtils.EXTRA_SUBJECT);
             String lectNo = bundle.getString(ExtraUtils.EXTRA_LECTURE_NO);
             String classId = bundle.getString(ExtraUtils.EXTRA_CLASS_ID);
             String attendRecId = bundle.getString(ExtraUtils.EXTRA_ATTEND_REC_ID);
 
-
-            /**
-             * populate the text views with the data from the intent
-             */
-            collegeTv.setText("GIT");
-            branchTv.setText(branch);
-            sectionTv.setText(section);
-            subjectTv.setText(subject);
             dateTv.setText(dateDisplay);
-            dayTv.setText(String.format("%s,", day));
-            semesterTv.setText(ExtraUtils.getSemester(semester));
+            dayTv.setText(day);
             lectureTv.setText(ExtraUtils.getLecture(lectNo));
 
             mAdapter = new TakeAttendAdapter(this, new ArrayList<>());
@@ -157,10 +134,6 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     }
 
     private void saveAttendance() {
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
-
         Gson gson = new Gson();
         Attendance[] attendances = TakeAttendAdapter.getmAttendanceList();
         final String attJsonObj = gson.toJson(attendances);
