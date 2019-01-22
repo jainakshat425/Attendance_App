@@ -40,34 +40,28 @@ public class NewAttendanceActivity extends AppCompatActivity {
     private Context mContext;
     int collegeId;
 
+    //layout for snackbar
     @BindView(R.id.new_attendance_layout)
     LinearLayout layout;
-    /**
-     * semester
-     */
+
+    //semester spinner
     @BindView(R.id.semester_spinner)
     Spinner semesterSpinner;
     private String semester = "";
 
-    /**
-     * branch
-     */
+   //branch spinner
     @BindView(R.id.branch_spinner)
     Spinner branchSpinner;
     private String branch = "";
     private SpinnerArrayAdapter branchAdapter;
 
-    /**
-     * section
-     */
+    //section spinner
     @BindView(R.id.section_spinner)
     Spinner sectionSpinner;
     private SpinnerArrayAdapter sectionAdapter;
     private String section = "";
 
-    /**
-     * lecture number
-     */
+    //lecture spinner
     @BindView(R.id.lecture_spinner)
     Spinner lectureSpinner;
     private SpinnerArrayAdapter lectureAdapter;
@@ -184,6 +178,9 @@ public class NewAttendanceActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * setup the initial spinners
+     */
     private void setupSemesterSpinner() {
         String[] semArr = getResources().getStringArray(R.array.semester_array);
         SpinnerArrayAdapter semesterAdapter = new SpinnerArrayAdapter(mContext,
@@ -276,6 +273,9 @@ public class NewAttendanceActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * refresh spinners from database
+     */
     private void refreshBranchSpinner() {
         VolleyTask.getBranchNames(this, collegeId, jObj -> {
             try {
@@ -290,6 +290,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
                         android.R.layout.simple_spinner_dropdown_item,
                         brArr);
                 branchSpinner.setAdapter(branchAdapter);
+                branch="";
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -319,6 +320,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
                                 android.R.layout.simple_spinner_dropdown_item,
                                 secArr);
                         sectionSpinner.setAdapter(sectionAdapter);
+                        section = "";
                     });
         } else
             setupSectionSpinner();
@@ -346,12 +348,16 @@ public class NewAttendanceActivity extends AppCompatActivity {
                                 android.R.layout.simple_spinner_dropdown_item,
                                 lectArr);
                         lectureSpinner.setAdapter(lectureAdapter);
+                        lectNo = "";
                     });
         } else
             setupLectureSpinner();
     }
 
-
+    /**
+     * check all inputs are valid or not
+     * @return whether inputs are valid or not
+     */
     private boolean validateInputs() {
         if (TextUtils.isEmpty(semester)) {
             Snackbar.make(layout, "Semester not selected!", Snackbar.LENGTH_SHORT).show();

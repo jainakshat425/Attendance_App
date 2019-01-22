@@ -187,6 +187,11 @@ public class MainActivity extends AppCompatActivity
             List<AttendanceRecord> records =
                     GsonUtils.extractRecordsFromJSON(jObj);
             mAdapter.swapList(records);
+
+            if (mAdapter.getItemCount() < 1)
+                mEmptyView.setVisibility(View.VISIBLE);
+            else
+                mEmptyView.setVisibility(View.GONE);
         });
     }
 

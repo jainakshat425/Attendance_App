@@ -114,7 +114,6 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
                 String branch = sch.getBName();
                 String section = sch.getSection();
                 String lectNo = String.valueOf(sch.getLectNo());
-                String subName = sch.getSubName();
                 String date = ExtraUtils.getCurrentDate();
                 String dateDisplay = ExtraUtils.getCurrentDateDisplay();
 
@@ -129,10 +128,6 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
                             intent.putExtra(ExtraUtils.EXTRA_DATE, date);
                             intent.putExtra(ExtraUtils.EXTRA_DISPLAY_DATE, dateDisplay);
                             intent.putExtra(ExtraUtils.EXTRA_DAY, mDay);
-                            intent.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
-                            intent.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
-                            intent.putExtra(ExtraUtils.EXTRA_SECTION, section);
-                            intent.putExtra(ExtraUtils.EXTRA_SUBJECT, subName);
                             intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
 
                             mContext.startActivity(intent);

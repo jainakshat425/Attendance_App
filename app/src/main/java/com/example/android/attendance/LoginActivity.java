@@ -36,8 +36,6 @@ public class LoginActivity extends AppCompatActivity {
         if (validateInputs()) {
             VolleyTask.login(this, username, pass, jObj -> {
                 try {
-                    Toast.makeText(LoginActivity.this, jObj.getString("message"),
-                            Toast.LENGTH_SHORT).show();
 
                     int facId = jObj.getInt("fac_id");
                     String facName = jObj.getString(SharedPrefManager.FAC_NAME);

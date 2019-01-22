@@ -208,26 +208,6 @@ public class CheckAttendanceActivity extends AppCompatActivity {
         toDateEt.setText(toDateDisplay);
     }
 
-    private void refreshBranchSpinner() {
-        VolleyTask.getBranchNames(this, collegeId, jObj -> {
-            try {
-                JSONArray brJsonArr = jObj.getJSONArray("branch_names");
-                List<String> brList = new ArrayList<>();
-                brList.add("Branch");
-                for (int i = 0; i < brJsonArr.length(); i++) {
-                    brList.add(brJsonArr.getString(i));
-                }
-                String[] brArr = brList.toArray(new String[0]);
-                branchAdapter = new SpinnerArrayAdapter(mContext,
-                        android.R.layout.simple_spinner_dropdown_item,
-                        brArr);
-                branchSpinner.setAdapter(branchAdapter);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        });
-
-    }
 
     private void setupSemesterSpinner() {
         String[] semArr = getResources().getStringArray(R.array.semester_array);
@@ -297,6 +277,28 @@ public class CheckAttendanceActivity extends AppCompatActivity {
         });
     }
 
+    private void refreshBranchSpinner() {
+        VolleyTask.getBranchNames(this, collegeId, jObj -> {
+            try {
+                JSONArray brJsonArr = jObj.getJSONArray("branch_names");
+                List<String> brList = new ArrayList<>();
+                brList.add("Branch");
+                for (int i = 0; i < brJsonArr.length(); i++) {
+                    brList.add(brJsonArr.getString(i));
+                }
+                String[] brArr = brList.toArray(new String[0]);
+                branchAdapter = new SpinnerArrayAdapter(mContext,
+                        android.R.layout.simple_spinner_dropdown_item,
+                        brArr);
+                branchSpinner.setAdapter(branchAdapter);
+                branch = "";
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        });
+
+    }
+
     private void refreshSectionsSpinner() {
         if (!TextUtils.isEmpty(semester) && !TextUtils.isEmpty(branch)) {
             final List<String> secList = new ArrayList<>();
@@ -319,6 +321,7 @@ public class CheckAttendanceActivity extends AppCompatActivity {
                                 android.R.layout.simple_spinner_dropdown_item,
                                 secArr);
                         sectionSpinner.setAdapter(sectionAdapter);
+                        section = "";
                     });
         } else
             setupSectionSpinner();
