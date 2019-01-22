@@ -1,7 +1,6 @@
 package com.example.android.attendance;
 
 import android.app.DatePickerDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,23 +12,24 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.example.android.attendance.utilities.ExtraUtils;
 import com.example.android.attendance.volley.VolleyTask;
+import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -38,52 +38,53 @@ import butterknife.OnClick;
 public class NewAttendanceActivity extends AppCompatActivity {
 
     private Context mContext;
+    int collegeId;
+
+    @BindView(R.id.new_attendance_layout)
+    LinearLayout layout;
     /**
      * semester
      */
     @BindView(R.id.semester_spinner)
     Spinner semesterSpinner;
-    private String semester = null;
+    private String semester = "";
 
     /**
      * branch
      */
     @BindView(R.id.branch_spinner)
     Spinner branchSpinner;
-    private String branch = null;
+    private String branch = "";
+    private SpinnerArrayAdapter branchAdapter;
 
     /**
      * section
      */
     @BindView(R.id.section_spinner)
     Spinner sectionSpinner;
-    private String section = null;
+    private SpinnerArrayAdapter sectionAdapter;
+    private String section = "";
 
     /**
-     * subject
+     * lecture number
      */
-    @BindView(R.id.subject_spinner)
-    Spinner subjectSpinner;
-    private String subject = null;
-
+    @BindView(R.id.lecture_spinner)
+    Spinner lectureSpinner;
+    private SpinnerArrayAdapter lectureAdapter;
+    private String lectNo = "";
 
     //declare date edit text
     @BindView(R.id.edit_date)
-    EditText dateEditText;
+    EditText dateIn;
     private Calendar myCalendar;
-    private String date = null;
-    private String dateDisplay = null;
-    private String day = null;
+    private String date = "";
+    private String dateDisplay = "";
+    private String day = "";
 
     @OnClick(R.id.fab_new_attendance)
     void newAttendance() {
-        if (allInputsProvided()) {
-            final ProgressDialog progressDialog = new ProgressDialog(mContext);
-            progressDialog.setMessage("Loading...");
-            progressDialog.show();
 
-            String lectNo = lectureEt.getText().toString().trim();
-
+        if (validateInputs()) {
             VolleyTask.takeNewAttendance(mContext, date, day, semester, branch,
                     section, lectNo, collegeId, -1,
                     jObj -> {
@@ -103,25 +104,12 @@ public class NewAttendanceActivity extends AppCompatActivity {
                         intent.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
                         intent.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
                         intent.putExtra(ExtraUtils.EXTRA_SECTION, section);
-                        intent.putExtra(ExtraUtils.EXTRA_SUBJECT, subject);
                         intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
 
-                        mContext.startActivity(intent);
+                        startActivity(intent);
                     });
-        } else {
-            RelativeLayout parentLayout = findViewById(R.id.relative_layout);
-            Snackbar.make(parentLayout, "Complete all fields.",
-                    Snackbar.LENGTH_LONG).show();
         }
     }
-
-    //declare buttons and edit text field for lecture selection
-    private EditText lectureEt;
-    private Button plusButton;
-    private Button minusButton;
-
-    SharedPrefManager sharedPrefManager;
-    int collegeId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,99 +126,18 @@ public class NewAttendanceActivity extends AppCompatActivity {
         mContext = this;
         ButterKnife.bind(this);
 
-        sharedPrefManager = SharedPrefManager.getInstance(mContext);
-        collegeId = sharedPrefManager.getCollId();
+        collegeId = SharedPrefManager.getInstance(mContext).getCollId();
 
+        setupBranchSpinner();
         setupSemesterSpinner();
+        setupSectionSpinner();
+        setupLectureSpinner();
 
-        final List<String> branchArr = new ArrayList<>();
-        branchArr.add("Branch");
-        VolleyTask.getBranchNames(mContext, collegeId, jObj -> {
-            JSONArray jsonArray;
-            try {
-                jsonArray = jObj.getJSONArray("branches");
-
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    branchArr.add(jsonArray.getString(i));
-                }
-                SpinnerArrayAdapter branchAdapter = new SpinnerArrayAdapter(mContext,
-                        android.R.layout.simple_spinner_dropdown_item,
-                        branchArr.toArray(new String[0]));
-                branchSpinner.setAdapter(branchAdapter);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        });
-
-        ExtraUtils.emptySectionSpinner(mContext, sectionSpinner);
-        ExtraUtils.emptySubjectSpinner(mContext, subjectSpinner);
-
-        //set click listeners on spinners
-        semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                subject = null;
-                if (position != 0) {
-                    semester = parent.getItemAtPosition(position).toString();
-                    refreshSubjectSpinner();
-                    refreshSectionSpinner();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        branchSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                subject = null;
-                if (position != 0) {
-                    branch = parent.getItemAtPosition(position).toString();
-                    refreshSubjectSpinner();
-                    refreshSectionSpinner();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        sectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != 0) {
-                    section = parent.getItemAtPosition(position).toString();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        subjectSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != 0) {
-                    subject = parent.getItemAtPosition(position).toString();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        refreshBranchSpinner();
 
         //setup date picker dialog
         setupDatePickerDialog();
         setDefaultDate();
-
-        //setup lecture chooser
-        setupLectureChooser();
     }
 
     private void setDefaultDate() {
@@ -238,42 +145,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
         day = ExtraUtils.getCurrentDay();
 
         dateDisplay = ExtraUtils.dateDisplayFormat.format(myCalendar.getTime());
-        dateEditText.setText(dateDisplay);
-    }
-
-    /**
-     * setup lecture chooser
-     */
-    private void setupLectureChooser() {
-        lectureEt = findViewById(R.id.lecture_et);
-        plusButton = findViewById(R.id.plus_lecture_button);
-        minusButton = findViewById(R.id.minus_lecture_button);
-
-        lectureEt.setText("1");
-        minusButton.setEnabled(false);
-
-        plusButton.setOnClickListener(v -> {
-
-            int currentLectureValue = Integer.parseInt(lectureEt.getText().toString());
-            if (currentLectureValue < 8) {
-                lectureEt.setText(String.valueOf(++currentLectureValue));
-                plusButton.setEnabled(true);
-            } else {
-                plusButton.setEnabled(false);
-            }
-            minusButton.setEnabled(true);
-        });
-
-        minusButton.setOnClickListener(v -> {
-            int currentLectureValue = Integer.parseInt(lectureEt.getText().toString());
-            if (currentLectureValue > 1) {
-                lectureEt.setText(String.valueOf(--currentLectureValue));
-                minusButton.setEnabled(true);
-            } else {
-                minusButton.setEnabled(false);
-            }
-            plusButton.setEnabled(true);
-        });
+        dateIn.setText(dateDisplay);
     }
 
     /**
@@ -292,7 +164,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
             updateDateEt();
         };
 
-        dateEditText.setOnClickListener(v -> {
+        dateIn.setOnClickListener(v -> {
 
             DatePickerDialog dpDialog = new DatePickerDialog(mContext, date, myCalendar
                     .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
@@ -311,79 +183,199 @@ public class NewAttendanceActivity extends AppCompatActivity {
         day = (ExtraUtils.dayFormat.format(myCalendar.getTime())).toUpperCase();
 
         dateDisplay = ExtraUtils.dateDisplayFormat.format(myCalendar.getTime());
-        dateEditText.setText(dateDisplay);
+        dateIn.setText(dateDisplay);
     }
 
-    /**
-     * check all inputs are valid or not
-     */
-    private boolean allInputsProvided() {
-        int currentLectureValue = Integer.parseInt(lectureEt.getText().toString());
-        if (date == null || semester == null ||
-                branch == null || subject == null ||
-                section == null || currentLectureValue > 8 || currentLectureValue < 1) {
-            return false;
-        }
-        return true;
-    }
 
     private void setupSemesterSpinner() {
         String[] semArr = getResources().getStringArray(R.array.semester_array);
-        SpinnerArrayAdapter semesterAdapter = new SpinnerArrayAdapter(NewAttendanceActivity.this,
+        SpinnerArrayAdapter semesterAdapter = new SpinnerArrayAdapter(mContext,
                 android.R.layout.simple_spinner_dropdown_item,
                 semArr);
         semesterSpinner.setAdapter(semesterAdapter);
 
+        semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long l) {
+                if (pos != 0) {
+                    semester = (String) parent.getItemAtPosition(pos);
+                    refreshSectionsSpinner();
+                    refreshLectureSpinner();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
     }
 
-    private void refreshSectionSpinner() {
-        if (semester != null && branch != null) {
-            final List<String> secArr = new ArrayList<>();
-            secArr.add("Section");
-            VolleyTask.getSections(mContext,
-                    branch, semester, collegeId, jObj -> {
-                        JSONArray jsonArray;
+    private void setupBranchSpinner() {
+        List<String> brList = new ArrayList<>();
+        brList.add("Branch");
+        String[] brArr = brList.toArray(new String[0]);
+        branchAdapter = new SpinnerArrayAdapter(mContext,
+                android.R.layout.simple_spinner_dropdown_item,
+                brArr);
+        branchSpinner.setAdapter(branchAdapter);
+
+        branchSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long l) {
+                if (pos != 0) {
+                    branch = (String) parent.getItemAtPosition(pos);
+                    refreshSectionsSpinner();
+                    refreshLectureSpinner();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+    }
+
+    private void setupSectionSpinner() {
+        String[] secArr = {"Section"};
+        sectionAdapter = new SpinnerArrayAdapter(this,
+                android.R.layout.simple_spinner_dropdown_item, secArr);
+        sectionSpinner.setAdapter(sectionAdapter);
+
+        sectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long l) {
+                if (pos != 0) {
+                    section = (String) parent.getItemAtPosition(pos);
+                    refreshLectureSpinner();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+    }
+
+    private void setupLectureSpinner() {
+        String[] lectArr = {"Lecture"};
+        lectureAdapter = new SpinnerArrayAdapter(this,
+                android.R.layout.simple_spinner_dropdown_item, lectArr);
+        lectureSpinner.setAdapter(lectureAdapter);
+
+        lectureSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long l) {
+                if (pos != 0)
+                    lectNo = (String) parent.getItemAtPosition(pos);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+    }
+
+
+    private void refreshBranchSpinner() {
+        VolleyTask.getBranchNames(this, collegeId, jObj -> {
+            try {
+                JSONArray brJsonArr = jObj.getJSONArray("branch_names");
+                List<String> brList = new ArrayList<>();
+                brList.add("Branch");
+                for (int i = 0; i < brJsonArr.length(); i++) {
+                    brList.add(brJsonArr.getString(i));
+                }
+                String[] brArr = brList.toArray(new String[0]);
+                branchAdapter = new SpinnerArrayAdapter(mContext,
+                        android.R.layout.simple_spinner_dropdown_item,
+                        brArr);
+                branchSpinner.setAdapter(branchAdapter);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        });
+
+    }
+
+    private void refreshSectionsSpinner() {
+        if (!TextUtils.isEmpty(semester) && !TextUtils.isEmpty(branch)) {
+            final List<String> secList = new ArrayList<>();
+            secList.add("Section");
+            VolleyTask.getSections(mContext, branch,
+                    semester, collegeId, jObj -> {
+
                         try {
-                            jsonArray = jObj.getJSONArray("sections");
+                            JSONArray jsonArray = jObj.getJSONArray("sections");
 
                             for (int i = 0; i < jsonArray.length(); i++) {
-                                secArr.add(jsonArray.getString(i));
+                                secList.add(jsonArray.getString(i));
                             }
-                            SpinnerArrayAdapter sectionAdapter = new SpinnerArrayAdapter(mContext,
-                                    android.R.layout.simple_spinner_dropdown_item,
-                                    secArr.toArray(new String[0]));
-                            sectionSpinner.setAdapter(sectionAdapter);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+
+                        String[] secArr = secList.toArray(new String[0]);
+                        sectionAdapter = new SpinnerArrayAdapter(mContext,
+                                android.R.layout.simple_spinner_dropdown_item,
+                                secArr);
+                        sectionSpinner.setAdapter(sectionAdapter);
                     });
         } else
-            ExtraUtils.emptySectionSpinner(mContext, sectionSpinner);
+            setupSectionSpinner();
     }
 
-    private void refreshSubjectSpinner() {
-        final List<String> subArray = new ArrayList<>();
-        subArray.add("Subject");
-        if (semester != null && branch != null) {
+    private void refreshLectureSpinner() {
+        if (!TextUtils.isEmpty(semester) && !TextUtils.isEmpty(branch) && !TextUtils.isEmpty(section) ) {
+            final List<String> lectList = new ArrayList<>();
+            lectList.add("Lecture");
+            VolleyTask.getLectureNumbers(mContext, branch,
+                    semester, section, collegeId, jObj -> {
 
-            VolleyTask.getSubjects(mContext, branch, semester, collegeId, jObj -> {
-                JSONArray subJSONArray;
-                try {
-                    subJSONArray = jObj.getJSONArray("subjects");
+                        try {
+                            JSONArray jsonArray = jObj.getJSONArray("lecture_numbers");
 
-                    for (int i = 0; i < subJSONArray.length(); i++) {
-                        JSONObject subObj = subJSONArray.getJSONObject(i);
-                        subArray.add(subObj.getString("sub_name"));
-                    }
-                    SpinnerArrayAdapter subjectAdapter = new SpinnerArrayAdapter(mContext,
-                            android.R.layout.simple_spinner_dropdown_item,
-                            subArray.toArray(new String[0]));
-                    subjectSpinner.setAdapter(subjectAdapter);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            });
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                lectList.add(jsonArray.getString(i));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        String[] lectArr = lectList.toArray(new String[0]);
+                        lectureAdapter = new SpinnerArrayAdapter(mContext,
+                                android.R.layout.simple_spinner_dropdown_item,
+                                lectArr);
+                        lectureSpinner.setAdapter(lectureAdapter);
+                    });
         } else
-            ExtraUtils.emptySubjectSpinner(mContext, subjectSpinner);
+            setupLectureSpinner();
     }
+
+
+    private boolean validateInputs() {
+        if (TextUtils.isEmpty(semester)) {
+            Snackbar.make(layout, "Semester not selected!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        } else if (TextUtils.isEmpty(branch)) {
+            Snackbar.make(layout, "Branch not selected!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        } else if (TextUtils.isEmpty(section)) {
+            Snackbar.make(layout, "Section not selected!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        } else if (TextUtils.isEmpty(lectNo)) {
+            Snackbar.make(layout, "Lecture not selected!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
+        else if (TextUtils.isEmpty(date)) {
+            dateIn.setError("Choose valid date!");
+            return false;
+        } else {
+            dateIn.setError(null);
+            return true;
+        }
+    }
+
 }

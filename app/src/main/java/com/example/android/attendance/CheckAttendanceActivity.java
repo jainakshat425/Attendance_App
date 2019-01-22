@@ -14,6 +14,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
@@ -39,36 +40,42 @@ import butterknife.OnClick;
 public class CheckAttendanceActivity extends AppCompatActivity {
 
     private Context mContext;
+
+    @BindView(R.id.check_attendance_linear_layout)
+    LinearLayout layout;
+
     /**
      * semester
      */
     @BindView(R.id.semester_spin)
     Spinner semesterSpinner;
-    private String semester = null;
+    private String semester = "";
 
     /**
      * branch
      */
     @BindView(R.id.branch_spin)
     Spinner branchSpinner;
-    private String branch = null;
+    private SpinnerArrayAdapter branchAdapter;
+    private String branch = "";
 
     /**
      * section
      */
     @BindView(R.id.section_spin)
     Spinner sectionSpinner;
-    private String section = null;
+    private SpinnerArrayAdapter sectionAdapter;
+    private String section = "";
 
     @BindView(R.id.from_edit_date)
     EditText fromDateEt;
-    private String fromDate = null;
-    private String fromDateDisplay = null;
+    private String fromDate = "";
+    private String fromDateDisplay = "";
 
     @BindView(R.id.to_edit_date)
     EditText toDateEt;
-    private String toDate = null;
-    private String toDateDisplay = null;
+    private String toDate = "";
+    private String toDateDisplay = "";
 
     @BindView(R.id.show_date_cb)
     CheckBox showDateCb;
@@ -79,7 +86,7 @@ public class CheckAttendanceActivity extends AppCompatActivity {
 
     @OnClick(R.id.show_button)
     void showAttendanceReport() {
-        if (allInputsProvided()) {
+        if (validateInputs()) {
             VolleyTask.checkValidClass(CheckAttendanceActivity.this, collegeId,
                     semester, branch, section, jObj -> {
 
@@ -109,10 +116,6 @@ public class CheckAttendanceActivity extends AppCompatActivity {
 
                         startActivity(i);
                     });
-        } else {
-            LinearLayout parentLayout = findViewById(R.id.check_attendance_linear_layout);
-            Snackbar.make(parentLayout, "Complete all fields!",
-                    Snackbar.LENGTH_LONG).show();
         }
     }
 
@@ -137,69 +140,11 @@ public class CheckAttendanceActivity extends AppCompatActivity {
         sharedPrefManager = SharedPrefManager.getInstance(this);
         collegeId = sharedPrefManager.getCollId();
 
-
+        setupBranchSpinner();
         setupSemesterSpinner();
+        setupSectionSpinner();
 
-        final List<String> branchArr = new ArrayList<>();
-        branchArr.add("Branch");
-        VolleyTask.getBranchNames(mContext, collegeId, jObj -> {
-            JSONArray jsonArray;
-            try {
-                jsonArray = jObj.getJSONArray("branches");
-
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    branchArr.add(jsonArray.getString(i));
-                }
-                SpinnerArrayAdapter branchAdapter = new SpinnerArrayAdapter(mContext,
-                        android.R.layout.simple_spinner_dropdown_item,
-                        branchArr.toArray(new String[0]));
-                branchSpinner.setAdapter(branchAdapter);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        });
-
-        ExtraUtils.emptySectionSpinner(this, sectionSpinner);
-
-        //set click listeners on spinners
-        semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != 0) {
-                    semester = parent.getItemAtPosition(position).toString();
-                    refreshSectionSpinner();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-        branchSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != 0) {
-                    branch = parent.getItemAtPosition(position).toString();
-                    refreshSectionSpinner();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-        sectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != 0) {
-                    section = parent.getItemAtPosition(position).toString();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+        refreshBranchSpinner();
 
         //setup date picker dialog
         setupDatePickerDialog(fromDateEt);
@@ -215,15 +160,6 @@ public class CheckAttendanceActivity extends AppCompatActivity {
                 isDateWise = false;
             }
         });
-    }
-
-    private boolean allInputsProvided() {
-        if (semester == null || branch == null || section == null) {
-            return false;
-        } else if (isDateWise && (fromDate == null || toDate == null)) {
-            return false;
-        }
-        return true;
     }
 
     private void setupDatePickerDialog(final EditText dateEditText) {
@@ -272,38 +208,138 @@ public class CheckAttendanceActivity extends AppCompatActivity {
         toDateEt.setText(toDateDisplay);
     }
 
-    private void refreshSectionSpinner() {
-        if (semester != null && branch != null) {
-            final List<String> secArr = new ArrayList<>();
-            secArr.add("Section");
-            VolleyTask.getSections(mContext,
-                    branch, semester, collegeId, jObj -> {
-                        JSONArray jsonArray;
-                        try {
-                            jsonArray = jObj.getJSONArray("sections");
+    private void refreshBranchSpinner() {
+        VolleyTask.getBranchNames(this, collegeId, jObj -> {
+            try {
+                JSONArray brJsonArr = jObj.getJSONArray("branch_names");
+                List<String> brList = new ArrayList<>();
+                brList.add("Branch");
+                for (int i = 0; i < brJsonArr.length(); i++) {
+                    brList.add(brJsonArr.getString(i));
+                }
+                String[] brArr = brList.toArray(new String[0]);
+                branchAdapter = new SpinnerArrayAdapter(mContext,
+                        android.R.layout.simple_spinner_dropdown_item,
+                        brArr);
+                branchSpinner.setAdapter(branchAdapter);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        });
 
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                secArr.add(jsonArray.getString(i));
-                            }
-                            SpinnerArrayAdapter sectionAdapter = new SpinnerArrayAdapter(mContext,
-                                    android.R.layout.simple_spinner_dropdown_item,
-                                    secArr.toArray(new String[0]));
-                            sectionSpinner.setAdapter(sectionAdapter);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    });
-        } else
-            ExtraUtils.emptySectionSpinner(mContext, sectionSpinner);
     }
 
     private void setupSemesterSpinner() {
         String[] semArr = getResources().getStringArray(R.array.semester_array);
-        SpinnerArrayAdapter semesterAdapter = new SpinnerArrayAdapter(CheckAttendanceActivity.this,
+        SpinnerArrayAdapter semesterAdapter = new SpinnerArrayAdapter(mContext,
                 android.R.layout.simple_spinner_dropdown_item,
                 semArr);
         semesterSpinner.setAdapter(semesterAdapter);
 
+        semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long l) {
+                if (pos != 0) {
+                    semester = (String) parent.getItemAtPosition(pos);
+                    refreshSectionsSpinner();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+    }
+
+    private void setupBranchSpinner() {
+        List<String> brList = new ArrayList<>();
+        brList.add("Branch");
+        String[] brArr = brList.toArray(new String[0]);
+        branchAdapter = new SpinnerArrayAdapter(mContext,
+                android.R.layout.simple_spinner_dropdown_item,
+                brArr);
+        branchSpinner.setAdapter(branchAdapter);
+
+        branchSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long l) {
+                if (pos != 0) {
+                    branch = (String) parent.getItemAtPosition(pos);
+                    refreshSectionsSpinner();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+    }
+
+    private void setupSectionSpinner() {
+        String[] secArr = {"Section"};
+        sectionAdapter = new SpinnerArrayAdapter(this,
+                android.R.layout.simple_spinner_dropdown_item, secArr);
+        sectionSpinner.setAdapter(sectionAdapter);
+
+        sectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long l) {
+                if (pos != 0)
+                    section = (String) parent.getItemAtPosition(pos);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+    }
+
+    private void refreshSectionsSpinner() {
+        if (!TextUtils.isEmpty(semester) && !TextUtils.isEmpty(branch)) {
+            final List<String> secList = new ArrayList<>();
+            secList.add("Section");
+            VolleyTask.getSections(mContext, branch,
+                    semester, collegeId, jObj -> {
+
+                        try {
+                            JSONArray jsonArray = jObj.getJSONArray("sections");
+
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                secList.add(jsonArray.getString(i));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        String[] secArr = secList.toArray(new String[0]);
+                        sectionAdapter = new SpinnerArrayAdapter(mContext,
+                                android.R.layout.simple_spinner_dropdown_item,
+                                secArr);
+                        sectionSpinner.setAdapter(sectionAdapter);
+                    });
+        } else
+            setupSectionSpinner();
+    }
+
+    private boolean validateInputs() {
+        if (TextUtils.isEmpty(semester)) {
+            Snackbar.make(layout, "Semester not selected!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        } else if (TextUtils.isEmpty(branch)) {
+            Snackbar.make(layout, "Branch not selected!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        } else if (TextUtils.isEmpty(section)) {
+            Snackbar.make(layout, "Section not selected!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        } else if (isDateWise && (TextUtils.isEmpty(fromDate) || TextUtils.isEmpty(toDate))) {
+            Snackbar.make(layout, "Select both dates for date wise report!",
+                    Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 
 

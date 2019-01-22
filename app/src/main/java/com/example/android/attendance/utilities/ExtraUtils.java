@@ -59,19 +59,18 @@ public class ExtraUtils {
     public static final String EXTRA_FAC_DEPT = "extra_fac_dept";
 
 
-    private static final String DB_URL = "http://192.168.43.156/attendancephp/v1/";
+    private static final String DB_URL = "http://10.0.11.249/attendancephp/v1/";
     public static final String FAC_LOGIN_URL = DB_URL + "facLogin.php";
     public static final String GET_ATT_REC_URL = DB_URL + "getAttendanceRecords.php";
-    public static final String GET_SUB_NAME_URL = DB_URL + "getSubjectsName.php";
     public static final String CHECK_ATTEND_ALREADY_EXIST = DB_URL + "checkAttendAlreadyExist.php";
     public static final String SETUP_NEW_ATTEND_URL = DB_URL + "setupNewAttendance.php";
     public static final String SETUP_UPDATE_ATTEND_URL = DB_URL + "setupUpdateAttendance.php";
     public static final String SAVE_NEW_ATTEND_URL = DB_URL + "saveNewAttendance.php";
     public static final String UPDATE_ATTEND_URL = DB_URL + "updateAttendance.php";
     public static final String DELETE_RECORD_URL = DB_URL + "deleteAttendRecord.php";
-    public static final String GET_BRANCHES_URL = DB_URL + "getBranches.php";
-    public static final String GET_SEMS_URL = DB_URL + "getSemesters.php";
+    public static final String GET_BRANCH_NAMES_URL = DB_URL + "getBranchNames.php";
     public static final String GET_SECS_URL = DB_URL + "getSections.php";
+    public static final String GET_LECTURE_NUMBERS_URL = DB_URL + "getLectureNumbers.php";
     public static final String GET_FAC_SCH_URL = DB_URL + "getFacSchedules.php";
     public static final String CHECK_VALID_CLASS_URL = DB_URL + "checkValidClass.php";
     public static final String GET_STD_REPORT_URL = DB_URL + "getStudentReport.php";

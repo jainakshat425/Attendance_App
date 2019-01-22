@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/relative_layout"
+    android:id="@+id/new_attendance_layout"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".NewAttendanceActivity">
@@ -11,7 +12,6 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:background="@color/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark"
         app:titleTextColor="@android:color/white" />
@@ -21,7 +21,6 @@
         android:id="@+id/date_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:orientation="horizontal">
@@ -29,7 +28,7 @@
         <!-- Label -->
         <TextView
             style="@style/CategoryStyle"
-            android:text="Date" />
+            android:text="@string/date" />
 
         <!-- input field -->
         <EditText
@@ -37,127 +36,57 @@
             style="@style/EditorFieldStyle"
             android:clickable="true"
             android:focusable="false"
-            android:hint="dd-mm-yyyy"
+            android:hint="@string/dd_mm_yyyy"
             android:inputType="date" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/select_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/date_layout"
-        android:layout_margin="16dp"
-        android:fontFamily="sans-serif-medium"
-        android:text="Select"
-        android:textColor="@color/colorAccent" />
+    <LinearLayout style="@style/SpinnerLayoutContainer">
 
-    <!-- Spinners category -->
-    <LinearLayout
-        android:id="@+id/spinner_layout_1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/select_text"
-        android:layout_marginLeft="32dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginRight="32dp"
-        android:orientation="horizontal">
-        <!-- semester field -->
+        <TextView
+            style="@style/SpinnerTextStyle"
+            android:text="@string/semester" />
+
         <Spinner
             android:id="@+id/semester_spinner"
-            style="@style/SpinnerStyle"
-            android:layout_marginRight="4dp" />
-        <!-- branch field -->
+            style="@style/SpinnerStyle" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/SpinnerLayoutContainer">
+
+        <TextView
+            style="@style/SpinnerTextStyle"
+            android:text="@string/branch" />
+
         <Spinner
             android:id="@+id/branch_spinner"
             style="@style/SpinnerStyle" />
-
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/spinner_layout_2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/spinner_layout_1"
-        android:layout_centerHorizontal="true"
-        android:layout_marginLeft="32dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginRight="32dp"
-        android:orientation="horizontal">
+    <LinearLayout style="@style/SpinnerLayoutContainer">
 
-        <!-- section field -->
+        <TextView
+            style="@style/SpinnerTextStyle"
+            android:text="@string/section" />
+
         <Spinner
             android:id="@+id/section_spinner"
-            style="@style/SpinnerStyle"
-            android:layout_marginRight="4dp" />
-
-        <!-- subject field -->
-        <Spinner
-            android:id="@+id/subject_spinner"
             style="@style/SpinnerStyle" />
-
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/lecture_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/spinner_layout_2"
-        android:paddingBottom="16dp">
-        <!-- Label -->
+    <LinearLayout style="@style/SpinnerLayoutContainer">
+
         <TextView
-            android:id="@+id/lecture_label"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_weight="1"
-            android:fontFamily="sans-serif-medium"
-            android:text="Lecture"
-            android:textColor="@color/colorAccent" />
-        <!-- lecture layout -->
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_weight="2">
+            style="@style/SpinnerTextStyle"
+            android:text="@string/lecture" />
 
-            <EditText
-                android:id="@+id/lecture_et"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@id/minus_lecture_button"
-                android:inputType="number"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                tools:text="1" />
-
-            <Button
-                android:id="@+id/minus_lecture_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:text="-"
-                android:textColor="@color/textColor" />
-
-            <Button
-                android:id="@+id/plus_lecture_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@id/lecture_et"
-                android:text="+" />
-        </RelativeLayout>
+        <Spinner
+            android:id="@+id/lecture_spinner"
+            style="@style/SpinnerStyle" />
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_new_attendance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/fab_margin"
-        android:background="@color/colorPrimary"
+        style="@style/fab_right"
         app:srcCompat="@drawable/ic_baseline_done_24px" />
 
-</RelativeLayout>
+</LinearLayout>

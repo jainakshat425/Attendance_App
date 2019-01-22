@@ -1,7 +1,5 @@
 package com.example.android.attendance;
 
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
@@ -54,7 +52,7 @@ public class ScheduleActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        facUserId = SharedPrefManager.getInstance(this).getFacUserId();
+        facUserId = SharedPrefManager.getInstance(this).getFacEmail();
         String currentDay = ExtraUtils.getCurrentDay();
 
         final MaterialDayPicker materialDayPicker = findViewById(R.id.day_picker);

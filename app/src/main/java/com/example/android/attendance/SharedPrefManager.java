@@ -64,7 +64,7 @@ public class SharedPrefManager {
         return sharedPref.getInt(FacultyEntry.F_COLLEGE_ID, -1);
     }
 
-    public String getFacUserId() {
+    public String getFacEmail() {
         SharedPreferences sharedPref = mCtx
                 .getSharedPreferences(MY_SHARED_PREF, Context.MODE_PRIVATE);
 

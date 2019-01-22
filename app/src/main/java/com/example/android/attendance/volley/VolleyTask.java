@@ -66,7 +66,7 @@ public class VolleyTask {
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
-    public static void getAttendanceList(final Context context, final String facUserId,
+    public static void getAttendanceList(final Context context, final String facEmail,
                                          final VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(context);
         pDialog.setMessage("Setting up...");
@@ -76,12 +76,10 @@ public class VolleyTask {
             pDialog.dismiss();
             try {
                 JSONObject jObj = new JSONObject(response);
-
+                Toast.makeText(context, jObj.getString("message"),
+                        Toast.LENGTH_SHORT).show();
                 if (!jObj.getBoolean("error")) {
                     callback.onSuccessResponse(jObj);
-                } else {
-                    Toast.makeText(context, jObj.getString("message"),
-                            Toast.LENGTH_SHORT).show();
                 }
 
             } catch (JSONException e) {
@@ -96,7 +94,7 @@ public class VolleyTask {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put(FacultyEntry.F_EMAIL_COL, facUserId);
+                params.put(FacultyEntry.F_EMAIL_COL, facEmail);
                 return params;
             }
         };
@@ -109,7 +107,7 @@ public class VolleyTask {
         pDialog.setMessage("Setting up...");
         pDialog.show();
         StringRequest request = new StringRequest(Request.Method.POST,
-                ExtraUtils.GET_BRANCHES_URL, response -> {
+                ExtraUtils.GET_BRANCH_NAMES_URL, response -> {
             pDialog.dismiss();
             try {
                 JSONObject jObj = new JSONObject(response);
@@ -137,8 +135,8 @@ public class VolleyTask {
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 
-    public static void getSections(final Context mContext, final String branchSelected,
-                                   final String semesterSelected, final int collId,
+    public static void getSections(final Context mContext, final String branch,
+                                   final String semester, final int collId,
                                    VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(mContext);
         pDialog.setMessage("Please wait...");
@@ -166,8 +164,8 @@ public class VolleyTask {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put("branch_name", branchSelected);
-                params.put("semester", semesterSelected);
+                params.put("branch_name", branch);
+                params.put("semester", semester);
                 params.put("college_id", String.valueOf(collId));
                 return params;
             }
@@ -175,37 +173,39 @@ public class VolleyTask {
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 
-    public static void getSubjects(final Context mContext, final String branchSelected,
-                                   final String semesterSelected, final int collId,
+    public static void getLectureNumbers(final Context mContext, final String branch,
+                                   final String semester, final String section, final int collId,
                                    VolleyCallback callback) {
-
         ProgressDialog pDialog = new ProgressDialog(mContext);
         pDialog.setMessage("Please wait...");
         pDialog.show();
         StringRequest request = new StringRequest(Request.Method.POST,
-                ExtraUtils.GET_SUB_NAME_URL, response -> {
-            pDialog.dismiss();
-            try {
-                JSONObject jObj = new JSONObject(response);
-                if (!jObj.getBoolean("error")) {
-                    callback.onSuccessResponse(jObj);
-                } else {
-                    Toast.makeText(mContext, jObj.getString("message"),
-                            Toast.LENGTH_SHORT).show();
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }, error -> {
+                ExtraUtils.GET_LECTURE_NUMBERS_URL,
+                response -> {
+                    pDialog.dismiss();
+                    try {
+                        JSONObject jObj = new JSONObject(response);
+
+                        if (!jObj.getBoolean("error")) {
+                            callback.onSuccessResponse(jObj);
+                        } else {
+                            Toast.makeText(mContext, jObj.getString("message"),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }, error -> {
             pDialog.dismiss();
             Toast.makeText(mContext, error.getMessage(), Toast.LENGTH_LONG).show();
         }) {
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
+            protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put(BranchEntry.BRANCH_NAME, branchSelected);
-                params.put(SubjectEntry.SUB_SEMESTER_COL, semesterSelected);
-                params.put(ClassEntry.COLLEGE_ID, String.valueOf(collId));
+                params.put("branch_name", branch);
+                params.put("semester", semester);
+                params.put("section", section);
+                params.put("college_id", String.valueOf(collId));
                 return params;
             }
         };
@@ -424,7 +424,7 @@ public class VolleyTask {
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
-    public static void showSchedule(final Context context, final String facUserId, final String day,
+    public static void showSchedule(final Context context, final String facEmail, final String day,
                                     VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(context);
         pDialog.setMessage("Loading...");
@@ -454,7 +454,7 @@ public class VolleyTask {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put(LectureEntry.FAC_USER_ID, facUserId);
+                params.put(LectureEntry.FAC_USER_ID, facEmail);
                 params.put(LectureEntry.LECTURE_DAY, day);
                 return params;
             }

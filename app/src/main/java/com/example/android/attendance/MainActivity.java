@@ -65,31 +65,22 @@ public class MainActivity extends AppCompatActivity
         mSharedPref = SharedPrefManager.getInstance(this);
         if (mSharedPref.isLoggedIn()) {
 
-            int facId = mSharedPref.getFacId();
-            final String facUserId = mSharedPref.getFacUserId();
+            final String facEmail = mSharedPref.getFacEmail();
             String facName = mSharedPref.getFacName();
             String facDept = mSharedPref.getFacDept();
 
-            setupNavigationDrawer(facName, facUserId, facDept);
+            setupNavigationDrawer(facName, facEmail, facDept);
 
-            mAdapter = new MainListAdapter(this, new ArrayList<AttendanceRecord>());
+            mAdapter = new MainListAdapter(this, new ArrayList<>());
             LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            layoutManager.setOrientation(RecyclerView.VERTICAL);
             DividerItemDecoration divider = new DividerItemDecoration(this,
                     LinearLayoutManager.VERTICAL);
             mRecyclerView.setLayoutManager(layoutManager);
             mRecyclerView.addItemDecoration(divider);
             mRecyclerView.setAdapter(mAdapter);
-            VolleyTask.getAttendanceList(this, facUserId, new VolleyCallback() {
-                @Override
-                public void onSuccessResponse(JSONObject jObj) {
-                    List<AttendanceRecord> records =
-                            GsonUtils.extractRecordsFromJSON(jObj);
-                    mAdapter.swapList(records);
-                }
-            });
 
-            //ReminderUtilities.scheduleAttendanceReminder(this);
+            refreshList();
 
         } else {
             finish();
@@ -98,7 +89,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private void setupNavigationDrawer(String facName, String facUserId, String facDept) {
+    private void setupNavigationDrawer(String facName, String facEmail, String facDept) {
 
         mDrawerLayout = findViewById(R.id.drawer_layout);
 
@@ -121,7 +112,7 @@ public class MainActivity extends AppCompatActivity
 
         facNameTv.setText(facName);
         facDeptTv.setText(facDept);
-        facIdTv.setText(facUserId);
+        facIdTv.setText(facEmail);
     }
 
     @Override
@@ -134,9 +125,9 @@ public class MainActivity extends AppCompatActivity
                 startActivity(checkAttendanceIntent);
                 break;
             case R.id.nav_schedule:
-                String facUserId = mSharedPref.getFacUserId();
+                String facEmail = mSharedPref.getFacEmail();
                 Intent scheduleIntent = new Intent(this, ScheduleActivity.class);
-                scheduleIntent.putExtra(ExtraUtils.EXTRA_FAC_EMAIL, facUserId);
+                scheduleIntent.putExtra(ExtraUtils.EXTRA_FAC_EMAIL, facEmail);
                 startActivity(scheduleIntent);
                 break;
         }
@@ -171,14 +162,17 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onResume() {
-        VolleyTask.getAttendanceList(this, mSharedPref.getFacUserId(), new VolleyCallback() {
-            @Override
-            public void onSuccessResponse(JSONObject jObj) {
-                List<AttendanceRecord> records =
-                        GsonUtils.extractRecordsFromJSON(jObj);
-                mAdapter.swapList(records);
-            }
-        });
+        refreshList();
         super.onResume();
     }
+
+    private void refreshList() {
+        VolleyTask.getAttendanceList(this, mSharedPref.getFacEmail(), jObj -> {
+            List<AttendanceRecord> records =
+                    GsonUtils.extractRecordsFromJSON(jObj);
+            mAdapter.swapList(records);
+        });
+    }
+
+
 }

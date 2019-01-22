@@ -7,7 +7,6 @@
     <string name="toast_login_successful">Login Successful</string>
     <string name="pick_date">Pick Date</string>
     <string name="subject">Subject</string>
-    <string name="semester">Semester</string>
     <string name="college_gct">GCT</string>
     <string name="college_git">GIT</string>
     <string name="gtcjaipur_com">\@gtcjaipur.com</string>
@@ -26,4 +25,10 @@
     <string name="to">to</string>
     <string name="lectures_not_scheduled">Lectures not scheduled!</string>
     <string name="new_name">New name</string>
+    <string name="date">Date</string>
+    <string name="lecture">Lecture</string>
+    <string name="section">Section</string>
+    <string name="branch">Branch</string>
+    <string name="semester">Semester</string>
+    <string name="dd_mm_yyyy">dd-mm-yyyy</string>
 </resources>
