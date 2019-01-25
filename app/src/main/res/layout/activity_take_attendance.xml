@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,17 +10,16 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:background="@color/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark"
-        android:layout_alignParentTop="true"/>
+        android:theme="@style/ThemeOverlay.AppCompat.Dark" />
 
 
-    <androidx.cardview.widget.CardView
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:layout_below="@id/toolbar"
+    <androidx.cardview.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:id="@+id/details_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
         android:layout_margin="4dp"
         card_view:cardCornerRadius="5dp">
 
@@ -27,34 +27,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:paddingBottom="8dp"
             android:paddingLeft="16dp"
+            android:paddingTop="8dp"
             android:paddingRight="16dp"
-            android:paddingTop="8dp">
+            android:paddingBottom="8dp">
 
             <TextView
                 android:id="@+id/date_text_view"
                 android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:layout_height="wrap_content"
                 tools:text="07-08-2018" />
 
             <TextView
                 android:id="@+id/day_text_view"
                 android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:layout_height="wrap_content"
                 tools:text="Thursday" />
 
             <TextView
                 android:id="@+id/lecture_text_view"
                 android:layout_width="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp"
+                android:layout_weight="1"
+                android:gravity="center"
                 tools:text="5th Lecture" />
 
         </LinearLayout>
@@ -62,19 +62,61 @@
 
     <androidx.cardview.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@id/details_container"
         android:layout_gravity="center"
-        android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
         card_view:cardCornerRadius="4dp">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/students_list_view"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:scrollbars="vertical" />
+            android:layout_height="match_parent">
+
+            <RelativeLayout
+                android:id="@+id/empty_view_take_attendance"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/no_reports_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_above="@id/empty_label"
+                    android:layout_centerHorizontal="true"
+                    android:contentDescription="@string/no_students_for_attendance_icon"
+                    app:srcCompat="@drawable/ic_checklist" />
+
+                <TextView
+                    android:id="@+id/empty_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="sans-serif-condensed-medium"
+                    android:text="@string/no_students_in_the_class"
+                    android:textColor="#FF7058"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/empty_label"
+                    android:layout_centerHorizontal="true"
+                    android:fontFamily="sans-serif-condensed-medium"
+                    android:gravity="center"
+                    android:text="@string/add_the_students_to_respective_class_to_take_attendance"
+                    android:textStyle="italic" />
+            </RelativeLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/students_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:scrollbars="vertical" />
+        </RelativeLayout>
     </androidx.cardview.widget.CardView>
 </RelativeLayout>

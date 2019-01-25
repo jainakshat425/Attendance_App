@@ -2,6 +2,8 @@ package com.example.android.attendance.utilities;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.view.Gravity;
 import android.widget.EditText;
@@ -60,7 +62,7 @@ public class ExtraUtils {
 
 
 
-    private static final String DB_URL = "http://10.0.11.249/attendancephp/v1/";
+    private static final String DB_URL = "http://192.168.137.1/attendancephp/v1/";
     public static final String FAC_LOGIN_URL = DB_URL + "facLogin.php";
     public static final String CHANGE_FACULTY_PASS_URL = DB_URL + "changeFacultyPassword.php";
 
@@ -140,6 +142,13 @@ public class ExtraUtils {
         }
         tv.setPadding(4, 4, 4, 4);
         return tv;
+    }
+
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 }

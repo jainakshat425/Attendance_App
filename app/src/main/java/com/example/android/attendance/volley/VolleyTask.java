@@ -69,11 +69,12 @@ public class VolleyTask {
             pDialog.dismiss();
             try {
                 JSONObject jObj = new JSONObject(response);
-                Toast.makeText(context, jObj.getString("message"),
-                        Toast.LENGTH_SHORT).show();
+
                 if (!jObj.getBoolean("error")) {
                     callback.onSuccessResponse(jObj);
-                }
+                } else
+                    Toast.makeText(context, jObj.getString("message"),
+                            Toast.LENGTH_SHORT).show();
 
             } catch (JSONException e) {
                 e.printStackTrace();

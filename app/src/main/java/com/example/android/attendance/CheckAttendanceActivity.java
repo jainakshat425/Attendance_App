@@ -86,36 +86,38 @@ public class CheckAttendanceActivity extends AppCompatActivity {
 
     @OnClick(R.id.show_button)
     void showAttendanceReport() {
-        if (validateInputs()) {
-            VolleyTask.checkValidClass(CheckAttendanceActivity.this, collegeId,
-                    semester, branch, section, jObj -> {
+        if (ExtraUtils.isNetworkAvailable(this)) {
+            if (validateInputs()) {
+                VolleyTask.checkValidClass(CheckAttendanceActivity.this, collegeId,
+                        semester, branch, section, jObj -> {
 
-                        Intent i = new Intent();
-                        i.setClass(mContext, StudentReportActivity.class);
+                            Intent i = new Intent();
+                            i.setClass(mContext, StudentReportActivity.class);
 
-                        i.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
-                        i.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
-                        i.putExtra(ExtraUtils.EXTRA_SECTION, section);
-                        i.putExtra(ExtraUtils.EXTRA_COLLEGE_ID, collegeId);
+                            i.putExtra(ExtraUtils.EXTRA_SEMESTER, semester);
+                            i.putExtra(ExtraUtils.EXTRA_BRANCH, branch);
+                            i.putExtra(ExtraUtils.EXTRA_SECTION, section);
+                            i.putExtra(ExtraUtils.EXTRA_COLLEGE_ID, collegeId);
 
-                        i.putExtra(ExtraUtils.EXTRA_IS_DATE_WISE, isDateWise);
-                        if (isDateWise) {
-                            i.putExtra(ExtraUtils.EXTRA_FROM_DATE, fromDate);
-                            i.putExtra(ExtraUtils.EXTRA_TO_DATE, toDate);
-                        }
+                            i.putExtra(ExtraUtils.EXTRA_IS_DATE_WISE, isDateWise);
+                            if (isDateWise) {
+                                i.putExtra(ExtraUtils.EXTRA_FROM_DATE, fromDate);
+                                i.putExtra(ExtraUtils.EXTRA_TO_DATE, toDate);
+                            }
 
-                        try {
-                            int classId = jObj.getInt("class_id");
-                            int branchId = jObj.getInt("branch_id");
+                            try {
+                                int classId = jObj.getInt("class_id");
+                                int branchId = jObj.getInt("branch_id");
 
-                            i.putExtra(ExtraUtils.EXTRA_CLASS_ID, classId);
-                            i.putExtra(ExtraUtils.EXTRA_BRANCH_ID, branchId);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                                i.putExtra(ExtraUtils.EXTRA_CLASS_ID, classId);
+                                i.putExtra(ExtraUtils.EXTRA_BRANCH_ID, branchId);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
 
-                        startActivity(i);
-                    });
+                            startActivity(i);
+                        });
+            }
         }
     }
 

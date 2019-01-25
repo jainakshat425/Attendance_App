@@ -1,10 +1,13 @@
 package com.example.android.attendance.volley;
 
 import android.content.Context;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.example.android.attendance.R;
+import com.example.android.attendance.utilities.ExtraUtils;
 
 public class RequestHandler {
     private static RequestHandler mInstance;
@@ -33,7 +36,10 @@ public class RequestHandler {
     }
 
     public <T> void addToRequestQueue(Request<T> req) {
-        getRequestQueue().add(req);
+        if (ExtraUtils.isNetworkAvailable(mCtx))
+            getRequestQueue().add(req);
+        else
+            Toast.makeText(mCtx, R.string.network_not_available, Toast.LENGTH_SHORT).show();
     }
 
 }

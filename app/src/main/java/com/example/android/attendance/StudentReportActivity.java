@@ -1,6 +1,11 @@
 package com.example.android.attendance;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -9,8 +14,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -37,8 +45,38 @@ public class StudentReportActivity extends AppCompatActivity {
     @BindView(R.id.rv_show_attendance)
     RecyclerView mRecyclerView;
 
+    @BindView(R.id.empty_view_reports)
+    RelativeLayout mEmptyView;
+
     private ReportAdapter mAdapter;
     private CreatePdf mCreatePdf;
+
+    private Bundle classDetails;
+    private int classId, branchId, collId;
+    private String toDate, fromDate;
+    private boolean isDayWise;
+
+    @BindView(R.id.no_network_view)
+    RelativeLayout noNetworkLayout;
+
+    private BroadcastReceiver networkReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isNotConnected = intent.getBooleanExtra(
+                    ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+
+            if (isNotConnected) {
+                noNetworkLayout.setVisibility(View.VISIBLE);
+                mEmptyView.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.GONE);
+            } else {
+                noNetworkLayout.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.VISIBLE);
+                refreshList();
+            }
+        }
+    };
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,33 +89,38 @@ public class StudentReportActivity extends AppCompatActivity {
         if (actionbar != null) {
             actionbar.setDisplayHomeAsUpEnabled(true);
         }
+
         ButterKnife.bind(this);
 
         mAdapter = new ReportAdapter(this, new ArrayList<Report>(), 0);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this,
-                LinearLayoutManager.VERTICAL, false);
+                RecyclerView.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setAdapter(mAdapter);
 
-        final Bundle classDetails = getIntent().getExtras();
+        classDetails = getIntent().getExtras();
         if (classDetails != null) {
 
-            int branchId = classDetails.getInt(ExtraUtils.EXTRA_BRANCH_ID);
-            int classId = classDetails.getInt(ExtraUtils.EXTRA_CLASS_ID);
-            int collId = classDetails.getInt(ExtraUtils.EXTRA_COLLEGE_ID);
-            boolean isDayWise = classDetails.getBoolean(ExtraUtils.EXTRA_IS_DATE_WISE);
-            String fromDate = null;
-            String toDate = null;
+            branchId = classDetails.getInt(ExtraUtils.EXTRA_BRANCH_ID);
+            classId = classDetails.getInt(ExtraUtils.EXTRA_CLASS_ID);
+            collId = classDetails.getInt(ExtraUtils.EXTRA_COLLEGE_ID);
+            isDayWise = classDetails.getBoolean(ExtraUtils.EXTRA_IS_DATE_WISE);
+            fromDate = null;
+            toDate = null;
+
             if (isDayWise) {
                 fromDate = classDetails.getString(ExtraUtils.EXTRA_FROM_DATE);
                 toDate = classDetails.getString(ExtraUtils.EXTRA_TO_DATE);
             }
+            refreshList();
+        }
+    }
 
-            VolleyTask.showReport(this,  branchId, classId, collId,
-                    isDayWise, fromDate, toDate, new VolleyCallback() {
-                @Override
-                public void onSuccessResponse(JSONObject jObj) {
+    private void refreshList() {
+        VolleyTask.showReport(this, branchId, classId, collId,
+                isDayWise, fromDate, toDate, jObj -> {
+
                     List<Report> reports = GsonUtils.extractReportsFromJson(jObj);
                     List<SubReport> subReports = GsonUtils.extractSubReportsFromJson(jObj);
                     showSubReport(subReports);
@@ -91,9 +134,11 @@ public class StudentReportActivity extends AppCompatActivity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-            });
-        }
+                });
+        if (mAdapter.getItemCount() < 1)
+            mEmptyView.setVisibility(View.VISIBLE);
+        else
+            mEmptyView.setVisibility(View.GONE);
     }
 
     public void showSubReport(List<SubReport> subReports) {
@@ -146,4 +191,21 @@ public class StudentReportActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkReceiver, filter);
+
+        refreshList();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(networkReceiver);
+    }
+
 }

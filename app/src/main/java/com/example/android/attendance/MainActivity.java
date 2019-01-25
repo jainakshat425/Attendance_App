@@ -1,6 +1,10 @@
 package com.example.android.attendance;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -53,6 +57,27 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.empty_view_main)
     RelativeLayout mEmptyView;
 
+    @BindView(R.id.no_network_view)
+    RelativeLayout noNetworkLayout;
+
+    private BroadcastReceiver networkReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isNotConnected = intent.getBooleanExtra(
+                    ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+
+            if (isNotConnected) {
+                noNetworkLayout.setVisibility(View.VISIBLE);
+                mEmptyView.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.GONE);
+            } else {
+                noNetworkLayout.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.VISIBLE);
+                refreshList();
+            }
+        }
+    };
+
     private MainListAdapter mAdapter;
 
     private SharedPrefManager mSharedPref;
@@ -89,9 +114,6 @@ public class MainActivity extends AppCompatActivity
             mRecyclerView.setLayoutManager(layoutManager);
             mRecyclerView.addItemDecoration(divider);
             mRecyclerView.setAdapter(mAdapter);
-
-            refreshList();
-
         } else {
             finish();
             startActivity(new Intent(this, LoginActivity.class));
@@ -176,23 +198,18 @@ public class MainActivity extends AppCompatActivity
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    protected void onResume() {
-        refreshList();
-        super.onResume();
-    }
-
     private void refreshList() {
-        VolleyTask.getAttendanceList(this, mSharedPref.getFacEmail(), jObj -> {
-            List<AttendanceRecord> records =
-                    GsonUtils.extractRecordsFromJSON(jObj);
-            mAdapter.swapList(records);
-
-            if (mAdapter.getItemCount() < 1)
-                mEmptyView.setVisibility(View.VISIBLE);
-            else
-                mEmptyView.setVisibility(View.GONE);
-        });
+        if (ExtraUtils.isNetworkAvailable(this)) {
+            VolleyTask.getAttendanceList(this, mSharedPref.getFacEmail(), jObj -> {
+                List<AttendanceRecord> records =
+                        GsonUtils.extractRecordsFromJSON(jObj);
+                mAdapter.swapList(records);
+                if (mAdapter.getItemCount() < 1)
+                    mEmptyView.setVisibility(View.VISIBLE);
+                else
+                    mEmptyView.setVisibility(View.GONE);
+            });
+        }
     }
 
     private void logout() {
@@ -269,5 +286,19 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
 
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkReceiver, filter);
+
+        refreshList();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(networkReceiver);
+    }
 }

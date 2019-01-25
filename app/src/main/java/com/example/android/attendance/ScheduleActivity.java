@@ -1,6 +1,11 @@
 package com.example.android.attendance;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,15 +33,36 @@ import ca.antonious.materialdaypicker.SingleSelectionMode;
 
 public class ScheduleActivity extends AppCompatActivity {
 
-    List<Schedule> mSchedules;
-    String facUserId;
+    private List<Schedule> mSchedules;
+    private String facUserId;
+    private String currentDay;
+    private ScheduleAdapter mAdapter;
 
     @BindView(R.id.sch_recycler_view)
     RecyclerView mRecyclerView;
     @BindView(R.id.sch_empty_view)
     RelativeLayout emptyView;
 
-    private ScheduleAdapter mAdapter;
+    @BindView(R.id.no_network_view)
+    RelativeLayout noNetworkLayout;
+
+    private BroadcastReceiver networkReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isNotConnected = intent.getBooleanExtra(
+                    ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+
+            if (isNotConnected) {
+                noNetworkLayout.setVisibility(View.VISIBLE);
+                emptyView.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.GONE);
+            } else {
+                noNetworkLayout.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.VISIBLE);
+                refreshList(facUserId, currentDay);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +79,7 @@ public class ScheduleActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         facUserId = SharedPrefManager.getInstance(this).getFacEmail();
-        String currentDay = ExtraUtils.getCurrentDay();
+        currentDay = ExtraUtils.getCurrentDay();
 
         final MaterialDayPicker materialDayPicker = findViewById(R.id.day_picker);
         materialDayPicker.setSelectionMode(SingleSelectionMode.create());
@@ -70,22 +96,40 @@ public class ScheduleActivity extends AppCompatActivity {
         mAdapter = new ScheduleAdapter(this, mSchedules, currentDay);
         mRecyclerView.setAdapter(mAdapter);
 
-        refreshList(facUserId, currentDay);
 
         materialDayPicker.setDayPressedListener((weekday, isSelected) -> {
-            if (isSelected)  refreshList(facUserId, weekday.toString());
+            currentDay = weekday.toString();
+            if (isSelected)  refreshList(facUserId, currentDay);
         });
     }
 
     private void refreshList(String facUserId, String currentDay) {
-        VolleyTask.showSchedule(this, facUserId, currentDay, jObj -> {
-            mSchedules = GsonUtils.extractScheduleFromJSON(jObj);
-            mAdapter.swapList(mSchedules, currentDay);
+        if(ExtraUtils.isNetworkAvailable(this)) {
+            VolleyTask.showSchedule(this, facUserId, currentDay, jObj -> {
+                mSchedules = GsonUtils.extractScheduleFromJSON(jObj);
+                mAdapter.swapList(mSchedules, currentDay);
 
-            if (mAdapter.getItemCount() < 1)
-                emptyView.setVisibility(View.VISIBLE);
-            else
-                emptyView.setVisibility(View.GONE);
-        });
+                if (mAdapter.getItemCount() < 1)
+                    emptyView.setVisibility(View.VISIBLE);
+                else
+                    emptyView.setVisibility(View.GONE);
+            });
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkReceiver, filter);
+
+        refreshList(facUserId, currentDay);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(networkReceiver);
     }
 }

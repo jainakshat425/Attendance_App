@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -9,6 +10,48 @@
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark" />
+
+    <include
+        android:id="@+id/no_network_view"
+        layout="@layout/no_network_layout"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:id="@+id/empty_view_reports"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/no_reports_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_report"
+            android:layout_above="@id/empty_label"
+            android:layout_centerHorizontal="true"
+            android:contentDescription="@string/no_reports_icon" />
+
+        <TextView
+            android:id="@+id/empty_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="4dp"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:text="@string/no_reports_found"
+            android:textColor="#FF7058"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/empty_label"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            android:textStyle="italic"
+            android:text="@string/reports_will_be_generated_after_adding_lectures_and_students" />
+    </RelativeLayout>
 
     <TableLayout
         android:layout_margin="4dp"

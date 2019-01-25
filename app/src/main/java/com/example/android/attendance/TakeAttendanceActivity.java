@@ -2,7 +2,11 @@ package com.example.android.attendance;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBar;
@@ -15,6 +19,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,7 +51,32 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     RecyclerView mRecyclerView;
     private TakeAttendAdapter mAdapter;
 
+    String date, day, classId, lectNo, attendRecId;
     private boolean isUpdateMode = false;
+
+    @BindView(R.id.empty_view_take_attendance)
+    RelativeLayout mEmptyView;
+
+    @BindView(R.id.no_network_view)
+    RelativeLayout noNetworkLayout;
+
+    private BroadcastReceiver networkReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isNotConnected = intent.getBooleanExtra(
+                    ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+
+            if (isNotConnected) {
+                noNetworkLayout.setVisibility(View.VISIBLE);
+                mEmptyView.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.GONE);
+            } else {
+                noNetworkLayout.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.VISIBLE);
+                refreshList();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,12 +94,13 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
 
         if (bundle != null) {
-            String date = bundle.getString(ExtraUtils.EXTRA_DATE);
+            date = bundle.getString(ExtraUtils.EXTRA_DATE);
+            day = bundle.getString(ExtraUtils.EXTRA_DAY);
+            lectNo = bundle.getString(ExtraUtils.EXTRA_LECTURE_NO);
+            classId = bundle.getString(ExtraUtils.EXTRA_CLASS_ID);
+            attendRecId = bundle.getString(ExtraUtils.EXTRA_ATTEND_REC_ID);
+
             String dateDisplay = bundle.getString(ExtraUtils.EXTRA_DISPLAY_DATE);
-            String day = bundle.getString(ExtraUtils.EXTRA_DAY);
-            String lectNo = bundle.getString(ExtraUtils.EXTRA_LECTURE_NO);
-            String classId = bundle.getString(ExtraUtils.EXTRA_CLASS_ID);
-            String attendRecId = bundle.getString(ExtraUtils.EXTRA_ATTEND_REC_ID);
 
             dateTv.setText(dateDisplay);
             dayTv.setText(day);
@@ -82,24 +114,32 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             mRecyclerView.addItemDecoration(divider);
             mRecyclerView.setAdapter(mAdapter);
 
-            if (attendRecId != null) {
-                setTitle(getString(R.string.update_attendance_title));
-                isUpdateMode = true;
-                VolleyTask.setupForUpdateAttendance(this, attendRecId, jObj -> {
-                    List<Attendance> records = GsonUtils
-                            .extractAttendanceFromJSON(jObj);
-                    mAdapter.swapList(records);
-                });
-            } else {
-                setTitle(R.string.take_attendance_title);
-                isUpdateMode = false;
-                VolleyTask.setupForNewAttendance(this, lectNo, classId, date, day,
-                        jObj -> {
-                            List<Attendance> records = GsonUtils.extractAttendanceFromJSON(jObj);
-                            mAdapter.swapList(records);
-                        });
-            }
+            refreshList();
         }
+    }
+
+    private void refreshList() {
+        if (attendRecId != null) {
+            setTitle(getString(R.string.update_attendance_title));
+            isUpdateMode = true;
+            VolleyTask.setupForUpdateAttendance(this, attendRecId, jObj -> {
+                List<Attendance> records = GsonUtils
+                        .extractAttendanceFromJSON(jObj);
+                mAdapter.swapList(records);
+            });
+        } else {
+            setTitle(R.string.take_attendance_title);
+            isUpdateMode = false;
+            VolleyTask.setupForNewAttendance(this, lectNo, classId, date, day,
+                    jObj -> {
+                        List<Attendance> records = GsonUtils.extractAttendanceFromJSON(jObj);
+                        mAdapter.swapList(records);
+                    });
+        }
+        if (mAdapter.getItemCount() < 1)
+            mEmptyView.setVisibility(View.VISIBLE);
+        else
+            mEmptyView.setVisibility(View.GONE);
     }
 
     @Override
@@ -117,7 +157,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             case android.R.id.home:
                 if (isUpdateMode) finish();
                 else {
-                   undoChangesAndFinish();
+                    undoChangesAndFinish();
                 }
                 break;
         }
@@ -172,5 +212,19 @@ public class TakeAttendanceActivity extends AppCompatActivity {
 
                         }).create();
         dialog.show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(networkReceiver);
     }
 }

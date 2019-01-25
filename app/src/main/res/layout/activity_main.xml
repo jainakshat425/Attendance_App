@@ -9,27 +9,31 @@
     tools:context=".MainActivity">
 
     <RelativeLayout
-        android:layout_width="match_parent"
         android:id="@+id/main_layout"
+        android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
             android:background="@color/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark"
-            android:layout_alignParentTop="true"/>
+            android:theme="@style/ThemeOverlay.AppCompat.Dark" />
 
-        <androidx.cardview.widget.CardView
-            xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        <include
+            android:id="@+id/no_network_view"
+            layout="@layout/no_network_layout"
+            android:visibility="gone" />
+
+        <androidx.cardview.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/toolbar"
-            android:layout_marginBottom="4dp"
             android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
             android:layout_marginTop="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
             card_view:cardCornerRadius="4dp">
 
             <androidx.recyclerview.widget.RecyclerView
@@ -42,19 +46,19 @@
         </androidx.cardview.widget.CardView>
 
         <RelativeLayout
-            android:visibility="gone"
             android:id="@+id/empty_view_main"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true">
+            android:layout_centerInParent="true"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/empty_attendance_list_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                app:srcCompat="@drawable/ic_empty_attendance_list"
-                android:tint="@color/darkRedColor" />
+                android:tint="@color/darkRedColor"
+                app:srcCompat="@drawable/ic_empty_attendance_list" />
 
             <TextView
                 android:id="@+id/list_empty_tv"
@@ -76,7 +80,7 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/click_button_below_to_add_new_attendance" />
         </RelativeLayout>
-        
+
     </RelativeLayout>
     <!-- Container for contents of drawer - use NavigationView to make configuration easier -->
     <com.google.android.material.navigation.NavigationView
@@ -85,7 +89,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:menu="@menu/drawer_view_main"
-        app:headerLayout="@layout/nav_header" />
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/drawer_view_main" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

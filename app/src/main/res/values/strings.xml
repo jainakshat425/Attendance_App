@@ -32,5 +32,14 @@
     <string name="semester">Semester</string>
     <string name="dd_mm_yyyy">dd-mm-yyyy</string>
 
-
+    <string name="network_not_available">Internet connection not available!</string>
+    <string name="no_internet_icon">No Internet Icon</string>
+    <string name="no_reports_icon">No reports icon.</string>
+    <string name="no_reports_found">No reports found.</string>
+    <string name="reports_will_be_generated_after_adding_lectures_and_students">
+        Reports will be generated after adding lectures and students…</string>
+    <string name="no_students_for_attendance_icon">No students for attendance icon</string>
+    <string name="no_students_in_the_class">No students in the class.</string>
+    <string name="add_the_students_to_respective_class_to_take_attendance">
+        Add the students to respective class to take attendance…</string>
 </resources>

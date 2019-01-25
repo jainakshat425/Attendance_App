@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.util.Patterns;
 import android.widget.Toast;
 
+import com.example.android.attendance.utilities.ExtraUtils;
 import com.example.android.attendance.volley.VolleyTask;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -33,28 +34,30 @@ public class LoginActivity extends AppCompatActivity {
         username = Objects.requireNonNull(usernameIn.getEditText()).getText().toString().trim();
         pass = Objects.requireNonNull(passIn.getEditText()).getText().toString().trim();
 
-        if (validateInputs()) {
-            VolleyTask.login(this, username, pass, jObj -> {
-                try {
+        if (ExtraUtils.isNetworkAvailable(this)) {
+            if (validateInputs()) {
+                VolleyTask.login(this, username, pass, jObj -> {
+                    try {
 
-                    int facId = jObj.getInt("fac_id");
-                    String facName = jObj.getString(SharedPrefManager.FAC_NAME);
-                    String facUsername = jObj.getString(SharedPrefManager.FAC_EMAIL);
-                    String facDept = jObj.getString(SharedPrefManager.FAC_DEPT);
-                    int fCollId = jObj.getInt(SharedPrefManager.FAC_COLL_ID);
-                    String mobNo = jObj.getString(SharedPrefManager.FAC_MOB_NO);
+                        int facId = jObj.getInt("fac_id");
+                        String facName = jObj.getString(SharedPrefManager.FAC_NAME);
+                        String facUsername = jObj.getString(SharedPrefManager.FAC_EMAIL);
+                        String facDept = jObj.getString(SharedPrefManager.FAC_DEPT);
+                        int fCollId = jObj.getInt(SharedPrefManager.FAC_COLL_ID);
+                        String mobNo = jObj.getString(SharedPrefManager.FAC_MOB_NO);
 
-                    boolean saved = SharedPrefManager.getInstance(LoginActivity.this)
-                            .saveLoginUserDetails(facId, facName, facUsername,
-                                    facDept, fCollId, mobNo);
-                    if (saved) {
-                        finish();
-                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        boolean saved = SharedPrefManager.getInstance(LoginActivity.this)
+                                .saveLoginUserDetails(facId, facName, facUsername,
+                                        facDept, fCollId, mobNo);
+                        if (saved) {
+                            finish();
+                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            });
+                });
+            }
         }
     }
 
