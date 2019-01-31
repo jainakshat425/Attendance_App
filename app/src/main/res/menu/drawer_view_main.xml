@@ -6,19 +6,23 @@
 
         <item
             android:id="@+id/nav_check_report"
-            android:title="Reports" />
+            android:title="Reports"
+            android:icon="@drawable/ic_report"/>
 
         <item
             android:id="@+id/nav_schedule"
-            android:title="Schedule" />
+            android:title="Schedule"
+            android:icon="@drawable/ic_round_schedule_24px"/>
 
         <item
             android:id="@+id/nav_change_pass"
-            android:title="Change Password" />
+            android:title="Change Password"
+            android:icon="@drawable/ic_change_pass"/>
 
         <item
             android:id="@+id/nav_logout"
-            android:title="Logout" />
+            android:title="Logout"
+            android:icon="@drawable/ic_logout"/>
     </group>
 
 
