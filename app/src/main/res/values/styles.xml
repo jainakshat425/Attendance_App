@@ -69,4 +69,16 @@
         <item name="android:layout_marginTop">36dp</item>
         <item name="android:layout_marginEnd">16dp</item>
     </style>
+
+    <style name="text_style_date_day_lecture">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:padding">2dp</item>
+        <item name="android:fontFamily">sans-serif-condensed-medium</item>
+        <item name="android:gravity">center</item>
+    </style>
 </resources>

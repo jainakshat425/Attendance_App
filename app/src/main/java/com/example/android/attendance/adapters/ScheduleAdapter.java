@@ -75,7 +75,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
         holder.semesterTv.setText(ExtraUtils.getSemester(semester));
         holder.branchTv.setText(branch);
         holder.sectionTv.setText(section);
-        holder.subjectNameTv.setText(subName);
+        holder.subjectNameTv.setText(String.format("Subject : %s",subName));
         holder.lectStartTimeTv.setText(lectStartTime);
         holder.lectEndTimeTv.setText(lectEndTime);
 
@@ -95,13 +95,13 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
         public ScheduleHolder(View view) {
             super(view);
             view.setOnClickListener(this);
-            lectNoTv =  view.findViewById(R.id.sch_lect_no_tv);
-            semesterTv = view.findViewById(R.id.sch_semester_tv);
-            branchTv = view.findViewById(R.id.sch_branch_tv);
-            sectionTv = view.findViewById(R.id.sch_section_tv);
-            subjectNameTv = view.findViewById(R.id.sch_subject_tv);
-            lectStartTimeTv = view.findViewById(R.id.sch_lect_start_tv);
-            lectEndTimeTv = view.findViewById(R.id.sch_lect_end_tv);
+            lectNoTv = view.findViewById(R.id.fac_sch_lect_no_tv);
+            semesterTv = view.findViewById(R.id.fac_sch_semester_tv);
+            branchTv = view.findViewById(R.id.fac_sch_branch_tv);
+            sectionTv = view.findViewById(R.id.fac_sch_section_tv);
+            subjectNameTv = view.findViewById(R.id.fac_sch_subject_tv);
+            lectStartTimeTv = view.findViewById(R.id.fac_sch_lect_start_tv);
+            lectEndTimeTv = view.findViewById(R.id.fac_sch_lect_end_tv);
         }
 
         @Override

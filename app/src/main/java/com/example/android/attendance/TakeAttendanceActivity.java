@@ -33,6 +33,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -104,8 +105,8 @@ public class TakeAttendanceActivity extends AppCompatActivity {
 
             String dateDisplay = bundle.getString(ExtraUtils.EXTRA_DISPLAY_DATE);
 
-            dateTv.setText(dateDisplay);
-            dayTv.setText(day);
+            dateTv.setText(Objects.requireNonNull(dateDisplay).split(",")[0]);
+            dayTv.setText(getFormattedDay(day));
             lectureTv.setText(ExtraUtils.getLecture(lectNo));
 
             mAdapter = new TakeAttendAdapter(this, new ArrayList<>());
@@ -118,6 +119,10 @@ public class TakeAttendanceActivity extends AppCompatActivity {
 
             refreshList();
         }
+    }
+
+    private String getFormattedDay(String day) {
+        return day.substring(0,1).toUpperCase() + day.substring(1).toLowerCase();
     }
 
     private void refreshList() {

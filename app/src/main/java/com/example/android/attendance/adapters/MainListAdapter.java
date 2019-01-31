@@ -64,21 +64,18 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
         String displayDate = dateString;
         if (date != null)  displayDate = ExtraUtils.dateDisplayFormat.format(date);
 
-        holder.collegeTv.setText(college);
         holder.semesterTv.setText(ExtraUtils.getSemester(semester));
         holder.branchTv.setText(branch);
         holder.sectionTv.setText(section);
         holder.subjectTv.setText(subject);
         holder.dateTv.setText(displayDate);
-        holder.dayTv.setText(String.format("%s,", day.substring(0, 3)));
-        holder.lectureTv.setText(ExtraUtils.getLecture(lectureNo));
+        holder.dayTv.setText(day);
+        holder.lectureTv.setText(lectureNo);
         holder.studentsPresentTv.setText(stdPresent);
         holder.totalStudentsTv.setText(totalStudents);
 
         String attendRecId = String.valueOf(record.getId());
-        String facUserId = record.getFacEmail();
         String classId = String.valueOf(record.getClassId());
-        String collegeId = String.valueOf(record.getCollegeId());
 
 
         Bundle intentBundle = new Bundle();
@@ -107,7 +104,6 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
 
     public class MainViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private TextView collegeTv;
         private TextView semesterTv;
         private TextView branchTv;
         private TextView sectionTv;
@@ -122,7 +118,6 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.MainVi
             super(view);
 
             view.setOnClickListener(this);
-            collegeTv = view.findViewById(R.id.main_college_tv);
             semesterTv = view.findViewById(R.id.main_semester_tv);
             branchTv = view.findViewById(R.id.main_branch_tv);
             sectionTv = view.findViewById(R.id.main_section_tv);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/sch_details"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#fff"
@@ -11,109 +11,120 @@
     android:paddingBottom="4dp">
 
     <TextView
-        android:id="@+id/sch_lect_no_tv"
+        android:id="@+id/fac_sch_lect_no_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:background="@drawable/serial_circle_bg"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/primary_circle"
         android:fontFamily="sans-serif-medium"
         android:gravity="center"
-        android:layout_marginEnd="12dp"
         android:textColor="@android:color/white"
         android:textSize="16sp"
         tools:text="1" />
 
-
-    <TextView
-        android:id="@+id/sch_semester_tv"
+    <RelativeLayout
+        android:id="@+id/fac_sch_rl1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginBottom="4dp"
-        android:layout_toEndOf="@id/sch_lect_no_tv"
-        android:textColor="@android:color/black"
-        tools:text="V Sem" />
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@id/fac_sch_lect_no_tv">
 
-    <TextView
-        android:id="@+id/sch_branch_tv"
+        <TextView
+            android:id="@+id/fac_sch_semester_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="4dp"
+            android:textColor="@android:color/black"
+            tools:text="5th Sem" />
+
+        <TextView
+            android:id="@+id/fac_sch_branch_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="4dp"
+            android:layout_toEndOf="@id/fac_sch_semester_tv"
+            android:textColor="@android:color/black"
+            tools:text="CS" />
+
+        <TextView
+            android:id="@+id/fac_sch_section_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="4dp"
+            android:layout_toEndOf="@id/fac_sch_branch_tv"
+            android:textColor="@android:color/black"
+            tools:text="A" />
+
+        <TextView
+            android:id="@+id/fac_sch_subject_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/fac_sch_semester_tv"
+            android:layout_alignParentStart="true"
+            android:textStyle="bold|italic"
+            tools:text="Subject: ADS" />
+    </RelativeLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fac_sch_rl2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="4dp"
-        android:layout_toEndOf="@id/sch_semester_tv"
-        android:textColor="@android:color/black"
-        tools:text="CS" />
-
-    <TextView
-        android:id="@+id/sch_section_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="4dp"
-        android:layout_toEndOf="@id/sch_branch_tv"
-        android:textColor="@android:color/black"
-        tools:text="A" />
-
-    <TextView
-        android:id="@+id/sch_subject_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/sch_semester_tv"
-        android:layout_toEndOf="@id/sch_lect_no_tv"
-        android:textColor="@android:color/black"
-        tools:text="ADS" />
-
-    <!-- from text (place holder)-->
-    <TextView
-        android:id="@+id/from_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toStartOf="@id/sch_lect_start_tv"
-        android:padding="2dp"
-        android:text="@string/from"
-        android:textColor="@android:color/black"
-        android:textSize="10sp" />
-
-    <!-- lecture start time text -->
-    <TextView
-        android:id="@+id/sch_lect_start_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginStart="4dp"
-        android:textColor="@android:color/black"
-        android:textSize="14sp"
-        tools:text="08:00" />
+        android:layout_centerVertical="true">
+        <!-- from text (place holder)-->
+        <TextView
+            android:id="@+id/fac_from_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:padding="2dp"
+            android:text="@string/from"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            app:layout_constraintBottom_toBottomOf="@+id/fac_sch_lect_start_tv"
+            app:layout_constraintEnd_toStartOf="@+id/fac_sch_lect_start_tv" />
 
-    <!-- to text (place holder)-->
-    <TextView
-        android:id="@+id/to_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/from_tv"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
-        android:layout_toStartOf="@id/sch_lect_end_tv"
-        android:padding="2dp"
-        android:text="@string/to"
-        android:textColor="@android:color/black"
-        android:textSize="10sp" />
+        <!-- to text (place holder)-->
+        <TextView
+            android:id="@+id/fac_to_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:padding="2dp"
+            android:text="@string/to"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            app:layout_constraintBottom_toBottomOf="@+id/fac_sch_lect_end_tv"
+            app:layout_constraintEnd_toStartOf="@+id/fac_sch_lect_end_tv" />
 
-    <!-- lecture end time text -->
-    <TextView
-        android:id="@+id/sch_lect_end_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/from_tv"
-        android:layout_alignParentEnd="true"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="4dp"
-        android:textColor="@android:color/black"
-        android:textSize="14sp"
-        tools:text="08:00" />
+        <!-- lecture end time text -->
+        <TextView
+            android:id="@+id/fac_sch_lect_start_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="08:00" />
 
+        <!-- lecture end time text -->
+        <TextView
+            android:id="@+id/fac_sch_lect_end_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="@+id/fac_sch_lect_start_tv"
+            app:layout_constraintTop_toBottomOf="@+id/fac_sch_lect_start_tv"
+            tools:text="08:00" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </RelativeLayout>
-

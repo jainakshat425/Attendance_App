@@ -10,18 +10,15 @@
 
     <!-- college text inside circle bg -->
     <TextView
-        android:id="@+id/main_college_tv"
+        android:id="@+id/main_lecture_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:background="@drawable/college_circle_bg"
-        android:fontFamily="sans-serif-medium"
+        android:background="@drawable/primary_circle"
         android:gravity="center"
-        android:textAllCaps="true"
         android:textColor="@android:color/white"
-        android:textSize="12sp"
-        tools:text="GIT"
+        android:textSize="16sp"
+        tools:text="1"
         android:layout_alignParentStart="true" />
 
     <!-- layout holding semester, branch and section -->
@@ -30,10 +27,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="8dp"
-        android:layout_toEndOf="@id/main_college_tv"
-        android:layout_marginStart="8dp"
-        android:layout_toRightOf="@id/main_college_tv">
+        android:layout_toEndOf="@id/main_lecture_tv"
+        android:layout_marginStart="8dp">
 
         <!-- semester text -->
         <TextView
@@ -62,15 +57,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/main_semester_tv"
-            android:layout_marginLeft="4dp"
             android:layout_toEndOf="@id/main_branch_tv"
-            android:paddingLeft="4dp"
-            android:paddingRight="2dp"
             android:textColor="#000"
             android:textSize="16sp"
             tools:text="'A'"
             android:layout_marginStart="4dp"
-            android:layout_toRightOf="@id/main_branch_tv"
             android:paddingStart="4dp"
             android:paddingEnd="2dp" />
     </RelativeLayout>
@@ -83,7 +74,6 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="12dp"
         android:layout_marginRight="12dp"
-        android:layout_toRightOf="@id/sem_branch_layout"
         android:background="@android:color/darker_gray"
         android:layout_toEndOf="@id/sem_branch_layout" />
 
@@ -91,7 +81,7 @@
         android:id="@+id/attendance_detail_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/separator"
+        android:layout_centerVertical="true"
         android:orientation="vertical"
         android:layout_toEndOf="@id/separator">
 
@@ -100,36 +90,20 @@
             android:id="@+id/main_subject_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#000"
-            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
             tools:text="ADS" />
 
-        <!-- lecture text -->
-        <TextView
-            android:id="@+id/main_lecture_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textColor="#000"
-            android:textSize="12sp"
-            tools:text="5th Lecture" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="2dp">
             <!-- date text -->
             <TextView
                 android:id="@+id/main_day_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAllCaps="true"
-                android:paddingRight="4dp"
                 android:textColor="@android:color/black"
-                tools:text="Sat,"
-                android:textSize="12sp"
-                android:paddingEnd="4dp" />
+                tools:text="SATURDAY"
+                android:textSize="12sp" />
 
             <!-- date text -->
             <TextView
@@ -137,9 +111,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/black"
-                android:textSize="12sp"
-                tools:text="07-08-2018" />
-        </LinearLayout>
+                android:textSize="14sp"
+                tools:text="January 31, 2018" />
     </LinearLayout>
 
     <!-- separator in between class and subject -->
@@ -150,7 +123,6 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_toLeftOf="@id/attendance_count_layout"
         android:background="@android:color/darker_gray"
         android:layout_toStartOf="@id/attendance_count_layout" />
 
@@ -158,7 +130,6 @@
         android:id="@+id/attendance_count_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:orientation="vertical"
         android:padding="4dp"
@@ -169,8 +140,9 @@
             android:id="@+id/main_students_present_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
+            android:layout_gravity="end"
             android:textColor="@android:color/black"
+            android:textSize="14sp"
             tools:text="36" />
 
         <!-- out of text (place holder)-->
@@ -180,16 +152,16 @@
             android:layout_height="wrap_content"
             android:padding="2dp"
             android:text="@string/out_of"
-            android:textColor="@android:color/black"
-            android:textSize="10sp" />
+            android:textSize="12sp" />
 
         <!-- total students text-->
         <TextView
             android:id="@+id/main_total_students_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
+            android:layout_gravity="end"
             android:textColor="@android:color/black"
+            android:textSize="14sp"
             tools:text="40" />
     </LinearLayout>
 </RelativeLayout>
