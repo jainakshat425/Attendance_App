@@ -17,4 +17,7 @@
     <color name="darkGrayColor">#424242</color>
     <color name="darkerGrayColor">#1b1b1b</color>
 
+    <color name="iconLight">#80CBC4</color>
+    <color name="iconMedium">#4DB6AC</color>
+    <color name="iconDark">#26A69A</color>
 </resources>
