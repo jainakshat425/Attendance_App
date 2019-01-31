@@ -18,10 +18,10 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.android.attendance.utilities.ExtraUtils;
 import com.example.android.attendance.volley.VolleyTask;
-import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +29,6 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -78,28 +77,32 @@ public class NewAttendanceActivity extends AppCompatActivity {
     @OnClick(R.id.fab_new_attendance)
     void newAttendance() {
 
-        if (validateInputs()) {
-            VolleyTask.takeNewAttendance(mContext, date, day, semester, branch,
-                    section, lectNo, collegeId, -1,
-                    jObj -> {
-                        Intent intent = new Intent();
-                        intent.setClass(mContext, TakeAttendanceActivity.class);
-                        if (jObj.has("class_id")) {
-                            try {
-                                int classId = jObj.getInt("class_id");
-                                intent.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+        if (ExtraUtils.isNetworkAvailable(this)) {
+            if (validateInputs()) {
+                VolleyTask.checkAttendAlreadyExists(mContext, date, day, semester, branch,
+                        section, lectNo, collegeId, -1,
+                        jObj -> {
+                            Intent intent = new Intent();
+                            intent.setClass(mContext, TakeAttendanceActivity.class);
+                            if (jObj.has("class_id")) {
+                                try {
+                                    int classId = jObj.getInt("class_id");
+                                    intent.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                        }
-                        intent.putExtra(ExtraUtils.EXTRA_DATE, date);
-                        intent.putExtra(ExtraUtils.EXTRA_DISPLAY_DATE, dateDisplay);
-                        intent.putExtra(ExtraUtils.EXTRA_DAY, day);
-                        intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
+                            intent.putExtra(ExtraUtils.EXTRA_DATE, date);
+                            intent.putExtra(ExtraUtils.EXTRA_DISPLAY_DATE, dateDisplay);
+                            intent.putExtra(ExtraUtils.EXTRA_DAY, day);
+                            intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
 
-                        startActivity(intent);
-                    });
+                            startActivity(intent);
+                        });
+            }
         }
+        else
+            Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -277,81 +280,90 @@ public class NewAttendanceActivity extends AppCompatActivity {
      * refresh spinners from database
      */
     private void refreshBranchSpinner() {
-        VolleyTask.getBranchNames(this, collegeId, jObj -> {
-            try {
-                JSONArray brJsonArr = jObj.getJSONArray("branch_names");
-                List<String> brList = new ArrayList<>();
-                brList.add("Branch");
-                for (int i = 0; i < brJsonArr.length(); i++) {
-                    brList.add(brJsonArr.getString(i));
-                }
-                String[] brArr = brList.toArray(new String[0]);
-                branchAdapter = new SpinnerArrayAdapter(mContext,
-                        android.R.layout.simple_spinner_dropdown_item,
-                        brArr);
-                branchSpinner.setAdapter(branchAdapter);
-                branch="";
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        });
+        if (ExtraUtils.isNetworkAvailable(this)) {
 
+            VolleyTask.getBranchNames(this, collegeId, jObj -> {
+                try {
+                    JSONArray brJsonArr = jObj.getJSONArray("branch_names");
+                    List<String> brList = new ArrayList<>();
+                    brList.add("Branch");
+                    for (int i = 0; i < brJsonArr.length(); i++) {
+                        brList.add(brJsonArr.getString(i));
+                    }
+                    String[] brArr = brList.toArray(new String[0]);
+                    branchAdapter = new SpinnerArrayAdapter(mContext,
+                            android.R.layout.simple_spinner_dropdown_item,
+                            brArr);
+                    branchSpinner.setAdapter(branchAdapter);
+                    branch = "";
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     private void refreshSectionsSpinner() {
-        if (!TextUtils.isEmpty(semester) && !TextUtils.isEmpty(branch)) {
-            final List<String> secList = new ArrayList<>();
-            secList.add("Section");
-            VolleyTask.getSections(mContext, branch,
-                    semester, collegeId, jObj -> {
+        if (ExtraUtils.isNetworkAvailable(this)) {
+            if (!TextUtils.isEmpty(semester) && !TextUtils.isEmpty(branch)) {
+                final List<String> secList = new ArrayList<>();
+                secList.add("Section");
+                VolleyTask.getSections(mContext, branch,
+                        semester, collegeId, jObj -> {
 
-                        try {
-                            JSONArray jsonArray = jObj.getJSONArray("sections");
+                            try {
+                                JSONArray jsonArray = jObj.getJSONArray("sections");
 
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                secList.add(jsonArray.getString(i));
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    secList.add(jsonArray.getString(i));
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
 
-                        String[] secArr = secList.toArray(new String[0]);
-                        sectionAdapter = new SpinnerArrayAdapter(mContext,
-                                android.R.layout.simple_spinner_dropdown_item,
-                                secArr);
-                        sectionSpinner.setAdapter(sectionAdapter);
-                        section = "";
-                    });
-        } else
-            setupSectionSpinner();
+                            String[] secArr = secList.toArray(new String[0]);
+                            sectionAdapter = new SpinnerArrayAdapter(mContext,
+                                    android.R.layout.simple_spinner_dropdown_item,
+                                    secArr);
+                            sectionSpinner.setAdapter(sectionAdapter);
+                            section = "";
+                        });
+            } else
+                setupSectionSpinner();
+        }
     }
 
     private void refreshLectureSpinner() {
-        if (!TextUtils.isEmpty(semester) && !TextUtils.isEmpty(branch) && !TextUtils.isEmpty(section) ) {
-            final List<String> lectList = new ArrayList<>();
-            lectList.add("Lecture");
-            VolleyTask.getLectureNumbers(mContext, branch,
-                    semester, section, collegeId, jObj -> {
+        if (ExtraUtils.isNetworkAvailable(this)) {
 
-                        try {
-                            JSONArray jsonArray = jObj.getJSONArray("lecture_numbers");
+            if (!TextUtils.isEmpty(semester) && !TextUtils.isEmpty(branch)
+                    && !TextUtils.isEmpty(section) && !TextUtils.isEmpty(day)) {
 
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                lectList.add(jsonArray.getString(i));
+                final List<String> lectList = new ArrayList<>();
+                lectList.add("Lecture");
+                VolleyTask.getLectureNumbers(mContext, branch,
+                        semester, section, collegeId, day, jObj -> {
+
+                            try {
+                                JSONArray jsonArray = jObj.getJSONArray("lecture_numbers");
+
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    lectList.add(jsonArray.getString(i));
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
 
-                        String[] lectArr = lectList.toArray(new String[0]);
-                        lectureAdapter = new SpinnerArrayAdapter(mContext,
-                                android.R.layout.simple_spinner_dropdown_item,
-                                lectArr);
-                        lectureSpinner.setAdapter(lectureAdapter);
-                        lectNo = "";
-                    });
-        } else
-            setupLectureSpinner();
+                            String[] lectArr = lectList.toArray(new String[0]);
+                            lectureAdapter = new SpinnerArrayAdapter(mContext,
+                                    android.R.layout.simple_spinner_dropdown_item,
+                                    lectArr);
+                            lectureSpinner.setAdapter(lectureAdapter);
+                            lectNo = "";
+                        });
+            } else
+                setupLectureSpinner();
+        }
     }
 
     /**

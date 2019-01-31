@@ -21,6 +21,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.android.attendance.utilities.ExtraUtils;
 import com.example.android.attendance.volley.VolleyTask;
@@ -119,6 +120,8 @@ public class CheckAttendanceActivity extends AppCompatActivity {
                         });
             }
         }
+        else
+            Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
     }
 
     SharedPrefManager sharedPrefManager;
@@ -280,53 +283,57 @@ public class CheckAttendanceActivity extends AppCompatActivity {
     }
 
     private void refreshBranchSpinner() {
-        VolleyTask.getBranchNames(this, collegeId, jObj -> {
-            try {
-                JSONArray brJsonArr = jObj.getJSONArray("branch_names");
-                List<String> brList = new ArrayList<>();
-                brList.add("Branch");
-                for (int i = 0; i < brJsonArr.length(); i++) {
-                    brList.add(brJsonArr.getString(i));
-                }
-                String[] brArr = brList.toArray(new String[0]);
-                branchAdapter = new SpinnerArrayAdapter(mContext,
-                        android.R.layout.simple_spinner_dropdown_item,
-                        brArr);
-                branchSpinner.setAdapter(branchAdapter);
-                branch = "";
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        });
+        if (ExtraUtils.isNetworkAvailable(this)) {
 
+            VolleyTask.getBranchNames(this, collegeId, jObj -> {
+                try {
+                    JSONArray brJsonArr = jObj.getJSONArray("branch_names");
+                    List<String> brList = new ArrayList<>();
+                    brList.add("Branch");
+                    for (int i = 0; i < brJsonArr.length(); i++) {
+                        brList.add(brJsonArr.getString(i));
+                    }
+                    String[] brArr = brList.toArray(new String[0]);
+                    branchAdapter = new SpinnerArrayAdapter(mContext,
+                            android.R.layout.simple_spinner_dropdown_item,
+                            brArr);
+                    branchSpinner.setAdapter(branchAdapter);
+                    branch = "";
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     private void refreshSectionsSpinner() {
-        if (!TextUtils.isEmpty(semester) && !TextUtils.isEmpty(branch)) {
-            final List<String> secList = new ArrayList<>();
-            secList.add("Section");
-            VolleyTask.getSections(mContext, branch,
-                    semester, collegeId, jObj -> {
+        if (ExtraUtils.isNetworkAvailable(this)) {
+            if (!TextUtils.isEmpty(semester) && !TextUtils.isEmpty(branch)) {
+                final List<String> secList = new ArrayList<>();
+                secList.add("Section");
+                VolleyTask.getSections(mContext, branch,
+                        semester, collegeId, jObj -> {
 
-                        try {
-                            JSONArray jsonArray = jObj.getJSONArray("sections");
+                            try {
+                                JSONArray jsonArray = jObj.getJSONArray("sections");
 
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                secList.add(jsonArray.getString(i));
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    secList.add(jsonArray.getString(i));
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
 
-                        String[] secArr = secList.toArray(new String[0]);
-                        sectionAdapter = new SpinnerArrayAdapter(mContext,
-                                android.R.layout.simple_spinner_dropdown_item,
-                                secArr);
-                        sectionSpinner.setAdapter(sectionAdapter);
-                        section = "";
-                    });
-        } else
-            setupSectionSpinner();
+                            String[] secArr = secList.toArray(new String[0]);
+                            sectionAdapter = new SpinnerArrayAdapter(mContext,
+                                    android.R.layout.simple_spinner_dropdown_item,
+                                    secArr);
+                            sectionSpinner.setAdapter(sectionAdapter);
+                            section = "";
+                        });
+            } else
+                setupSectionSpinner();
+        }
     }
 
     private boolean validateInputs() {

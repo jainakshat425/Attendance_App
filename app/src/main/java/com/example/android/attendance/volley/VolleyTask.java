@@ -6,6 +6,7 @@ import android.content.Context;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 
@@ -167,9 +168,9 @@ public class VolleyTask {
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 
-    public static void getLectureNumbers(final Context mContext, final String branch,
-                                   final String semester, final String section, final int collId,
-                                   VolleyCallback callback) {
+    public static void getLectureNumbers(Context mContext, String branch, String semester,
+                                         String section, int collId, String day, VolleyCallback callback) {
+
         ProgressDialog pDialog = new ProgressDialog(mContext);
         pDialog.setMessage("Please wait...");
         pDialog.show();
@@ -200,16 +201,17 @@ public class VolleyTask {
                 params.put("semester", semester);
                 params.put("section", section);
                 params.put("college_id", String.valueOf(collId));
+                params.put("day", day);
                 return params;
             }
         };
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 
-    public static void takeNewAttendance(final Context mContext, final String date, final String day,
-                                         final String semester, final String branch, final String section,
-                                         final String lectNo, final int collegeId, final int lectId,
-                                         VolleyCallback callback) {
+    public static void checkAttendAlreadyExists(final Context mContext, final String date, final String day,
+                                                final String semester, final String branch, final String section,
+                                                final String lectNo, final int collegeId, final int lectId,
+                                                VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(mContext);
         pDialog.setMessage("Please wait...");
         pDialog.show();
@@ -297,6 +299,8 @@ public class VolleyTask {
                 return params;
             }
         };
+        request.setRetryPolicy(new DefaultRetryPolicy(15000,
+                0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
@@ -415,6 +419,8 @@ public class VolleyTask {
                 return params;
             }
         };
+        request.setRetryPolicy(new DefaultRetryPolicy(15000,
+                0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
@@ -508,7 +514,7 @@ public class VolleyTask {
                 response -> {
                     pDialog.dismiss();
                     try {
-                        final JSONObject jObj = new JSONObject(response);
+                        JSONObject jObj = new JSONObject(response);
                         if (!jObj.getBoolean("error")) {
 
                             callback.onSuccessResponse(jObj);

@@ -7,14 +7,18 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 
 import androidx.core.content.FileProvider;
 import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.attendance.pojos.Report;
@@ -380,6 +384,20 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         context.startActivity(intent);
     }
+
+    public static TextView getTextView(Context context, int textSize) {
+        TextView tv = new TextView(context);
+        tv.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT,
+                TableRow.LayoutParams.WRAP_CONTENT));
+        tv.setGravity(Gravity.CENTER);
+        tv.setTextSize(textSize);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            tv.setTextColor(context.getColor(android.R.color.black));
+        }
+        tv.setPadding(4, 4, 4, 4);
+        return tv;
+    }
+
 
 }
 

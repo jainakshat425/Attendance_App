@@ -17,9 +17,9 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.example.android.attendance.CreatePdf;
 import com.example.android.attendance.R;
 import com.example.android.attendance.pojos.Report;
-import com.example.android.attendance.utilities.ExtraUtils;
 
 
 import java.util.List;
@@ -85,7 +85,7 @@ public class ReportAdapter extends
 
         String[] colText = report.getSubWiseAttend().toArray(new String[0]);
         for (String text : colText) {
-            TextView tv = ExtraUtils.getTextView(mContext, 16);
+            TextView tv = CreatePdf.getTextView(mContext, 16);
             tv.setText(text);
             holder.row.addView(tv);
         }

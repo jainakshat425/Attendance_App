@@ -36,10 +36,8 @@ public class RequestHandler {
     }
 
     public <T> void addToRequestQueue(Request<T> req) {
-        if (ExtraUtils.isNetworkAvailable(mCtx))
-            getRequestQueue().add(req);
-        else
-            Toast.makeText(mCtx, R.string.network_not_available, Toast.LENGTH_SHORT).show();
+        getRequestQueue().add(req);
+
     }
 
 }

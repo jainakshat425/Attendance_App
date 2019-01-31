@@ -22,17 +22,16 @@ import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.attendance.adapters.ReportAdapter;
 import com.example.android.attendance.pojos.Report;
 import com.example.android.attendance.pojos.SubReport;
 import com.example.android.attendance.utilities.ExtraUtils;
 import com.example.android.attendance.utilities.GsonUtils;
-import com.example.android.attendance.volley.VolleyCallback;
 import com.example.android.attendance.volley.VolleyTask;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,23 +117,28 @@ public class StudentReportActivity extends AppCompatActivity {
     }
 
     private void refreshList() {
-        VolleyTask.showReport(this, branchId, classId, collId,
-                isDayWise, fromDate, toDate, jObj -> {
+        if (ExtraUtils.isNetworkAvailable(this)) {
 
-                    List<Report> reports = GsonUtils.extractReportsFromJson(jObj);
-                    List<SubReport> subReports = GsonUtils.extractSubReportsFromJson(jObj);
-                    showSubReport(subReports);
-                    try {
-                        int attendTaken = jObj.getInt("attend_taken");
-                        String collName = jObj.getString("coll_full_name");
+            VolleyTask.showReport(this, branchId, classId, collId,
+                    isDayWise, fromDate, toDate, jObj -> {
 
-                        mAdapter.swapList(reports, attendTaken);
-                        mCreatePdf = new CreatePdf(StudentReportActivity.this, reports,
-                                subReports, attendTaken, collName, classDetails);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                });
+                        List<Report> reports = GsonUtils.extractReportsFromJson(jObj);
+                        List<SubReport> subReports = GsonUtils.extractSubReportsFromJson(jObj);
+                        showSubReport(subReports);
+                        try {
+                            int attendTaken = jObj.getInt("attend_taken");
+                            String collName = jObj.getString("coll_full_name");
+
+                            mAdapter.swapList(reports, attendTaken);
+                            mCreatePdf = new CreatePdf(StudentReportActivity.this, reports,
+                                    subReports, attendTaken, collName, classDetails);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+        }
+        else
+            Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
         if (mAdapter.getItemCount() < 1)
             mEmptyView.setVisibility(View.VISIBLE);
         else
@@ -159,10 +163,10 @@ public class StudentReportActivity extends AppCompatActivity {
                 String subName = subReport.getSubName();
                 int subTotalLect = subReport.getSubTotalLect();
 
-                TextView subNameTv = ExtraUtils.getTextView(this, 14);
+                TextView subNameTv = CreatePdf.getTextView(this, 14);
                 subNameTv.setText(subName);
                 rowHeader.addView(subNameTv);
-                TextView tv = ExtraUtils.getTextView(this, 16);
+                TextView tv = CreatePdf.getTextView(this, 16);
                 tv.setText(String.valueOf(subTotalLect));
                 row.addView(tv);
             }

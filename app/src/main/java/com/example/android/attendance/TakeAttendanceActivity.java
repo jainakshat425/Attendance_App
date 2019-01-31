@@ -54,6 +54,8 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     String date, day, classId, lectNo, attendRecId;
     private boolean isUpdateMode = false;
 
+    private boolean LOCK = false;
+
     @BindView(R.id.empty_view_take_attendance)
     RelativeLayout mEmptyView;
 
@@ -119,27 +121,35 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     }
 
     private void refreshList() {
-        if (attendRecId != null) {
-            setTitle(getString(R.string.update_attendance_title));
-            isUpdateMode = true;
-            VolleyTask.setupForUpdateAttendance(this, attendRecId, jObj -> {
-                List<Attendance> records = GsonUtils
-                        .extractAttendanceFromJSON(jObj);
-                mAdapter.swapList(records);
-            });
-        } else {
-            setTitle(R.string.take_attendance_title);
-            isUpdateMode = false;
-            VolleyTask.setupForNewAttendance(this, lectNo, classId, date, day,
-                    jObj -> {
+        if (ExtraUtils.isNetworkAvailable(this)) {
+
+            if ( !LOCK ) {
+                if (attendRecId != null) {
+                    setTitle(getString(R.string.update_attendance_title));
+                    isUpdateMode = true;
+                    LOCK = true;
+                    VolleyTask.setupForUpdateAttendance(this, attendRecId, jObj -> {
+
+                        List<Attendance> records = GsonUtils
+                                .extractAttendanceFromJSON(jObj);
+                        mAdapter.swapList(records);
+                        checkEmptyView();
+                    });
+                } else {
+                    setTitle(R.string.take_attendance_title);
+                    isUpdateMode = false;
+                    LOCK = true;
+                    VolleyTask.setupForNewAttendance(this, lectNo, classId, date, day, jObj -> {
+
                         List<Attendance> records = GsonUtils.extractAttendanceFromJSON(jObj);
                         mAdapter.swapList(records);
+
+                        checkEmptyView();
                     });
-        }
-        if (mAdapter.getItemCount() < 1)
-            mEmptyView.setVisibility(View.VISIBLE);
-        else
-            mEmptyView.setVisibility(View.GONE);
+                }
+            }
+        } else
+            Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -165,22 +175,30 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     }
 
     private void undoChangesAndFinish() {
-        int recordId = TakeAttendAdapter.getmAttendanceList()[1].getAttendanceRecordId();
-        VolleyTask.undoAttendance(this, recordId, jObj -> {
-            Toast.makeText(this, "Attendance not saved.",
-                    Toast.LENGTH_SHORT).show();
-            finish();
-        });
+        if (ExtraUtils.isNetworkAvailable(this)) {
+
+            int recordId = TakeAttendAdapter.getmAttendanceList()[1].getAttendanceRecordId();
+            VolleyTask.undoAttendance(this, recordId, jObj -> {
+                Toast.makeText(this, "Attendance not saved.",
+                        Toast.LENGTH_SHORT).show();
+                finish();
+            });
+        } else
+            Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
     }
 
     private void saveAttendance() {
-        Gson gson = new Gson();
-        Attendance[] attendances = TakeAttendAdapter.getmAttendanceList();
-        final String attJsonObj = gson.toJson(attendances);
-        VolleyTask.saveAttendance(this, isUpdateMode, attJsonObj, jObj -> {
-            finish();
-            startActivity(new Intent(TakeAttendanceActivity.this, MainActivity.class));
-        });
+        if (ExtraUtils.isNetworkAvailable(this)) {
+
+            Gson gson = new Gson();
+            Attendance[] attendances = TakeAttendAdapter.getmAttendanceList();
+            final String attJsonObj = gson.toJson(attendances);
+            VolleyTask.saveAttendance(this, isUpdateMode, attJsonObj, jObj -> {
+                finish();
+                startActivity(new Intent(TakeAttendanceActivity.this, MainActivity.class));
+            });
+        } else
+            Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -212,6 +230,13 @@ public class TakeAttendanceActivity extends AppCompatActivity {
 
                         }).create();
         dialog.show();
+    }
+
+    private void checkEmptyView() {
+        if (mAdapter.getItemCount() < 1)
+            mEmptyView.setVisibility(View.VISIBLE);
+        else
+            mEmptyView.setVisibility(View.GONE);
     }
 
     @Override

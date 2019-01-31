@@ -59,6 +59,8 @@ public class LoginActivity extends AppCompatActivity {
                 });
             }
         }
+        else
+            Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
     }
 
     @OnClick(R.id.need_help_button)

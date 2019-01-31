@@ -28,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.attendance.adapters.MainListAdapter;
 import com.example.android.attendance.pojos.AttendanceRecord;
@@ -210,6 +211,8 @@ public class MainActivity extends AppCompatActivity
                     mEmptyView.setVisibility(View.GONE);
             });
         }
+        else
+            Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
     }
 
     private void logout() {
@@ -230,23 +233,27 @@ public class MainActivity extends AppCompatActivity
         final AlertDialog dialog = builder.show();
 
         dialogView.findViewById(R.id.cp_modify_button).setOnClickListener(view -> {
-            if (currentPassIn.getEditText() != null
-                    && newPassIn.getEditText() != null
-                    && confirmPassIn.getEditText() != null) {
+            if (ExtraUtils.isNetworkAvailable(this)) {
+                if (currentPassIn.getEditText() != null
+                        && newPassIn.getEditText() != null
+                        && confirmPassIn.getEditText() != null) {
 
-                String currentPass = currentPassIn.getEditText().getText().toString().trim();
-                String newPass = newPassIn.getEditText().getText().toString().trim();
-                String confirmPass = confirmPassIn.getEditText().getText().toString().trim();
+                    String currentPass = currentPassIn.getEditText().getText().toString().trim();
+                    String newPass = newPassIn.getEditText().getText().toString().trim();
+                    String confirmPass = confirmPassIn.getEditText().getText().toString().trim();
 
-                boolean valid = validatePassInputs(currentPass, newPass, confirmPass,
-                        currentPassIn, newPassIn, confirmPassIn);
+                    boolean valid = validatePassInputs(currentPass, newPass, confirmPass,
+                            currentPassIn, newPassIn, confirmPassIn);
 
-                if (valid) {
-                    VolleyTask.changeFacultyPassword(MainActivity.this, mSharedPref.getFacId(),
-                            currentPass, newPass,
-                            jObj -> dialog.dismiss());
+                    if (valid) {
+                        VolleyTask.changeFacultyPassword(MainActivity.this, mSharedPref.getFacId(),
+                                currentPass, newPass,
+                                jObj -> dialog.dismiss());
+                    }
                 }
             }
+            else
+                Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
         });
 
         dialogView.findViewById(R.id.cp_cancel_button).setOnClickListener(view ->

@@ -15,11 +15,7 @@ import com.example.android.attendance.R;
 import com.example.android.attendance.TakeAttendanceActivity;
 import com.example.android.attendance.pojos.Schedule;
 import com.example.android.attendance.utilities.ExtraUtils;
-import com.example.android.attendance.volley.VolleyCallback;
 import com.example.android.attendance.volley.VolleyTask;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -58,10 +54,19 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
         String lectEndTime = String.valueOf(sch.getLectEndTime());
 
         try {
-            Date lectStartTimeDisplay = ExtraUtils.timeFormat.parse(lectStartTime);
-            lectStartTime = ExtraUtils.timeDisplayFormat.format(lectStartTimeDisplay);
-            Date lectEndTimeDisplay = ExtraUtils.timeFormat.parse(lectEndTime);
-            lectEndTime = ExtraUtils.timeDisplayFormat.format(lectEndTimeDisplay);
+            if (!lectStartTime.equals("00:00:00")) {
+                Date lectStartTimeDisplay = ExtraUtils.timeFormat.parse(lectStartTime);
+                lectStartTime = ExtraUtils.timeDisplayFormat.format(lectStartTimeDisplay);
+            } else {
+                lectStartTime = "--:-- --";
+            }
+
+            if (!lectEndTime.equals("00:00:00")) {
+                Date lectEndTimeDisplay = ExtraUtils.timeFormat.parse(lectEndTime);
+                lectEndTime = ExtraUtils.timeDisplayFormat.format(lectEndTimeDisplay);
+            } else {
+                lectEndTime = "--:-- --";
+            }
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -118,20 +123,23 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
                 String dateDisplay = ExtraUtils.getCurrentDateDisplay();
 
 
-                VolleyTask.takeNewAttendance(mContext, date, mDay, semester, branch,
-                        section, lectNo, collegeId, lectId,
-                        jObj -> {
-                            Intent intent = new Intent();
-                            intent.setClass(mContext, TakeAttendanceActivity.class);
+                if (ExtraUtils.isNetworkAvailable(mContext)) {
 
-                            intent.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
-                            intent.putExtra(ExtraUtils.EXTRA_DATE, date);
-                            intent.putExtra(ExtraUtils.EXTRA_DISPLAY_DATE, dateDisplay);
-                            intent.putExtra(ExtraUtils.EXTRA_DAY, mDay);
-                            intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
+                    VolleyTask.checkAttendAlreadyExists(mContext, date, mDay, semester, branch,
+                            section, lectNo, collegeId, lectId,
+                            jObj -> {
+                                Intent intent = new Intent();
+                                intent.setClass(mContext, TakeAttendanceActivity.class);
 
-                            mContext.startActivity(intent);
-                        });
+                                intent.putExtra(ExtraUtils.EXTRA_CLASS_ID, String.valueOf(classId));
+                                intent.putExtra(ExtraUtils.EXTRA_DATE, date);
+                                intent.putExtra(ExtraUtils.EXTRA_DISPLAY_DATE, dateDisplay);
+                                intent.putExtra(ExtraUtils.EXTRA_DAY, mDay);
+                                intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
+
+                                mContext.startActivity(intent);
+                            });
+                }
             } else {
                 Toast.makeText(mContext, "Attendance can only be taken for current day!",
                         Toast.LENGTH_SHORT).show();

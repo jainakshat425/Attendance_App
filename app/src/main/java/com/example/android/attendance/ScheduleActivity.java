@@ -16,6 +16,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.example.android.attendance.adapters.ScheduleAdapter;
 import com.example.android.attendance.pojos.Schedule;
@@ -115,6 +116,8 @@ public class ScheduleActivity extends AppCompatActivity {
                     emptyView.setVisibility(View.GONE);
             });
         }
+        else
+            Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
     }
 
     @Override
