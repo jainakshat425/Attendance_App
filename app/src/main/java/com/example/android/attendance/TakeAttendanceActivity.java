@@ -130,9 +130,9 @@ public class TakeAttendanceActivity extends AppCompatActivity {
                     LOCK = true;
                     VolleyTask.setupForUpdateAttendance(this, attendRecId, jObj -> {
 
-                        List<Attendance> records = GsonUtils
-                                .extractAttendanceFromJSON(jObj);
+                        List<Attendance> records = GsonUtils.extractAttendanceFromJSON(jObj);
                         mAdapter.swapList(records);
+
                         checkEmptyView();
                     });
                 } else {

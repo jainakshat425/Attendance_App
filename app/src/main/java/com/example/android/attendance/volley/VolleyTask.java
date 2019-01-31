@@ -24,8 +24,8 @@ import java.util.Map;
  */
 public class VolleyTask {
 
-    public static void login(final Context context, final String username, final String password,
-                             final VolleyCallback volleyCallback) {
+    public static void login( Context context, String username, String password,
+                              VolleyCallback volleyCallback) {
         ProgressDialog pDialog = new ProgressDialog(context);
         pDialog.setMessage("Logging in...");
         pDialog.show();
@@ -60,8 +60,7 @@ public class VolleyTask {
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
-    public static void getAttendanceList(final Context context, final String facEmail,
-                                         final VolleyCallback callback) {
+    public static void getAttendanceList(Context context, String facEmail, VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(context);
         pDialog.setMessage("Setting up...");
         pDialog.show();
@@ -96,8 +95,7 @@ public class VolleyTask {
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
-    public static void getBranchNames(final Context mContext, final int collId,
-                                      VolleyCallback callback) {
+    public static void getBranchNames(Context mContext, int collId, VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(mContext);
         pDialog.setMessage("Setting up...");
         pDialog.show();
@@ -130,9 +128,8 @@ public class VolleyTask {
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 
-    public static void getSections(final Context mContext, final String branch,
-                                   final String semester, final int collId,
-                                   VolleyCallback callback) {
+    public static void getSections(Context mContext, String branch, String semester,
+                                   int collId, VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(mContext);
         pDialog.setMessage("Please wait...");
         pDialog.show();
@@ -208,10 +205,9 @@ public class VolleyTask {
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 
-    public static void checkAttendAlreadyExists(final Context mContext, final String date, final String day,
-                                                final String semester, final String branch, final String section,
-                                                final String lectNo, final int collegeId, final int lectId,
-                                                VolleyCallback callback) {
+    public static void checkAttendAlreadyExists(Context mContext, String date, String day, String semester,
+                                                String branch, String section, String lectNo,
+                                                int collegeId, int lectId, VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(mContext);
         pDialog.setMessage("Please wait...");
         pDialog.show();
@@ -257,8 +253,7 @@ public class VolleyTask {
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 
-
-    public static void saveAttendance(final Context context, final boolean isUpdateMode,
+    public static void saveAttendance(Context context, boolean isUpdateMode,
                                       String attJsonObj, VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(context);
 
@@ -304,7 +299,7 @@ public class VolleyTask {
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
-    public static void undoAttendance(final Context context, int recordId, VolleyCallback callback) {
+    public static void undoAttendance(Context context, int recordId, VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(context);
         pDialog.setMessage("Please wait...");
         pDialog.show();
@@ -339,8 +334,7 @@ public class VolleyTask {
     }
 
 
-    public static void setupForUpdateAttendance(final Context context, final String attendRecId,
-                                                final VolleyCallback callback) {
+    public static void setupForUpdateAttendance(Context context, String attendRecId, VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(context);
         pDialog.setMessage("Setting up...");
         pDialog.show();
@@ -377,9 +371,8 @@ public class VolleyTask {
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
-    public static void setupForNewAttendance(final Context context, final String lectureNo,
-                                             final String classId, final String date,
-                                             final String day, final VolleyCallback callback) {
+    public static void setupForNewAttendance(Context context, String lectureNo, String classId,
+                                             String date, String day, VolleyCallback callback) {
 
         ProgressDialog pDialog = new ProgressDialog(context);
         pDialog.setMessage("Setting up...");
@@ -424,8 +417,7 @@ public class VolleyTask {
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
-    public static void showSchedule(final Context context, final String facEmail, final String day,
-                                    VolleyCallback callback) {
+    public static void showSchedule(Context context, String facEmail, String day, VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(context);
         pDialog.setMessage("Loading...");
         pDialog.show();
@@ -462,8 +454,8 @@ public class VolleyTask {
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
-    public static void checkValidClass(final Context mContext, final int collegeId, final String semester,
-                                       final String branch, final String section, VolleyCallback callback) {
+    public static void checkValidClass(Context mContext, int collegeId, String semester,
+                                       String branch, String section, VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(mContext);
         pDialog.setMessage("Please wait...");
         pDialog.show();
@@ -503,9 +495,9 @@ public class VolleyTask {
         RequestHandler.getInstance(mContext).addToRequestQueue(request);
     }
 
-    public static void showReport(final Context context, final int branchId, final int classId,
-                                  final int collId, final boolean isDayWise, final String fromDate,
-                                  final String toDate, final VolleyCallback callback) {
+    public static void showReport(Context context, int branchId, int classId,
+                                  int collId, boolean isDayWise, String fromDate,
+                                  String toDate, VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(context);
         pDialog.setMessage("Setting up...");
         pDialog.show();

@@ -53,7 +53,9 @@ public class StudentReportActivity extends AppCompatActivity {
     private Bundle classDetails;
     private int classId, branchId, collId;
     private String toDate, fromDate;
+
     private boolean isDayWise;
+    private boolean LOCK = false;
 
     @BindView(R.id.no_network_view)
     RelativeLayout noNetworkLayout;
@@ -80,7 +82,7 @@ public class StudentReportActivity extends AppCompatActivity {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_show_attendance);
+        setContentView(R.layout.activity_show_report);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -119,30 +121,31 @@ public class StudentReportActivity extends AppCompatActivity {
     private void refreshList() {
         if (ExtraUtils.isNetworkAvailable(this)) {
 
-            VolleyTask.showReport(this, branchId, classId, collId,
-                    isDayWise, fromDate, toDate, jObj -> {
+            if (!LOCK) {
+                LOCK = true;
+                VolleyTask.showReport(this, branchId, classId, collId,
+                        isDayWise, fromDate, toDate, jObj -> {
 
-                        List<Report> reports = GsonUtils.extractReportsFromJson(jObj);
-                        List<SubReport> subReports = GsonUtils.extractSubReportsFromJson(jObj);
-                        showSubReport(subReports);
-                        try {
-                            int attendTaken = jObj.getInt("attend_taken");
-                            String collName = jObj.getString("coll_full_name");
+                            List<Report> reports = GsonUtils.extractReportsFromJson(jObj);
+                            List<SubReport> subReports = GsonUtils.extractSubReportsFromJson(jObj);
+                            showSubReport(subReports);
+                            try {
+                                int attendTaken = jObj.getInt("attend_taken");
+                                String collName = jObj.getString("coll_full_name");
 
-                            mAdapter.swapList(reports, attendTaken);
-                            mCreatePdf = new CreatePdf(StudentReportActivity.this, reports,
-                                    subReports, attendTaken, collName, classDetails);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    });
-        }
-        else
+                                mAdapter.swapList(reports, attendTaken);
+
+                                checkEmptyView();
+                                mCreatePdf = new CreatePdf(StudentReportActivity.this, reports,
+                                        subReports, attendTaken, collName, classDetails);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        });
+            }
+        } else
             Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
-        if (mAdapter.getItemCount() < 1)
-            mEmptyView.setVisibility(View.VISIBLE);
-        else
-            mEmptyView.setVisibility(View.GONE);
+        checkEmptyView();
     }
 
     public void showSubReport(List<SubReport> subReports) {
@@ -210,6 +213,13 @@ public class StudentReportActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         unregisterReceiver(networkReceiver);
+    }
+
+    private void checkEmptyView() {
+        if (mAdapter.getItemCount() < 1)
+            mEmptyView.setVisibility(View.VISIBLE);
+        else
+            mEmptyView.setVisibility(View.GONE);
     }
 
 }

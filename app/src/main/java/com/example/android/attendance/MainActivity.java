@@ -34,11 +34,8 @@ import com.example.android.attendance.adapters.MainListAdapter;
 import com.example.android.attendance.pojos.AttendanceRecord;
 import com.example.android.attendance.utilities.ExtraUtils;
 import com.example.android.attendance.utilities.GsonUtils;
-import com.example.android.attendance.volley.VolleyCallback;
 import com.example.android.attendance.volley.VolleyTask;
 import com.google.android.material.textfield.TextInputLayout;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -152,7 +149,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
         switch (item.getItemId()) {
-            case R.id.nav_check_attendance:
+            case R.id.nav_check_report:
                 Intent checkAttendanceIntent = new Intent(this,
                         CheckAttendanceActivity.class);
                 startActivity(checkAttendanceIntent);

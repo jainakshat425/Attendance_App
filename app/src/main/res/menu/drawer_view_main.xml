@@ -5,8 +5,8 @@
     <group android:checkableBehavior="single">
 
         <item
-            android:id="@+id/nav_check_attendance"
-            android:title="Check Attendance" />
+            android:id="@+id/nav_check_report"
+            android:title="Reports" />
 
         <item
             android:id="@+id/nav_schedule"
@@ -15,18 +15,6 @@
         <item
             android:id="@+id/nav_change_pass"
             android:title="Change Password" />
-
-        <item
-            android:id="@+id/nav_about"
-            android:title="About" />
-
-        <item
-            android:id="@+id/nav_feedback"
-            android:title="Feedback" />
-
-        <item
-            android:id="@+id/nav_help"
-            android:title="Help" />
 
         <item
             android:id="@+id/nav_logout"

@@ -133,7 +133,7 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
                 pCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
 
-                pCell.setPhrase(new Phrase("Attendance Report"));
+                pCell.setPhrase(new Phrase("ATTENDANCE REPORT"));
                 parentTable.addCell(pCell);
 
                 pCell.setPhrase(new Phrase(mCollegeName));
@@ -231,11 +231,6 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
                     String stdName = currentStdReport.getStdName();
                     String stdRollNo = currentStdReport.getStdRollNo();
                     String stdTotalPresent = currentStdReport.getTotalPresent();
-                    float totalPercentage = 0;
-
-                    if (mAttendTaken > 0) {
-                        totalPercentage = (Float.parseFloat(stdTotalPresent) / (float) mAttendTaken) * 100;
-                    }
 
                     String[] subWisePresents =
                             currentStdReport.getSubWiseAttend().toArray(new String[0]);
@@ -248,8 +243,16 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
                     table.addCell(cell);
                     cell.setPhrase(new Phrase(stdTotalPresent));
                     table.addCell(cell);
-                    if (totalPercentage < 75) cell.setBackgroundColor(colorLtGrey);
-                    String percentage = String.format(Locale.US, "%.1f", totalPercentage);
+
+                    String percentage = "0.0";
+                    if (mAttendTaken > 0) {
+                        float totalPercentage =
+                                (Float.parseFloat(stdTotalPresent) / (float) mAttendTaken) * 100;
+
+                        if (totalPercentage < 75) cell.setBackgroundColor(colorLtGrey);
+                        percentage = String.format(Locale.US, "%.1f", totalPercentage);
+                    }
+
                     cell.setPhrase(new Phrase(percentage));
                     table.addCell(cell);
 
@@ -259,12 +262,14 @@ public class CreatePdf extends AsyncTask<String, Void, File> {
                     for (String noOfPresent : subWisePresents) {
 
                         subTotalLecture = mSubReports.get(k).getSubTotalLect();
-                        float subWisePercent = 0;
-                        if (subTotalLecture > 0) {
-                            subWisePercent = (Float.valueOf(noOfPresent) / (float) subTotalLecture) * 100;
-                        }
 
-                        if (subWisePercent < 75) cell.setBackgroundColor(colorLtGrey);
+                        if (subTotalLecture > 0) {
+
+                            float subWisePercent =
+                                    (Float.valueOf(noOfPresent) / (float) subTotalLecture) * 100;
+
+                            if (subWisePercent < 75) cell.setBackgroundColor(colorLtGrey);
+                        }
                         else cell.setBackgroundColor(colorWhite);
 
                         cell.setPhrase(new Phrase(String.valueOf(noOfPresent)));
