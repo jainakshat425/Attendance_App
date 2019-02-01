@@ -60,7 +60,8 @@ public class VolleyTask {
         RequestHandler.getInstance(context).addToRequestQueue(request);
     }
 
-    public static void getAttendanceList(Context context, String facEmail, VolleyCallback callback) {
+    public static void getAttendanceList(Context context, String facEmail, String date,
+                                         VolleyCallback callback) {
         ProgressDialog pDialog = new ProgressDialog(context);
         pDialog.setMessage("Setting up...");
         pDialog.show();
@@ -89,6 +90,7 @@ public class VolleyTask {
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
                 params.put(SharedPrefManager.FAC_EMAIL, facEmail);
+                params.put("date", date);
                 return params;
             }
         };

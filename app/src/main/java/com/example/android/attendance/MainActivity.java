@@ -198,18 +198,25 @@ public class MainActivity extends AppCompatActivity
 
     private void refreshList() {
         if (ExtraUtils.isNetworkAvailable(this)) {
-            VolleyTask.getAttendanceList(this, mSharedPref.getFacEmail(), jObj -> {
+            VolleyTask.getAttendanceList(this, mSharedPref.getFacEmail(),
+                    ExtraUtils.getCurrentDate(), jObj -> {
                 List<AttendanceRecord> records =
                         GsonUtils.extractRecordsFromJSON(jObj);
                 mAdapter.swapList(records);
-                if (mAdapter.getItemCount() < 1)
-                    mEmptyView.setVisibility(View.VISIBLE);
-                else
-                    mEmptyView.setVisibility(View.GONE);
+
+                checkEmptyView();
             });
         }
         else
             Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
+        checkEmptyView();
+    }
+
+    private void checkEmptyView() {
+        if (mAdapter.getItemCount() < 1)
+            mEmptyView.setVisibility(View.VISIBLE);
+        else
+            mEmptyView.setVisibility(View.GONE);
     }
 
     private void logout() {
