@@ -1,5 +1,6 @@
 package com.example.android.attendance;
 
+import android.app.DatePickerDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -38,6 +39,7 @@ import com.example.android.attendance.volley.VolleyTask;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout mDrawerLayout;
+    private String date;
 
     @BindView(R.id.main_list_view)
     RecyclerView mRecyclerView;
@@ -101,6 +104,7 @@ public class MainActivity extends AppCompatActivity
             String facEmail = mSharedPref.getFacEmail();
             String facName = mSharedPref.getFacName();
             String facDept = mSharedPref.getFacDept();
+            date = ExtraUtils.getCurrentDate();
 
             setupNavigationDrawer(facName, facEmail, facDept);
 
@@ -149,28 +153,53 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
         switch (item.getItemId()) {
+
             case R.id.nav_check_report:
                 Intent checkAttendanceIntent = new Intent(this,
                         CheckAttendanceActivity.class);
                 startActivity(checkAttendanceIntent);
-                break;
+                return true;
+
             case R.id.nav_schedule:
                 String facEmail = mSharedPref.getFacEmail();
                 Intent scheduleIntent = new Intent(this, ScheduleActivity.class);
                 scheduleIntent.putExtra(ExtraUtils.EXTRA_FAC_EMAIL, facEmail);
                 startActivity(scheduleIntent);
-                break;
-            case R.id.nav_logout:
-                logout();
                 return true;
+
             case R.id.nav_change_pass:
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 showChangePasswordDialog();
+                return true;
+
+            case R.id.nav_logout:
+                logout();
                 return true;
         }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void dateChange() {
+
+        Calendar calendar = Calendar.getInstance();
+
+        DatePickerDialog.OnDateSetListener dateSetter = (view, year, monthOfYear, dayOfMonth) -> {
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, monthOfYear);
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+            date = ExtraUtils.dateFormat.format(calendar.getTime());
+            refreshList();
+        };
+
+        DatePickerDialog dpDialog = new DatePickerDialog(this, dateSetter, calendar
+                .get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
+        dpDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
+        dpDialog.show();
+
     }
 
     @Override
@@ -183,6 +212,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.menu_new_attend:
                 startActivity(new Intent(MainActivity.this,
                         NewAttendanceActivity.class));
+                return true;
+            case R.id.menu_calendar:
+                dateChange();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -198,16 +230,14 @@ public class MainActivity extends AppCompatActivity
 
     private void refreshList() {
         if (ExtraUtils.isNetworkAvailable(this)) {
-            VolleyTask.getAttendanceList(this, mSharedPref.getFacEmail(),
-                    ExtraUtils.getCurrentDate(), jObj -> {
-                List<AttendanceRecord> records =
-                        GsonUtils.extractRecordsFromJSON(jObj);
-                mAdapter.swapList(records);
+            VolleyTask.getAttendanceList(this, mSharedPref.getFacEmail(), date, jObj -> {
+                        List<AttendanceRecord> records =
+                                GsonUtils.extractRecordsFromJSON(jObj);
+                        mAdapter.swapList(records);
 
-                checkEmptyView();
-            });
-        }
-        else
+                        checkEmptyView();
+                    });
+        } else
             Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
         checkEmptyView();
     }
@@ -255,8 +285,7 @@ public class MainActivity extends AppCompatActivity
                                 jObj -> dialog.dismiss());
                     }
                 }
-            }
-            else
+            } else
                 Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
         });
 
