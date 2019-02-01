@@ -3,21 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/save_attendance"
-        android:title="Save"
-        android:orderInCategory="3"
-        android:icon="@drawable/ic_baseline_done_24px"
+        android:id="@+id/delete_attendance"
+        android:title="Delete"
+        android:orderInCategory="1"
+        android:icon="@drawable/ic_delete"
         app:showAsAction="always" />
     <item
         android:id="@+id/check_all"
         android:title="Check all"
-        android:orderInCategory="2"
+        android:orderInCategory="3"
         android:icon="@drawable/ic_check_all"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/uncheck_all"
         android:title="Uncheck all"
-        android:orderInCategory="1"
+        android:orderInCategory="2"
         android:icon="@drawable/ic_uncheck_all_24px"
         app:showAsAction="ifRoom" />
 </menu>

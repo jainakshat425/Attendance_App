@@ -1,7 +1,6 @@
 package com.example.android.attendance;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,8 +28,12 @@ import com.example.android.attendance.adapters.TakeAttendAdapter;
 import com.example.android.attendance.pojos.Attendance;
 import com.example.android.attendance.utilities.ExtraUtils;
 import com.example.android.attendance.utilities.GsonUtils;
+import com.example.android.attendance.volley.VolleyCallback;
 import com.example.android.attendance.volley.VolleyTask;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +41,16 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 
 public class TakeAttendanceActivity extends AppCompatActivity {
 
     public static final int NEW_ATTENDANCE_ACTIVITY = 1001;
     public static final int SCHEDULE_ACTIVITY = 1002;
+
+    private static final int DELETE = 101;
+    private static final int DONT_SAVE = 102;
 
     @BindView(R.id.date_text_view)
     TextView dateTv;
@@ -83,6 +91,22 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             }
         }
     };
+
+    @OnClick(R.id.save_button)
+    public void saveAttendance() {
+        if (ExtraUtils.isNetworkAvailable(this)) {
+
+            Gson gson = new Gson();
+            Attendance[] attendances = TakeAttendAdapter.getmAttendanceList();
+            final String attJsonObj = gson.toJson(attendances);
+            VolleyTask.saveAttendance(this, isUpdateMode, attJsonObj, jObj -> {
+
+                setResult(Activity.RESULT_OK);
+                finish();
+            });
+        } else
+            Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,13 +153,13 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     }
 
     private String getFormattedDay(String day) {
-        return day.substring(0,1).toUpperCase() + day.substring(1).toLowerCase();
+        return day.substring(0, 1).toUpperCase() + day.substring(1).toLowerCase();
     }
 
     private void refreshList() {
         if (ExtraUtils.isNetworkAvailable(this)) {
 
-            if ( !LOCK ) {
+            if (!LOCK) {
                 if (attendRecId != null) {
                     setTitle(getString(R.string.update_attendance_title));
                     isUpdateMode = true;
@@ -167,8 +191,8 @@ public class TakeAttendanceActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.save_attendance:
-                saveAttendance();
+            case R.id.delete_attendance:
+                deleteAttendanceAndFinish();
                 break;
             case R.id.check_all:
                 mAdapter.checkAll();
@@ -179,37 +203,63 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             case android.R.id.home:
                 if (isUpdateMode) finish();
                 else {
-                    undoChangesAndFinish();
+                    undoChangesAndFinish(DONT_SAVE);
                 }
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void undoChangesAndFinish() {
+    private void deleteAttendanceAndFinish() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        View dialogView = View.inflate(this, R.layout.verify_password_layout, null);
+
+        TextInputLayout passIn = dialogView.findViewById(R.id.pass_input);
+
+        builder.setView(dialogView);
+        final AlertDialog dialog = builder.show();
+
+        dialogView.findViewById(R.id.verify_delete_button).setOnClickListener(view -> {
+
+            if (ExtraUtils.isNetworkAvailable(this)) {
+
+                String pass = Objects.requireNonNull(passIn.getEditText()).getText().toString().trim();
+
+                if (TextUtils.isEmpty(pass) || pass.length() < 8) {
+                    passIn.setError("Password must contain atleast 8-characters.");
+                } else {
+
+                    VolleyTask.login(this,
+                            SharedPrefManager.getInstance(this).getFacEmail(),
+                            pass,
+                            jObj -> undoChangesAndFinish(DELETE)
+                    );
+                }
+            } else
+                Toast.makeText(TakeAttendanceActivity.this, R.string.network_not_available,
+                        Toast.LENGTH_SHORT).show();
+        });
+
+        dialogView.findViewById(R.id.cancel_button).setOnClickListener(view ->
+                dialog.dismiss());
+    }
+
+
+
+    private void undoChangesAndFinish(int mode) {
         if (ExtraUtils.isNetworkAvailable(this)) {
 
             int recordId = TakeAttendAdapter.getmAttendanceList()[1].getAttendanceRecordId();
             VolleyTask.undoAttendance(this, recordId, jObj -> {
-                Toast.makeText(this, "Attendance not saved.",
+
+                if (mode == DELETE) Toast.makeText(this, "Attendance removed.",
+                            Toast.LENGTH_SHORT).show();
+
+                else Toast.makeText(this, "Attendance not saved.",
                         Toast.LENGTH_SHORT).show();
 
                 setResult(Activity.RESULT_CANCELED);
-                finish();
-            });
-        } else
-            Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
-    }
-
-    private void saveAttendance() {
-        if (ExtraUtils.isNetworkAvailable(this)) {
-
-            Gson gson = new Gson();
-            Attendance[] attendances = TakeAttendAdapter.getmAttendanceList();
-            final String attJsonObj = gson.toJson(attendances);
-            VolleyTask.saveAttendance(this, isUpdateMode, attJsonObj, jObj -> {
-
-                setResult(Activity.RESULT_OK);
                 finish();
             });
         } else
@@ -239,10 +289,8 @@ public class TakeAttendanceActivity extends AppCompatActivity {
 
                             if (isUpdateMode) {
                                 finish();
-                            }
-
-                            else {
-                                undoChangesAndFinish();
+                            } else {
+                                undoChangesAndFinish(DONT_SAVE);
                             }
 
                         }).create();

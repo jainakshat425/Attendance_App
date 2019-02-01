@@ -27,7 +27,7 @@ public class VolleyTask {
     public static void login( Context context, String username, String password,
                               VolleyCallback volleyCallback) {
         ProgressDialog pDialog = new ProgressDialog(context);
-        pDialog.setMessage("Logging in...");
+        pDialog.setMessage("Verifying...");
         pDialog.show();
         StringRequest request = new StringRequest(Request.Method.POST,
                 ExtraUtils.FAC_LOGIN_URL, response -> {

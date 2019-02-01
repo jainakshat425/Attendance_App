@@ -42,4 +42,7 @@
     <string name="no_students_in_the_class">No students in the class.</string>
     <string name="add_the_students_to_respective_class_to_take_attendance">
         Add the students to respective class to take attendance…</string>
+    <string name="save">save</string>
+    <string name="verify_your_password_to_delete_this_attendance">Verify your password to delete this attendance…</string>
+    <string name="verify_amp_delete"><![CDATA[Verify & DELETE]]></string>
 </resources>
