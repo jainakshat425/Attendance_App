@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.attendance.R;
+import com.example.android.attendance.ScheduleActivity;
 import com.example.android.attendance.TakeAttendanceActivity;
 import com.example.android.attendance.pojos.Schedule;
 import com.example.android.attendance.utilities.ExtraUtils;
@@ -137,7 +138,8 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
                                 intent.putExtra(ExtraUtils.EXTRA_DAY, mDay);
                                 intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
 
-                                mContext.startActivity(intent);
+                                ((ScheduleActivity) mContext)
+                                        .startActivityForResult(intent, TakeAttendanceActivity.SCHEDULE_ACTIVITY);
                             });
                 }
             } else {

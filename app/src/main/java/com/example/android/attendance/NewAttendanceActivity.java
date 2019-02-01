@@ -1,5 +1,6 @@
 package com.example.android.attendance;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import com.example.android.attendance.adapters.SpinnerArrayAdapter;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -97,7 +99,7 @@ public class NewAttendanceActivity extends AppCompatActivity {
                             intent.putExtra(ExtraUtils.EXTRA_DAY, day);
                             intent.putExtra(ExtraUtils.EXTRA_LECTURE_NO, lectNo);
 
-                            startActivity(intent);
+                            startActivityForResult(intent, TakeAttendanceActivity.NEW_ATTENDANCE_ACTIVITY);
                         });
             }
         }
@@ -132,6 +134,11 @@ public class NewAttendanceActivity extends AppCompatActivity {
         //setup date picker dialog
         setupDatePickerDialog();
         setDefaultDate();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if(resultCode == Activity.RESULT_OK) finish();
     }
 
     private void setDefaultDate() {

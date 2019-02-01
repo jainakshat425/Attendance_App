@@ -41,6 +41,9 @@ import butterknife.ButterKnife;
 
 public class TakeAttendanceActivity extends AppCompatActivity {
 
+    public static final int NEW_ATTENDANCE_ACTIVITY = 1001;
+    public static final int SCHEDULE_ACTIVITY = 1002;
+
     @BindView(R.id.date_text_view)
     TextView dateTv;
     @BindView(R.id.lecture_text_view)
@@ -97,6 +100,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
 
         if (bundle != null) {
+
             date = bundle.getString(ExtraUtils.EXTRA_DATE);
             day = bundle.getString(ExtraUtils.EXTRA_DAY);
             lectNo = bundle.getString(ExtraUtils.EXTRA_LECTURE_NO);
@@ -118,6 +122,9 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             mRecyclerView.setAdapter(mAdapter);
 
             refreshList();
+        } else {
+            setResult(Activity.RESULT_CANCELED);
+            finish();
         }
     }
 
@@ -186,6 +193,8 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             VolleyTask.undoAttendance(this, recordId, jObj -> {
                 Toast.makeText(this, "Attendance not saved.",
                         Toast.LENGTH_SHORT).show();
+
+                setResult(Activity.RESULT_CANCELED);
                 finish();
             });
         } else
@@ -199,8 +208,9 @@ public class TakeAttendanceActivity extends AppCompatActivity {
             Attendance[] attendances = TakeAttendAdapter.getmAttendanceList();
             final String attJsonObj = gson.toJson(attendances);
             VolleyTask.saveAttendance(this, isUpdateMode, attJsonObj, jObj -> {
+
+                setResult(Activity.RESULT_OK);
                 finish();
-                startActivity(new Intent(TakeAttendanceActivity.this, MainActivity.class));
             });
         } else
             Toast.makeText(this, R.string.network_not_available, Toast.LENGTH_SHORT).show();
@@ -227,11 +237,13 @@ public class TakeAttendanceActivity extends AppCompatActivity {
                         (dialog1, which) -> dialog1.cancel()).setNegativeButton("Yes",
                         (dialog12, which) -> {
 
-                            setResult(Activity.RESULT_CANCELED);
+                            if (isUpdateMode) {
+                                finish();
+                            }
 
-                            if (isUpdateMode) finish();
-
-                            else undoChangesAndFinish();
+                            else {
+                                undoChangesAndFinish();
+                            }
 
                         }).create();
         dialog.show();

@@ -44,6 +44,7 @@ public class ExtraUtils {
     public static final String EXTRA_LECTURE_NO = "extra_lecture";
 
     public static final String EXTRA_FAC_EMAIL = "extra_fac_email";
+    public static final String EXTRA_PARENT_ACTIVITY = "extra_parent_activity";
 
 
     private static final String DB_URL = "http://192.168.42.112/AttendManagePHP/FacultyAppPHP/";
