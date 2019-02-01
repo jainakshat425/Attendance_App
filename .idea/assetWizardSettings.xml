@@ -51,7 +51,7 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="scalingPercent" value="67" />
+                                                <entry key="scalingPercent" value="84" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -61,7 +61,7 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="foregroundImage" value="C:\Users\Akshat Jain\Downloads\test.svg" />
+                                      <entry key="foregroundImage" value="C:\Users\Akshat Jain\Desktop\Project_Attendance_App\Attendance\app\src\main\res\drawable\ic_launcher.xml" />
                                       <entry key="legacyIconShape" value="CIRCLE" />
                                       <entry key="webIconShape" value="CIRCLE" />
                                     </map>
@@ -132,9 +132,11 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_delete" />
+                            <entry key="height" value="512" />
+                            <entry key="outputName" value="ic_launcher" />
                             <entry key="overrideSize" value="true" />
-                            <entry key="sourceFile" value="C:\Users\Akshat Jain\Downloads\delete.svg" />
+                            <entry key="sourceFile" value="C:\Users\Akshat Jain\Downloads\checklist (1).svg" />
+                            <entry key="width" value="512" />
                           </map>
                         </option>
                       </PersistentState>
